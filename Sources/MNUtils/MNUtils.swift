@@ -1,4 +1,4 @@
-import Foundation // For Bundle.main...
+import AppKit
 
 public struct MNUtils {
     
@@ -22,7 +22,6 @@ class MNDebug {
 class MNConstants {
     let dlog : MNLogger? = MNLog.forClass("MNUtils")
     
-    let MNUTILS_VERSION = "0.1.0"
     let BASE_64_PARAM_KEY = "e64"
     let PROTOBUF_PARAM_KEY = "ptb"
     let PERCENT_ESCAPED_HINTS = [

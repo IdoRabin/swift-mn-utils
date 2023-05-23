@@ -11,10 +11,10 @@ extension Bundle {
     
     var versionNumber: String? {
         let result = infoDictionary?["CFBundleShortVersionString"] as? String
-        // if (infoDictionary?.count ?? 0 == 0) {
-        //     // Fallback
-        //     result = APP_BUILD_VERSION.versionString(formattedWith: .fullVersion)
-        // }
+         if (infoDictionary?.count ?? 0 == 0) {
+             // Fallback
+             result = BUILD_VERSION.versionString(formattedWith: .fullVersion)
+         }
         return result
     }
     
