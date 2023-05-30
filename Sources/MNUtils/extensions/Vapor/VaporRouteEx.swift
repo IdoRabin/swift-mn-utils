@@ -9,6 +9,7 @@
 
 import Foundation
 import Vapor
+import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("VaporRouteEx")
 

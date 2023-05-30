@@ -28,7 +28,7 @@ func descOrNil(_ any : Any?)->String {
     return formattedValue(any)
 }
 
-extension Optional where Wrapped == String {
+public extension Optional where Wrapped == String {
     
     /// Returns true when the optional string is nil or empty (has no charachters, count == 0)
     /// NOTE: is also implemented as isNilOrEmpty (same implementation)
@@ -53,7 +53,7 @@ extension Optional where Wrapped == String {
     }
 }
 
-extension Optional /*: CustomDebugStringConvertible */ {
+public extension Optional /*: CustomDebugStringConvertible */ {
     
     var debugDescription : String {
         return descOrNil

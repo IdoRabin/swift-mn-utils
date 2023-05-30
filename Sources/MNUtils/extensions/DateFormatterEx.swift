@@ -17,7 +17,7 @@ fileprivate var _intlDateFormatter:DateFormatter? = nil // for debugging and sup
 fileprivate var _iso8601DateFormatter : ISO8601DateFormatter? = nil
 fileprivate var _lock = NSRecursiveLock()
 
-extension Date {
+public extension Date {
     
     
     /// Convenience property: returns true when this date is in the future for current calendar and local time.
@@ -49,7 +49,7 @@ extension Date {
     }
 }
 
-extension DateFormatter {
+public extension DateFormatter {
     
     /// Conveniene init with a given string date format
     ///
@@ -159,10 +159,10 @@ public protocol AnyDateFormatter {
     func string(from date: Date) -> String
 }
 
-class INT64toDateFormatter : AnyDateFormatter {
+public class INT64toDateFormatter : AnyDateFormatter {
     
     /// Format a string into a date
-    func date(from string: String) -> Date?
+    public func date(from string: String) -> Date?
     {
         if let intStr = Int64(string) {
             return format(unboxedValue: intStr)
@@ -171,7 +171,7 @@ class INT64toDateFormatter : AnyDateFormatter {
     }
     
     /// Format a date into a string
-    func string(from date: Date) -> String {
+    public func string(from date: Date) -> String {
         return "\(floor(date.timeIntervalSince1970))"
     }
     
@@ -186,7 +186,7 @@ class INT64toDateFormatter : AnyDateFormatter {
     init(){}
 }
 
-extension Date {
+public extension Date {
     
     init?(optionalTimeIntervalSinceReferenceDate:TimeInterval?) {
         guard let interval = optionalTimeIntervalSinceReferenceDate else {

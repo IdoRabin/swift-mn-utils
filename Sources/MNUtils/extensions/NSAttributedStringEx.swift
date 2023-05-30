@@ -7,7 +7,7 @@
 import Foundation
 import AppKit
 
-class AttributedString : Codable, Equatable, Hashable {
+public class AttributedString : Codable, Equatable, Hashable {
     
     let attributedString : NSAttributedString
     
@@ -25,30 +25,30 @@ class AttributedString : Codable, Equatable, Hashable {
     }
     
     // MARK: Encodable
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         let data = try NSKeyedArchiver.archivedData(withRootObject: attributedString, requiringSecureCoding: false)
         var singleContainer = encoder.singleValueContainer()
         try singleContainer.encode(data.base64EncodedString())
     }
     
     // MARK: Hashable
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(attributedString)
     }
     
     // MARK: Equatable
-    static func == (lhs: AttributedString, rhs: AttributedString) -> Bool {
+    public static func == (lhs: AttributedString, rhs: AttributedString) -> Bool {
         return lhs.attributedString == rhs.attributedString
     }
 }
 
-enum AttributedStringMatchFilter {
+public enum AttributedStringMatchFilter {
     case all
     case first
     case last
 }
 
-extension String {
+public extension String {
     
     /// Find all ranges where a given substring exists within a string
     ///
@@ -214,7 +214,7 @@ extension String {
     }
 }
 
-extension NSMutableAttributedString {
+public extension NSMutableAttributedString {
     
     
     /// Set attributes for all sub strings matching the given match string. mutates the original string.

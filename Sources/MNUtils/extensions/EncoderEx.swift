@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("EncoderEx")
 fileprivate let APP_STRING_PREFERENCE_KEY = "IS_STRING_PREFERENCE"
 
-extension Decoder {
+public extension Decoder {
     func getUserInfo(forKey key: String) -> Any? {
         let infoKey = CodingUserInfoKey(rawValue: key)!
         return userInfo[infoKey]
@@ -23,14 +24,14 @@ extension Decoder {
     }
 }
 
-extension JSONDecoder {
+public extension JSONDecoder {
     func setUserInfo(_ info: Any?, forKey key: String) {
         let infoKey = CodingUserInfoKey(rawValue: key)!
         userInfo[infoKey] = info
     }
 }
 
-extension JSONEncoder {
+public extension JSONEncoder {
     func getUserInfo(forKey key: String) -> Any? {
         let infoKey = CodingUserInfoKey(rawValue: key)!
         return userInfo[infoKey]
@@ -42,13 +43,13 @@ extension JSONEncoder {
     }
 }
 
-extension Encoder {
-    public static func isJSONEncoder(encoder: Encoder)->Bool {
+public extension Encoder {
+    static func isJSONEncoder(encoder: Encoder)->Bool {
         // dlog?.info("isJSONEncoder \(type(of:self)) - userInfo:\(encoder.userInfo) path:\(encoder.codingPath)")
         return "\(type(of:self))".lowercased().contains("jsonencoder") || ((self as? JSONEncoder.Type) != nil)
     }
     
-    public var isJSONEncoder : Bool {
+    var isJSONEncoder : Bool {
         return Self.isJSONEncoder(encoder:self)
     }
     
@@ -59,7 +60,7 @@ extension Encoder {
     }
 }
 
-extension JSONEncoder {
+public extension JSONEncoder {
     var isStringPreference : Bool {
         get {
             return (self.getUserInfo(forKey:APP_STRING_PREFERENCE_KEY) as? Bool) ?? false == true

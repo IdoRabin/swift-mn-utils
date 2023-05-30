@@ -8,7 +8,7 @@
 import Foundation
 
 /// Allows converting between NSError, error and AppError
-protocol MNErrorable : Error, CustomDebugStringConvertible, CustomStringConvertible {
+public protocol MNErrorable : Error, CustomDebugStringConvertible, CustomStringConvertible {
     
     var desc : String { get }
     var domain : String { get }
@@ -19,7 +19,7 @@ protocol MNErrorable : Error, CustomDebugStringConvertible, CustomStringConverti
     var reason : String { get }
 }
 
-extension MNErrorable /* default implementation */ {
+public extension MNErrorable /* default implementation */ {
     
     var domainCodeDesc : String {
         return "\(self.domain).\(self.code)"
@@ -27,7 +27,7 @@ extension MNErrorable /* default implementation */ {
     
     /// CustomStringConvertible
     /// We have the same description and debugDescription to avoid confusion
-    public var description: String { // CustomStringConvertible
+    var description: String { // CustomStringConvertible
         var res : String = ""
         if (res.count == 0) {
             // Convert to string failed:
@@ -39,7 +39,7 @@ extension MNErrorable /* default implementation */ {
     
     /// CustomDebugStringConvertible
     /// We have the same description and debugDescription to avoid confusion
-    public var debugDescription: String {
+    var debugDescription: String {
         return self.description
     }
 }

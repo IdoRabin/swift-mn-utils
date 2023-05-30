@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension CharacterSet {
+public extension CharacterSet {
     
     /// All punctuation characters except perdiod (".")
     static let punctuationCharactersWithoutPeriod = CharacterSet.punctuationCharacters.subtracting(CharacterSet(charactersIn: "."))
@@ -35,7 +35,7 @@ extension CharacterSet {
     // NOTE: for Emoji-cleanup or testing, see String+Emoji.swift, since its not as simple as a character set.
 }
 
-extension CharacterSet /* App-Specific */ {
+public extension CharacterSet /* App-Specific */ {
     
     static let usernameAllowedSet = CharacterSet.latinAlphabet.union(.latinDigits).union(CharacterSet(charactersIn: "-_"))
     

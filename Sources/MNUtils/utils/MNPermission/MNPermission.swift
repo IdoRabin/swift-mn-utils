@@ -6,10 +6,24 @@
 //
 
 import Foundation
+import DSLogger
 fileprivate let dlog : MNLogger? = MNLog.forClass("MNPermission")
 
-// public typealias AppResult<Success:Any> = Result<Success, AppError>
-@frozen public enum MNPermission<Allowed : Hashable, Forbidden: Hashable> : Hashable, Equatable where Forbidden : Error {
+
+public typealias MNAllowed = Hashable
+public typealias MNForbidden = Hashable
+
+public protocol MNPermissionable : Hashable, Equatable {
+    associatedtype Allowed : MNAllowed
+    associatedtype Forbidden : MNForbidden
+    
+    var isAllowed : Bool { get }
+    var isForbidden : Bool { get }
+    var allowedValue : Allowed? { get }
+    var forbiddenValue : Forbidden? { get }
+}
+
+@frozen public enum MNPermission<Allowed : MNAllowed, Forbidden: MNForbidden> : MNPermissionable where Forbidden : Error {
     
     /// A success, storing a `Success` value.
     case allowed(Allowed)
@@ -17,32 +31,32 @@ fileprivate let dlog : MNLogger? = MNLog.forClass("MNPermission")
     /// A failure, storing a `Failure` value.
     case forbidden(Forbidden)
     
-    var isAllowed : Bool {
+    public var isAllowed : Bool {
         switch self {
         case .allowed:    return true
         case .forbidden:  return false
         }
     }
     
-    var isForbidden : Bool {
+    public var isForbidden : Bool {
         return !self.isAllowed
     }
     
-    var allowedValue : Allowed? {
+    public var allowedValue : Allowed? {
         switch self {
         case .allowed(let success): return success
         case .forbidden:  return nil
         }
     }
     
-    var forbiddenValue : Forbidden? {
+    public var forbiddenValue : Forbidden? {
         switch self {
         case .allowed: return nil
         case .forbidden(let forbidden): return forbidden
         }
     }
     
-    // MARK: Hqshable
+    // MARK: Hashable
     public func hash(into hasher: inout Hasher) {
         switch self {
         case .allowed(let allow):    hasher.combine(allow)

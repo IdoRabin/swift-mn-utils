@@ -7,17 +7,18 @@
 //
 
 import Foundation
+import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("JSONSerializable")
 
-extension JSONEncoder {
+public extension JSONEncoder {
     func encodeJSONObject<T: Encodable>(_ value: T, options opt: JSONSerialization.ReadingOptions = []) throws -> Any {
         let data = try encode(value)
         return try JSONSerialization.jsonObject(with: data, options: opt)
     }
 }
 
-extension JSONDecoder {
+public extension JSONDecoder {
     static let RAW_JSON_USER_INFO_KEY = "raw_json_object"
     
     func decode<T: Decodable>(_ type: T.Type, withJSONObject object: Any, options opt: JSONSerialization.WritingOptions = []) throws -> T {
@@ -31,7 +32,8 @@ extension JSONDecoder {
 extension String : JSONSerializable {
     
 }
-extension Dictionary where Key : JSONSerializable, Value : JSONSerializable {
+
+public extension Dictionary where Key : JSONSerializable, Value : JSONSerializable {
     /// Will Serialize each element in the array to a json dictionary
     ///
     /// - Parameter isForRemote: each JSONSerializable may use this to override its serialization process, for "remote" (i.e sending via API) vs. local uses
@@ -89,7 +91,7 @@ extension Dictionary where Key : JSONSerializable, Value : JSONSerializable {
     }
 }
 
-extension Array where Element : JSONSerializable {
+public extension Array where Element : JSONSerializable {
     
     
     /// Will Serialize each element in the array to a json dictionary
@@ -141,7 +143,7 @@ extension Array where Element : JSONSerializable {
 }
 
 /// Protocol declating convenience method for serializing/ deserializing Codable objects to/from JSON
-protocol JSONSerializable : Codable {
+public protocol JSONSerializable : Codable {
     func serializeToJsonData(prettyPrint:Bool)->Data?
     func serializeToJsonString(prettyPrint:Bool)->String?
     static func deserializeFromJsonData<AType:Decodable>(data:Data?)->AType?
@@ -151,7 +153,7 @@ protocol JSONSerializable : Codable {
     func didSerializeToJson()
 }
 
-extension JSONSerializable {
+public extension JSONSerializable {
     
     func didDeserializefromJson() {
         
@@ -245,12 +247,13 @@ extension JSONSerializable {
     }
 }
 
-typealias StringStringDistionary = [String:String]
+public typealias StringStringDistionary = [String:String]
 
 extension StringStringDistionary : JSONSerializable {
+    
 }
 
-protocol JSONFileSerializable : JSONSerializable {
+public protocol JSONFileSerializable : JSONSerializable {
     
     ///
     /// - Parameter path: path to save into
@@ -270,7 +273,7 @@ protocol JSONFileSerializable : JSONSerializable {
     static func loadFromJSON(_ fileurl:URL)->Result<Self, Error>
 }
 
-extension JSONFileSerializable {
+public extension JSONFileSerializable {
     func saveToJSON(_ fileurl:URL, prettyPrint:Bool)->Result<Void, Error> {
         do {
             

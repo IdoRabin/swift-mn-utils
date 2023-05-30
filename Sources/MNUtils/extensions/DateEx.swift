@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Date {
+public extension Date {
     
     var isInTheFuture : Bool {
         return self.isInTheFuture(safetyMargin: 0)
@@ -24,4 +24,8 @@ extension Date {
     func isInThePast(safetyMargin:TimeInterval)->Bool {
         return self.timeIntervalSinceNow  < -safetyMargin
     }
+    
+//    var now: Date {
+//        return Date(timeIntervalSinceNow: 0)
+//    }
 }

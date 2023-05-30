@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("String+Base64")
 
-extension String  /* base64 */ {
+public extension String  /* base64 */ {
     
     func fromBase64() throws -> String{
         guard let data = Data(base64Encoded: self) else {
@@ -42,7 +43,7 @@ extension String  /* base64 */ {
     }
 }
 
-extension String /* protobuf */ {
+public extension String /* protobuf */ {
     
     func toProtobuf() -> String {
         dlog?.warning(".toProtobuf() IMPLEMENT PROTOBUF! ")

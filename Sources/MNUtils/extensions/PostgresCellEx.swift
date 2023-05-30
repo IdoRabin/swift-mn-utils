@@ -14,8 +14,8 @@ import FluentKit
 import PostgresNIO
 import NIOFoundationCompat
 
-extension PostgresCell {
-    var stringValue : String? {
+public extension PostgresCell {
+    public var stringValue : String? {
         switch self.dataType {
         case .text, .name:
             // Create String from ByteBuffer
@@ -27,7 +27,7 @@ extension PostgresCell {
         return nil
     }
     
-    var dataValue : Data? {
+    public var dataValue : Data? {
         switch self.format {
         case .binary:
             // Create Data from ByteBuffer

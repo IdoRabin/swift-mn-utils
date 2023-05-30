@@ -7,17 +7,18 @@
 
 import Foundation
 import AppKit
+import DSLogger
 // see also NSColorEx.swift for NSColor.hexString() etc..
 
 fileprivate let dlog : MNLogger? = nil // MNLog.forClass("decodeStringAnyDict")
 fileprivate let dlogWarnings : MNLogger? = MNLog.forClass("decodeStringAnyDict_")
 
-typealias LosslessStrEnum = LosslessStringConvertible & Codable
-typealias CodableHashable = Codable & Hashable
-typealias AnyCodable = Any & Codable
-typealias AnyEquatable = Any & Equatable
+public typealias LosslessStrEnum = LosslessStringConvertible & Codable
+public typealias CodableHashable = Codable & Hashable
+public typealias AnyCodable = Any & Codable
+public typealias AnyEquatable = Any & Equatable
 
-struct TypeDescriptor {
+public struct TypeDescriptor {
     let name : String
     let type : Any.Type
 }
@@ -25,7 +26,7 @@ struct TypeDescriptor {
 //typealias AnyCodableEquatable = Any & Codable & Equatable
 //typealias AnyCodableHashable = Any & Codable & Hashable
 
-extension UnkeyedEncodingContainer {
+public extension UnkeyedEncodingContainer {
     
     mutating func encode(dic:[String:Any], encoder:Encoder) throws {
         for (key, value) in dic {
@@ -81,14 +82,14 @@ extension UnkeyedEncodingContainer {
 fileprivate var codingRegisteredIffyClasses : [String:Any.Type] = [:]
 fileprivate var codingRegisteredIffyPrefixes = Set<String>()
 
-typealias StringAnyDictionary = Dictionary<String, Any>
-typealias StringAnyCodableDictionary = Dictionary<String, Codable>
+public typealias StringAnyDictionary = Dictionary<String, Any>
+public typealias StringAnyCodableDictionary = Dictionary<String, Codable>
 
-protocol StringAnyInitable {
+public protocol StringAnyInitable {
     init(stringAnyDict dict:StringAnyDictionary) throws
     static func createInstance(stringAnyDict dict:StringAnyDictionary)->Self?
 }
-extension StringAnyInitable {
+public extension StringAnyInitable {
     static func createInstance(stringAnyDict dict:StringAnyDictionary)->Self? {
         do {
             return try Self.init(stringAnyDict: dict)
@@ -100,11 +101,11 @@ extension StringAnyInitable {
 }
 
 
-class StringAny {
+public class StringAny {
     
 }
 
-extension StringAnyDictionary {
+public extension StringAnyDictionary {
     
     /// Returns true is the class was already registered for StringAnyDictionary / UnkeyedEncodingContainerEx decoding of custom classes.
     /// NOTE: All class names / type strings must be prefixed with the module name.
@@ -193,7 +194,7 @@ extension StringAnyDictionary {
     
 }
 
-class UnkeyedDecodingUtil {
+public class UnkeyedDecodingUtil {
     
     public static func decode(decoder:Decoder, key:String, typeName:String, value:String) throws ->Any? {
         var typeNameClean = typeName.replacingOccurrences(ofFromTo: ["Swift.":""])
@@ -256,7 +257,7 @@ class UnkeyedDecodingUtil {
     
 }
 
-extension UnkeyedDecodingContainer {
+public extension UnkeyedDecodingContainer {
     
     mutating public func decode(decoder:Decoder, key:String, typeName:String, value:String) throws ->Any? {
         return try UnkeyedDecodingUtil.decode(decoder: decoder, key: key, typeName: typeName, value: value)

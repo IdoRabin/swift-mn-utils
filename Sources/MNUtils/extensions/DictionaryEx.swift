@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension Dictionary {
+public extension Dictionary {
     
     func hasKey(_ key : Key)->Bool {
         return self[key] != nil
@@ -102,7 +102,7 @@ extension Dictionary {
     }
 }
 
-extension Dictionary where Value : Equatable {
+public extension Dictionary where Value : Equatable {
     
     /// Returns a dictionary with all Keys and Values that are equal (Equatable) between both dictionaries. That is, for the same key, the same value exists in both dictionaries.
     /// - Parameter other: other dictionary to intersect
@@ -139,7 +139,7 @@ extension Dictionary where Value : Equatable {
     }
 }
 
-extension Dictionary where Key : Comparable {
+public extension Dictionary where Key : Comparable {
     var sortedKeys : [Key] {
         return Array(self.keys.sorted()) // Do not: .reversed()
     }
@@ -155,7 +155,7 @@ extension Dictionary where Key : Comparable {
     }
 }
 
-extension Dictionary where Value : Comparable & Hashable {
+public extension Dictionary where Value : Comparable & Hashable {
     
     var keysForLargestValue : [Key] {
         var mostKeys = Set<Key>()
@@ -213,7 +213,7 @@ extension Dictionary where Value : Comparable & Hashable {
     }
 }
 
-extension Dictionary where Key : FloatingPoint {
+public extension Dictionary where Key : FloatingPoint {
     
     /// Will normalize the dictionary keys so that the sum of all the keys will total 1.0 exactly.
     func normalizingKeys()->[Key:Value] {
@@ -235,7 +235,7 @@ extension Dictionary where Key : FloatingPoint {
     }
 }
 
-extension Dictionary where Value : FloatingPoint {
+public extension Dictionary where Value : FloatingPoint {
     /// Will normalize the dictionary values so that the sum of all the values will total 1.0 exactly.
     func normalizingValues()->[Key:Value] {
         var result : [Key:Value] = [:]
@@ -252,14 +252,14 @@ extension Dictionary where Value : FloatingPoint {
 }
 
 
-extension Dictionary {
+public extension Dictionary {
 
     mutating func add<T>(_ element: T, toArrayOn key: Key) where Value == [T] {
         self[key] == nil ? self[key] = [element] : self[key]?.append(element)
     }
 }
 
-extension Dictionary where Value : Sequence, Value.Element : Equatable {
+public extension Dictionary where Value : Sequence, Value.Element : Equatable {
     
     @discardableResult
     func isValues(for key:Key, contains value: Value.Element)->Bool {
@@ -313,7 +313,7 @@ extension Dictionary where Value : Sequence, Value.Element : Equatable {
 }
 
 
-extension Dictionary where Value == Array<Any> {
+public extension Dictionary where Value == Array<Any> {
     func count(for key:Key)->Int {
         return self[key]?.count ?? 0
     }

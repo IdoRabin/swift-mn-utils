@@ -7,12 +7,13 @@
 //
 
 import Foundation
+import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("ArrayEx")
 
-extension Sequence {
+public extension Sequence {
     /// Iterate all elements while handling for each element its index and the element.
-    public func forEachIndex(_ body: (Int, Element) throws -> Void) rethrows {
+    func forEachIndex(_ body: (Int, Element) throws -> Void) rethrows {
         try self.enumerated().forEach { index, element in
             try body(index, element)
         }
@@ -33,7 +34,7 @@ extension Sequence {
     }
 }
 
-extension Sequence where Element : CustomDebugStringConvertible {
+public extension Sequence where Element : CustomDebugStringConvertible {
 
     func debugDescriptions()-> [String] {
         return self.compactMap({ (element) -> String in
@@ -42,11 +43,11 @@ extension Sequence where Element : CustomDebugStringConvertible {
     }
 }
 
-extension Array {
+public extension Array {
     
     /// Iterate all elements and their preceeding elements (current, previous). Will call first block with items index 0 and nil, next will call items 1 and 0 and so on..
     /// (current, previous) is the order of elements in the completion block
-    public func forEachAndPrevious(_ body: (Element, Element?) throws -> Void) rethrows {
+    func forEachAndPrevious(_ body: (Element, Element?) throws -> Void) rethrows {
         
         if self.count == 0 {return}
         var prev : Element? = nil
@@ -57,7 +58,7 @@ extension Array {
     }
     
     /// Iterate all elements while handling for each element its index and the element.
-    public func forEachIndex(_ body: (Int, Element) throws -> Void) rethrows {
+    func forEachIndex(_ body: (Int, Element) throws -> Void) rethrows {
         if self.count == 0 {return}
         
         // TODO: Compare efficiency between .enumerated().forEach and the "for i in ..." loop...
@@ -70,7 +71,7 @@ extension Array {
     }
     
     /// Iterate all elements while handling for each element its float (index / total amount) part and the element. Thus serving a float growing on each iteration between 0... to 1.0. Good for calulating progress etc.
-    public func forEachPart(_ body: (Float, Element) throws -> Void) rethrows {
+    func forEachPart(_ body: (Float, Element) throws -> Void) rethrows {
         if self.count == 0 {return}
         
         let lastIndex = self.count - 1
@@ -82,7 +83,7 @@ extension Array {
     
     /// Iterate all elements while handling for each element its index and the element.
     /// - Parameter body: iteration bloc. Return True to stop iterating!
-    public func forEachIndexOrStop(_ body: (Int, Element) throws -> Bool) rethrows {
+    func forEachIndexOrStop(_ body: (Int, Element) throws -> Bool) rethrows {
         if self.count == 0 {return}
         
         for i in 0..<self.count {
@@ -94,7 +95,7 @@ extension Array {
     }
 }
 
-extension Array {
+public extension Array {
     
     /// Will iterate all elements one by one and compare them with all other elements but themselves, in an eficcient manner
     /// The function will call block with distinct pairs of elements, each pair called only once. (i.e same pair will never appear twice)
@@ -123,7 +124,7 @@ extension Array {
     }
 }
 
-extension Array {
+public extension Array {
 
     /// Searches for the biggest slices that match the test
     /// Will attempt to expand each element in both direction until a match is reached. Note that without the stopSliceGrowing test, we will grow slices even if they fail the test, to see if bigger slices pass the test. I.E algo will iterate through [b,c,d] even if [b,c] or [c,d] or [b] or [c] or [d] were not matched as slices and we started growing from wither of those. This means this function may proce CPU intensive.
@@ -324,7 +325,7 @@ extension Array {
 }
 
 /// Extends the Array class to handle equatable objects, thus allowing remove by object, intersection and testing if elements are common (shared) between two arrays
-extension Array where Element: Equatable {
+public extension Array where Element: Equatable {
     
     func find(where test:(_ object:Element)->Bool, found:(_ object:Element)->Void, notFound:()->Void) {
         for object in self {
@@ -526,7 +527,7 @@ extension Array where Element: Equatable {
     }
 }
 
-extension Array where Element : Equatable & Hashable {
+public extension Array where Element : Equatable & Hashable {
     
     /// Returns an array with the elements in the same order, only removing duplicate elements (equatables)
     /// - Returns: The resulting array maintains the order, only removes elements
@@ -543,7 +544,7 @@ extension Array where Element : Equatable & Hashable {
     }
 }
 
-extension Sequence {
+public extension Sequence {
     
     func toDictionary<T:Hashable>(keyForItem:(_ element:Element)->T?)-> [T:Element] {
         var result :[T:Element] = [:]
@@ -597,13 +598,13 @@ extension Sequence {
     }
 }
 
-extension Sequence where Element : Sequence {
+public extension Sequence where Element : Sequence {
     var flattened : [Element.Element] {
         return self.flatMap { $0 }
     }
 }
 
-extension Sequence where Element == String {
+public extension Sequence where Element == String {
     
     ///
     /// // Note: test order is according to array order, and will stop testing after first found item

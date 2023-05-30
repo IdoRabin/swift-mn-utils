@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension MNError {
+public extension MNError {
     convenience init(_ code: MNErrorCode, reason: String) {
         self.init(code: code, reasons: [reason])
     }
@@ -17,9 +17,9 @@ extension MNError {
     }
 }
 
-typealias MNErrorInt = Int
+public typealias MNErrorInt = Int
 
-enum MNErrorCode: MNErrorInt, MNErrorCodable {
+public enum MNErrorCode: MNErrorInt, MNErrorCodable {
     //  - If there is any codes / domains BEFORE http statuses -
     // MAXRANGE: 99
     
@@ -260,18 +260,18 @@ enum MNErrorCode: MNErrorInt, MNErrorCodable {
     case ui_unknown = 5000
 
     // == END OF CASES == // marker for autogeneraing script!
-    var domain: String {
-        var result = MNError.DEFAULT_DOMAIN
+    public var domain: String {
+        var result : String = "\(Self.self)"
         result += "."
         result += MNErrorDomain.domain(for: self).name
         return result
     }
 
-    var reason: String {
+    public var reason: String {
         return desc
     }
 
-    var desc: String {
+    public var desc: String {
         switch rawValue {
         case 100 ..< 600: // HttpStatus
             return httpStatusCode?.reasonPhrase ?? "TODO.MNErrorCode.httpStatus.desc|\(self.code)"
@@ -280,30 +280,30 @@ enum MNErrorCode: MNErrorInt, MNErrorCodable {
         }
     }
 
-    var code: MNErrorInt {
+    public var code: MNErrorInt {
         return rawValue
     }
 
-    var httpStatusCode : HTTPResponseStatus? {
+    public var httpStatusCode : HTTPResponseStatus? {
         // IANA HTTPResponseStatus
-var result : HTTPResponseStatus? = nil
+        var result : HTTPResponseStatus? = nil
         switch rawValue {
         case 100 ..< 600: // HttpStatus
             return HTTPResponseStatus(statusCode: rawValue)
         default:
             if self.code >= UInt.min && self.code <= UInt.max {
-                return HTTPResponseStatus.custom(code: UInt(self.code), reasonPhrase: self.reason)
+                result = HTTPResponseStatus.custom(code: UInt(self.code), reasonPhrase: self.reason)
             }
         }
-        return nil
+        return result
     }
     
-    var isHTTPStatus: Bool {
+    public var isHTTPStatus: Bool {
         return code >= 100 && code < 600
     }
 }
 
-extension Sequence where Element == MNErrorCode {
+public extension Sequence where Element == MNErrorCode {
     var codes: [MNErrorInt] {
         return map { errCode in
             errCode.code

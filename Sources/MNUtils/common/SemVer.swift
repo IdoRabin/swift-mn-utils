@@ -8,7 +8,7 @@
 import Foundation
 import struct Foundation.CharacterSet
 
-extension CharacterSet {
+public extension CharacterSet {
     /// Contains the allowed characters for a Version suffix (Version.prelease and Version.metadata)
     /// Allowed are alphanumerics and hyphen.
     public static let versionSuffixAllowed: CharacterSet = {
@@ -18,7 +18,7 @@ extension CharacterSet {
     }()
 }
 
-typealias SemVer = Version
+public typealias SemVer = Version
 
 /// A Version struct that implements the rules of semantic versioning.
 /// - SeeAlso: https://semver.org
@@ -155,7 +155,7 @@ public struct Version: Hashable, Comparable, LosslessStringConvertible {
 /* This currently does not work, due to the compiler ignoring the `init(_ description:)` for `Version("blah")` now.
 // MARK: - String Literal Conversion
 /// - Note: This conformance will crash if the given String literal is not a valid version!
-extension Version: ExpressibleByStringLiteral {
+ public extension Version: ExpressibleByStringLiteral {
     /// inherited
     public typealias StringLiteralType = String
 
@@ -170,16 +170,16 @@ extension Version: ExpressibleByStringLiteral {
 */
 
 // MARK: - Comparison
-extension Version {
+public extension Version {
     /// inherited
-    public static func ==(lhs: Version, rhs: Version) -> Bool {
+    static func ==(lhs: Version, rhs: Version) -> Bool {
         (lhs.major, lhs.minor, lhs.patch, lhs.prerelease)
             ==
         (rhs.major, rhs.minor, rhs.patch, rhs.prerelease)
     }
 
     /// inherited
-    public static func <(lhs: Version, rhs: Version) -> Bool {
+    static func <(lhs: Version, rhs: Version) -> Bool {
         (lhs.major, lhs.minor, lhs.patch)
             <
         (rhs.major, rhs.minor, rhs.patch)
@@ -188,7 +188,7 @@ extension Version {
     }
 
     /// inherited
-    public static func >(lhs: Version, rhs: Version) -> Bool {
+    static func >(lhs: Version, rhs: Version) -> Bool {
         (lhs.major, lhs.minor, lhs.patch)
             >
         (rhs.major, rhs.minor, rhs.patch)
@@ -198,9 +198,9 @@ extension Version {
 }
 
 // MARK: - Incrementing
-extension Version {
+public extension Version {
     /// Lists all the numeric parts of a version (major, minor and patch).
-    public enum NumericPart: Hashable, CustomStringConvertible {
+    enum NumericPart: Hashable, CustomStringConvertible {
         /// The major version part.
         case major
         /// The minor version part.
@@ -227,7 +227,7 @@ extension Version {
     ///   - part: The numeric part to increase.
     ///   - keepingMetadata: Whether or not the metadata should be kept. Defaults to `false`.
     /// - Returns: A new version that has the specified `part` increased, along with the necessary other changes.
-    public func next(_ part: NumericPart, keepingMetadata: Bool = false) -> Version {
+    func next(_ part: NumericPart, keepingMetadata: Bool = false) -> Version {
         let newMetadata = keepingMetadata ? metadata : []
         switch part {
         case .major: return Version(major: major + 1, minor: 0, patch: 0, metadata: newMetadata)
@@ -244,7 +244,7 @@ extension Version {
     /// - Parameters:
     ///   - part: The numeric part to increase.
     ///   - keepingMetadata: Whether or not the metadata should be kept. Defaults to `false`.
-    public mutating func increase(_ part: NumericPart, keepingMetadata: Bool = false) {
+    mutating func increase(_ part: NumericPart, keepingMetadata: Bool = false) {
         switch part {
         case .major:
             major += 1

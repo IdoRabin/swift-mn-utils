@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("DispatchQueueEx")
 fileprivate let waitForLog : MNLogger? = MNLog.forClass("waitFor")
@@ -18,7 +19,7 @@ fileprivate let waitForLog : MNLogger? = MNLog.forClass("waitFor")
 ///   - test: test to be taken periodically
 ///   - completion: completion when test returns non-nil results
 ///   - interval: interval for testing
-enum WaitResult
+public enum WaitResult
 {
     case success
     case timeout
@@ -31,7 +32,7 @@ enum WaitResult
         return self == .success
     }
 }
-enum WaitForLogType : Int {
+public enum WaitForLogType : Int {
     case never              // never log any part of the waitForLoop
     case onlyAnyResult      // log only when the waitFor is done (success or timeout)
     case onlyFirstTestResult // log all messages for the first test only

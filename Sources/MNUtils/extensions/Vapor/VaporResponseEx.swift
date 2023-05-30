@@ -9,11 +9,12 @@
 
 import Foundation
 import Vapor
+import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("VaporResponseEx")
 
 // Response is a final class!
-extension Vapor.Response {
+public extension Vapor.Response {
     
     @discardableResult
     static func headersForEnrich(with request:Request)->[String:String] {
@@ -50,7 +51,7 @@ extension Vapor.Response {
 
 // HTTPHeadersEx
 
-extension HTTPHeaders {
+public extension HTTPHeaders {
     
     enum ClientType {
     case browser

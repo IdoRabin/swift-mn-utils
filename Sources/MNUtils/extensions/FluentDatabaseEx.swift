@@ -6,21 +6,22 @@
 //
 
 import Foundation
+import DSLogger
 
 #if VAPOR || FLUENT
 import Fluent
-import FluentKit
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("FluentDatabaseEx")
 
-extension Database {
+// FluentKit
+public extension any Fluent.Database {
     
     /// .read() or .create() an enum type in the DB, according to the need (creates if does not already exists)
     /// - Parameters:
     ///   - enumName: name of the enum
     ///   - enumAllCases: all cases of the enum.
     /// - Returns: EventLoopFuture<DatabaseSchema.DataType> the data type schema for use in other migrations, during .prepare functions.
-    func createOrGetEnumType(enumName:String, enumAllCases:[String] )->EventLoopFuture<DatabaseSchema.DataType> {
+    public func createOrGetEnumType(enumName:String, enumAllCases:[String] )->EventLoopFuture<DatabaseSchema.DataType> {
         // Read the enum type if it exists
         dlog?.info("createOrGetEnumType for enum: [\(enumName)] got cases: \(enumAllCases.descriptionsJoined)")
         let enumBuilder : EnumBuilder = self.enum(enumName)
@@ -44,7 +45,7 @@ extension Database {
 //                    }
 //                    return self.eventLoop.makeSucceededFuture(schema)
 //                default:
-//                    throw AppError(.db_unknown, reason: "createOrGetEnumType schema type is not Enum")
+//                    throw AppError(code:.db_unknown, reason: "createOrGetEnumType schema type is not Enum")
 //                }
 //            case .failure(let error):
 //                // Handle only errors: in this case, we need to create a new enum type and add its cases and return that
@@ -56,14 +57,6 @@ extension Database {
 //                return enumBuilder.create() // enumBuilder has no .ignoreExisting()
 //            }
 //        })
-    }
-    
-    func createOrGetEnumType<T:AppModelStrEnum>(anEnumType:T.Type)->EventLoopFuture<DatabaseSchema.DataType> {
-        let name = anEnumType.dbTypeName
-        let values = anEnumType.all.map { enumVal in
-            return enumVal.dbRawValue
-        }
-        return createOrGetEnumType(enumName: name, enumAllCases: values)
     }
 }
 

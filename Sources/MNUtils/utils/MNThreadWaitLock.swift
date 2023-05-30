@@ -73,7 +73,7 @@ public func currentQueueName() -> String
 ///    // Perform tasks after the dispatch thread has completed
 /// }
 /// ````
-final class MNThreadWaitLock
+final public class MNThreadWaitLock
 {
     // TODO: Test for multiple re-uses (lock, unlock and then again lock, unlock) of the same ThreadWaitLock instance
     static let WAIT_LOCK_IS_WORKING = 1
@@ -81,13 +81,13 @@ final class MNThreadWaitLock
     
     let lock :NSConditionLock
     
-    init()
+    public init()
     {
         lock = NSConditionLock(condition: MNThreadWaitLock.WAIT_LOCK_IS_WORKING)
     }
 
     /// `waitForSignal()` will lock a thread until `signal()` is called (which will 'unblock' the thread)
-    func waitForSignal() {
+    public func waitForSignal() {
         // Wait for the result: (block this thread until delegate unlocks the conditional)
         lock.lock(whenCondition: MNThreadWaitLock.WAIT_LOCK_IS_DONE)
         lock.unlock(withCondition: MNThreadWaitLock.WAIT_LOCK_IS_DONE)
@@ -95,7 +95,7 @@ final class MNThreadWaitLock
     }
     
     /// `signal()` should be called from within another thread than that in which `waitForSignal()` was called. When called, this will 'unblock' the thread in which `waitForSignal()` was called from.
-    func signal() {
+    public func signal() {
         // Signals the generateAdViewWithContext: to unlock after completion
         if (lock.tryLock(whenCondition: MNThreadWaitLock.WAIT_LOCK_IS_WORKING)) {
             lock.unlock(withCondition: MNThreadWaitLock.WAIT_LOCK_IS_DONE)

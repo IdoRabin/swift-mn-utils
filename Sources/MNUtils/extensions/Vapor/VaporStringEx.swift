@@ -8,6 +8,7 @@
 
 
 import Foundation
+import DSLogger
 
 #if VAPOR
 import Vapor

@@ -6,21 +6,13 @@
 //
 
 import Foundation
+import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("MNError")
 
-/// Main app class of error, is derived from Error, but can be initialized by AppError codes and also in concurrance with NSErrors and other Errors and underlying errors / filtered before determining eventual error code
+/// App class of error, is derived from Error, but can be initialized by AppError codes and also in concurrance with NSErrors and other Errors and underlying errors / filtered before determining eventual error code
 /// The main aim in this class is to wrap each error raised in the app from any source into a more organized state
-public class MNError : Error, JSONSerializable, CustomDebugStringConvertible {
-    
-    // let appName = Bundle.main.bundleName?.capitalized.replacingOccurrences(of: .whitespaces, with: "_") ?? "Bundle.main.bundleName == nil !"
-    static let DEFAULT_DOMAIN = {
-        guard let bundleName = Bundle.main.bundleName else {
-            return "\(MNUtils.self)"
-        }
-        
-        return "com.\(bundleName.capitalized.replacingOccurrences(of: .whitespaces, with: "_"))"
-    }()
+open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConvertible {
     
     // Codable
     private enum CodingKeys: String, CodingKey {
@@ -32,27 +24,27 @@ public class MNError : Error, JSONSerializable, CustomDebugStringConvertible {
     }
     
     // Base members
-    let domain : String
-    let code:MNErrorInt
-    let desc : String
-    private (set) var underlyingError:MNError?
-    private (set) var reasons:[String]?
+    public let domain : String
+    public let code:MNErrorInt
+    public let desc : String
+    private (set) public var underlyingError:MNError?
+    private (set) public var reasons:[String]?
 
-    func mnErrorCode() -> MNErrorCode? {
+    public func mnErrorCode() -> MNErrorCode? {
         guard let result = MNErrorCode(rawValue:code) else {
             return nil
         }
         return result
     }
     
-    func mnErrorCode() throws -> MNErrorCode  {
+    public func mnErrorCode() throws -> MNErrorCode  {
         guard let result = MNErrorCode(rawValue:code) else {
             throw MNError(MNErrorCode.misc_failed_decoding, reason:"MNError failed converting code [\(code)] to MNErrorCode!")
         }
         return result
     }
     
-    var localizedDescription: String {
+    public var localizedDescription: String {
         get {
             return desc
         }
@@ -62,11 +54,11 @@ public class MNError : Error, JSONSerializable, CustomDebugStringConvertible {
         return "<MNError \(self.domain) \(self.code)> [\(self.reason)]"
     }
     
-    var hasUnderlyingError : Bool {
+    public var hasUnderlyingError : Bool {
         return underlyingError != nil
     }
     
-    var reasonsLines: String? {
+    public var reasonsLines: String? {
         guard let reasons = reasons else {
             return nil
         }
@@ -77,7 +69,7 @@ public class MNError : Error, JSONSerializable, CustomDebugStringConvertible {
         return reasons.first
     }
     
-    var reason: String {
+    public var reason: String {
         get {
             return reasonsLines ?? self.desc
         }
@@ -102,7 +94,7 @@ public class MNError : Error, JSONSerializable, CustomDebugStringConvertible {
         #endif
     }
     
-    func setUnderlyingError(err:MNError) {
+    public func setUnderlyingError(err:MNError) {
         if self != err && self.underlyingError != err {
             self.underlyingError = err
         }
@@ -311,10 +303,7 @@ public class MNError : Error, JSONSerializable, CustomDebugStringConvertible {
     }
 }
 
-extension MNError : MNErrorable {
-}
-
-extension MNError /*mnErrors*/ {
+public extension MNError /*mnErrors*/ {
     
     convenience init(fromError input:Error?, defaultErrorCode:MNErrorCode, reason:String?) {
         self.init(fromError:input, defaultErrorCode:defaultErrorCode, reasons:reason != nil ? [reason!] : [])
@@ -373,7 +362,7 @@ extension MNError : Hashable {
     }
 }
 
-extension MNResult3 where Failure : MNError {
+extension Result3 where Failure : MNError {
     
     var mnError : MNError? {
         switch self {

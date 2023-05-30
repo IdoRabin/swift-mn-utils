@@ -8,7 +8,7 @@
 
 import Cocoa
 
-extension Sequence where Iterator.Element == String {
+public extension Sequence where Iterator.Element == String {
     func lowercased(with locale:Locale? = nil)->[String] {
         return self.map { (str) -> String in
             return str.lowercased(with: locale)
@@ -27,7 +27,7 @@ extension Sequence where Iterator.Element == String {
     }
 }
 
-extension String {
+public extension String {
 
     /// Return a substring from index (as int)
     /// - Parameters:
@@ -502,7 +502,7 @@ extension String {
 
 }
 
-extension StaticString {
+public extension StaticString {
     
     /// Will return the last path compoment of the string IF it can be split into a url, otherwise, will return the whole string
     ///
@@ -514,7 +514,7 @@ extension StaticString {
 
 // NSRange / Range<String.Index> conversions
 
-extension String {
+public extension String {
     
     
     /// Returns an NSRange describing the whole length of the string (from start index to the last index)
@@ -664,7 +664,7 @@ extension String {
 }
 
 
-extension String {
+public extension String {
     
     
     /// Capitalizes only the first word in the text
@@ -788,7 +788,7 @@ extension String {
     /// will codense into:
     /// "mY TEXT 123 new"
     /// - Returns: a condensed string
-    func condenseWhitespacesAndNewlines() -> String {
+    public func condenseWhitespacesAndNewlines() -> String {
         let components = self.components(separatedBy: .whitespacesAndNewlines)
         return components.filter { !$0.isEmpty }.joined(separator: " ")
     }
@@ -799,14 +799,14 @@ extension String {
     /// will codense into:
     /// "mY TEXT 123\n \tnew"
     /// - Returns: a condensed string
-    func condenseWhitespaces() -> String {
+    public func condenseWhitespaces() -> String {
         let components = self.components(separatedBy: .whitespaces)
         return components.filter { !$0.isEmpty }.joined(separator: " ")
     }
     
     
     /// tries to detect the direction of the best found language is the string
-    func detectBestLanguage()->String? {
+    public func detectBestLanguage()->String? {
         guard self.count > 0 else {
             return nil
         }
@@ -816,7 +816,7 @@ extension String {
     }
     
     /// tries to detect the direction of the best found language is the string
-    func detectBestTextAlignment()->NSTextAlignment? {
+    public func detectBestTextAlignment()->NSTextAlignment? {
         if let lang = self.detectBestLanguage() {
             let rtlLangs = ["ar", "he"]
             return lang.lowercased().contains(anyOf: rtlLangs) ? .right : .left
@@ -825,7 +825,7 @@ extension String {
     }
 }
 
-extension String {
+public extension String {
     
     init (memoryAddressOf object:AnyObject) {
         self.init(String(describing: Unmanaged<AnyObject>.passUnretained(object as AnyObject).toOpaque()))
@@ -848,7 +848,7 @@ extension String {
     }
 }
 
-extension Sequence where Element == String {
+public extension Sequence where Element == String {
     var lowercased : [String] {
         return self.compactMap { str in
             return str.lowercased()
@@ -877,7 +877,7 @@ extension Sequence where Element == String {
     }
 }
 
-extension String {
+public extension String {
     
     func serializationIssuesVariants(isUniquify : Bool = true)->[String] {
         let result = [self,
@@ -907,7 +907,7 @@ extension String {
     }
 }
 
-extension String /* substring with int ranges */ {
+public extension String /* substring with int ranges */ {
     
     func substring(from: Int?, to: Int?) -> String {
         if let start = from {
@@ -984,19 +984,19 @@ extension String /* substring with int ranges */ {
     }
 }
 
-extension String /* OLD substring with int ranges */ {
+public extension String /* OLD substring with int ranges */ {
     
      
     /// - Parameter range: NSRange for the substring location, assuming utf16 encoding
     /// - Returns: the substring of the string or nil if NSRange is out of bounds
-    public func substring(with range:NSRange)->String? {
+    func substring(with range:NSRange)->String? {
         if range.location >= 0 && range.location + range.length <= self.count, let rng = self.range(from: range) {
             return String(self[rng])
         }
         return nil
     }
     
-    public func substring(atIndex index:Int)->String? {
+    func substring(atIndex index:Int)->String? {
         return self.substring(with: NSRange(location:index, length:1))
     }
     
@@ -1004,7 +1004,7 @@ extension String /* OLD substring with int ranges */ {
     ///
     /// - Parameter index: index to return a substring that is up to this index, or shorter if the string is shorter
     /// - Returns: either
-    public func substring(upTo index:Int)->String {
+    func substring(upTo index:Int)->String {
         
         if index < 0 {
             return self.substring(from: max(Int(self.count) + index, 0))
@@ -1021,7 +1021,7 @@ extension String /* OLD substring with int ranges */ {
     }
     
     /*
-    public func substring(from fromIndex:UInt, upTo upToIndex:UInt)->String {
+    func substring(from fromIndex:UInt, upTo upToIndex:UInt)->String {
         guard fromIndex < Int.max / 2 && upToIndex < Int.max / 2 else {
             NSLog("[StringEx] substring(from:to:) failed. toIndex or fromIndex too big!")
             return self
@@ -1035,7 +1035,7 @@ extension String /* OLD substring with int ranges */ {
     ///   - fromIndex: starting index for the resulting Substring
     ///   - upToIndex: ending index for the substring to reach up to, but not including its charachter.
     /// - Returns: a substring from the given two int indexes.
-    public func substring(from fromIndex:Int, upTo upToIndex:Int)->String {
+    func substring(from fromIndex:Int, upTo upToIndex:Int)->String {
         guard fromIndex < upToIndex else {
             NSLog("[StringEx] substring(from:to:) failed. upToIndex < fromIndex!")
             return self
@@ -1059,7 +1059,7 @@ extension String /* OLD substring with int ranges */ {
     }
      */
     
-    public func substring(untilFirstOccuranceOf substr:String)->String? {
+    func substring(untilFirstOccuranceOf substr:String)->String? {
         
         let indices = self.indices(of: substr)
         if (indices.count > 0)

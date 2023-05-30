@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Error {
+public extension Error {
     
     var description : String {
         var result = "<unknown error \(type(of: self)) \(self.localizedDescription)>"
@@ -56,7 +56,7 @@ extension Error {
     
 }
 
-extension NSError {
+public extension NSError {
     var reason : String {
         return self.localizedDescription // ?? self.localizedFailureReason ?? self.description
     }

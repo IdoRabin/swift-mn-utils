@@ -16,7 +16,7 @@ import Foundation
 //    }
 //}
 
-extension Set where Element : CustomStringConvertible {
+public extension Set where Element : CustomStringConvertible {
     
     var description : String {
         get {
@@ -37,7 +37,7 @@ extension Set where Element : CustomStringConvertible {
     }
 }
 
-extension Array where Element : CustomStringConvertible {
+public extension Array where Element : CustomStringConvertible {
     var description : String {
         get {
             var result : String = ""
@@ -87,7 +87,7 @@ extension Array where Element : CustomStringConvertible {
     }
 }
 
-extension Dictionary where Value : CustomStringConvertible {
+public extension Dictionary where Value : CustomStringConvertible {
     
     var descriptionLines : String {
         get {

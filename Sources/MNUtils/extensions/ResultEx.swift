@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Result {
+public extension Result {
     var isSuccess : Bool {
         switch self {
         case .success: return true
@@ -20,7 +20,7 @@ extension Result {
     }
 }
 
-extension Result where Failure : Error {
+public extension Result where Failure : Error {
     
     var errorValue : Error? {
         switch self {
