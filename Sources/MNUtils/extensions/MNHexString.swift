@@ -7,30 +7,28 @@
 
 import Foundation
 
-fileprivate static let DEFAULT_UPPERCASE_HEX = false
-
 // IntEx
 public extension Int {
     
     var hexString  : String {
-        return toHex(uppercase: DEFAULT_UPPERCASE_HEX)
+        return toHex(uppercase: false)
     }
     
-    func toHex(uppercase:Bool = DEFAULT_UPPERCASE_HEX)->String {
+    func toHex(uppercase:Bool = false)->String {
         return Self.intToHex(value: self, uppercase:uppercase)
     }
     
-    static func intToHex(value:Int, uppercase:Bool = DEFAULT_UPPERCASE_HEX)->String {
+    static func intToHex(value:Int, uppercase:Bool = false)->String {
         return String(value, radix: 16, uppercase: uppercase)
     }
 }
 
 public extension String {
-    static func toHexString(int value:Int, uppercase:Bool = DEFAULT_UPPERCASE_HEX)->String {
+    static func toHexString(int value:Int, uppercase:Bool = false)->String {
         return String(value, radix: 16, uppercase: uppercase)
     }
     
-    func toHexString(int64 value:Int64, uppercase:Bool = DEFAULT_UPPERCASE_HEX)->String {
+    func toHexString(int64 value:Int64, uppercase:Bool = false)->String {
         return String(value, radix: 16, uppercase: uppercase)
     }
 }
