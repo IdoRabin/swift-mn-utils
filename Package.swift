@@ -19,8 +19,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // In-House pakcages
-       .package(path: "../../xcode/DSLogger"),
-       .package(path: "../../xcode/MNUtils/MNUtils"),
+        .package(url: "https://gitlab.com/ido_r_demos/dslogger.git", from:"0.0.1"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -35,5 +34,7 @@ let package = Package(
             name: "MNUtilsTests",
             dependencies: ["MNUtils"]
         ), // one
-    ] // before
+    ], // before
+    
+    swiftLanguageVersions: [.v5]
 ) // last

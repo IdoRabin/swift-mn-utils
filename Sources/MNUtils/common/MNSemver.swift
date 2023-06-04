@@ -1,6 +1,6 @@
 //
-//  SemVer.swift
-//  
+//  MNSemver.swift
+//
 //
 //  Source: https://github.com/sersoft-gmbh/semver/blob/master/Sources/SemVer/Version.swift
 //
@@ -11,18 +11,18 @@ import struct Foundation.CharacterSet
 public extension CharacterSet {
     /// Contains the allowed characters for a Version suffix (Version.prelease and Version.metadata)
     /// Allowed are alphanumerics and hyphen.
-    public static let versionSuffixAllowed: CharacterSet = {
+    static let versionSuffixAllowed: CharacterSet = {
         var validCharset = alphanumerics
         validCharset.insert("-")
         return validCharset
     }()
 }
 
-public typealias SemVer = Version
+public typealias MNSemver = Semver
 
 /// A Version struct that implements the rules of semantic versioning.
 /// - SeeAlso: https://semver.org
-public struct Version: Hashable, Comparable, LosslessStringConvertible {
+public struct Semver: Hashable, Comparable, LosslessStringConvertible {
     /// The major part of this version. Must be >= 0.
     public var major: Int {
         willSet { assert(newValue >= 0) }
@@ -170,16 +170,16 @@ public struct Version: Hashable, Comparable, LosslessStringConvertible {
 */
 
 // MARK: - Comparison
-public extension Version {
+public extension Semver {
     /// inherited
-    static func ==(lhs: Version, rhs: Version) -> Bool {
+    static func ==(lhs: Semver, rhs: Semver) -> Bool {
         (lhs.major, lhs.minor, lhs.patch, lhs.prerelease)
             ==
         (rhs.major, rhs.minor, rhs.patch, rhs.prerelease)
     }
 
     /// inherited
-    static func <(lhs: Version, rhs: Version) -> Bool {
+    static func <(lhs: Semver, rhs: Semver) -> Bool {
         (lhs.major, lhs.minor, lhs.patch)
             <
         (rhs.major, rhs.minor, rhs.patch)
@@ -188,7 +188,7 @@ public extension Version {
     }
 
     /// inherited
-    static func >(lhs: Version, rhs: Version) -> Bool {
+    static func >(lhs: Semver, rhs: Semver) -> Bool {
         (lhs.major, lhs.minor, lhs.patch)
             >
         (rhs.major, rhs.minor, rhs.patch)
@@ -198,7 +198,7 @@ public extension Version {
 }
 
 // MARK: - Incrementing
-public extension Version {
+public extension Semver {
     /// Lists all the numeric parts of a version (major, minor and patch).
     enum NumericPart: Hashable, CustomStringConvertible {
         /// The major version part.
@@ -227,12 +227,12 @@ public extension Version {
     ///   - part: The numeric part to increase.
     ///   - keepingMetadata: Whether or not the metadata should be kept. Defaults to `false`.
     /// - Returns: A new version that has the specified `part` increased, along with the necessary other changes.
-    func next(_ part: NumericPart, keepingMetadata: Bool = false) -> Version {
+    func next(_ part: NumericPart, keepingMetadata: Bool = false) -> Semver {
         let newMetadata = keepingMetadata ? metadata : []
         switch part {
-        case .major: return Version(major: major + 1, minor: 0, patch: 0, metadata: newMetadata)
-        case .minor: return Version(major: major, minor: minor + 1, patch: 0, metadata: newMetadata)
-        case .patch: return Version(major: major, minor: minor, patch: patch + 1, metadata: newMetadata)
+        case .major: return Semver(major: major + 1, minor: 0, patch: 0, metadata: newMetadata)
+        case .minor: return Semver(major: major, minor: minor + 1, patch: 0, metadata: newMetadata)
+        case .patch: return Semver(major: major, minor: minor, patch: patch + 1, metadata: newMetadata)
         }
     }
 
@@ -262,10 +262,10 @@ public extension Version {
 }
 
 // MARK: - Formatting Options
-extension Version {
+public extension Semver {
     /// Describes a set options that define the formatting behavior.
     @frozen
-    public struct FormattingOptions: OptionSet {
+    struct FormattingOptions: OptionSet {
         /// inherited
         public typealias RawValue = Int
 
@@ -279,26 +279,26 @@ extension Version {
     }
 }
 
-extension Version.FormattingOptions {
+public extension Semver.FormattingOptions {
     /// Leave out patch part if it's zero.
-    public static let dropPatchIfZero = Version.FormattingOptions(rawValue: 1 << 0)
+    static let dropPatchIfZero = Semver.FormattingOptions(rawValue: 1 << 0)
     /// Leave out minor part if it's zero. Requires `dropPatchIfZero`.
-    public static let dropMinorIfZero = Version.FormattingOptions(rawValue: 1 << 1)
+    static let dropMinorIfZero = Semver.FormattingOptions(rawValue: 1 << 1)
     /// Include the prerelease part of the version.
-    public static let includePrerelease = Version.FormattingOptions(rawValue: 1 << 2)
+    static let includePrerelease = Semver.FormattingOptions(rawValue: 1 << 2)
     /// Include the metadata part of the version.
-    public static let includeMetadata = Version.FormattingOptions(rawValue: 1 << 3)
+    static let includeMetadata = Semver.FormattingOptions(rawValue: 1 << 3)
 
     /// Combination of `.includePrerelease` and `.includeMetadata`.
     @inlinable
-    public static var fullVersion: Version.FormattingOptions { [.includePrerelease, .includeMetadata] }
+    static var fullVersion: Semver.FormattingOptions { [.includePrerelease, .includeMetadata] }
     /// Combination of `.dropPatchIfZero` and `.dropMinorIfZero`.
     @inlinable
-    public static var dropTrailingZeros: Version.FormattingOptions { [.dropMinorIfZero, .dropPatchIfZero] }
+    static var dropTrailingZeros: Semver.FormattingOptions { [.dropMinorIfZero, .dropPatchIfZero] }
 }
 
 #if compiler(>=5.5) && canImport(_Concurrency)
-extension Version: Sendable {}
-extension Version.NumericPart: Sendable {}
-extension Version.FormattingOptions: Sendable {}
+extension Semver: Sendable {}
+extension Semver.NumericPart: Sendable {}
+extension Semver.FormattingOptions: Sendable {}
 #endif

@@ -63,3 +63,8 @@ def processfile(filepath: str):
 
 # main run:
 processfile(FILEPATH)
+
+## TODO:
+# commit annotated tag
+# git tag -a 1.4.2 -m "my version 1.4.2"
+# -- DO NOT PUSH: git push --tags
