@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "dslogger",
+      "kind" : "remoteSourceControl",
+      "location" : "https://gitlab.com/ido_r_demos/dslogger.git",
+      "state" : {
+        "revision" : "6148cbb185f08b591068307885b3c8a09b27f302",
+        "version" : "0.0.1"
+      }
+    }
+  ],
+  "version" : 2
+}

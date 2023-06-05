@@ -23,8 +23,16 @@ public protocol MNPermissionable : Hashable, Equatable {
     var forbiddenValue : Forbidden? { get }
 }
 
-@frozen public enum MNPermission<Allowed : MNAllowed, Forbidden: MNForbidden> : MNPermissionable where Forbidden : Error {
+// MARK: Codable
+fileprivate enum CodingKeys: String, CodingKey {
+    case allowed = "allowed"
+    case forbidden = "forbidden"
+    case undetermined = "undetermined"
     
+    static var all : [CodingKeys] = [.allowed, .forbidden, .undetermined]
+}
+
+@frozen public enum MNPermission<Allowed : MNAllowed, Forbidden: MNForbidden> : MNPermissionable where Forbidden : Error {
     /// A success, storing a `Success` value.
     case allowed(Allowed)
     
@@ -76,5 +84,25 @@ public protocol MNPermissionable : Hashable, Equatable {
         }
         
         return false
+    }
+}
+
+// MARK: Codable
+extension MNPermission : Codable where Forbidden : Codable, Allowed : Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let allowed = try container.decodeIfPresent(Allowed.self, forKey: .allowed) {
+            self = .allowed(allowed)
+        } else if let forbidden = try container.decodeIfPresent(Forbidden.self, forKey: .forbidden) {
+            self = .forbidden(forbidden)
+        }
+        
+        throw MNError(.misc_failed_decoding, reason: "\(Self.self) failed decoding (no allowed AND no forbidden).")
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(allowedValue, forKey: .allowed)
+        try container.encodeIfPresent(forbiddenValue, forKey: .forbidden)
     }
 }
