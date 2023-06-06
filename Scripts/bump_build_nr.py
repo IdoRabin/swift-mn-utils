@@ -12,25 +12,21 @@ import re
 import sys
 import os
 import fileinput
+import argparse
 from tempfile import NamedTemporaryFile
 
 # globals
-FILEPATH: str = '/Users/syncme/xcode/MNUtils/MNUtils/Sources/MNUtils/Version.swift'
+FILEPATH: str = '/../Version.swift'
 regex: re.Pattern = r'\b.{0,40}BUILD_NR\s{0,2}:\s{0,2}Int\s{0,2}=\s{0,2}(?P<version_int>\d+)\b'
 print('= bump_build_nr.py is starting: =')
 regex_key = 'version_int'
-# consider >> let BUILD_NR : Int = 1717
-print('= bump_build_nr.py is starting for MNUtils =')
-if not os.path.isfile(FILEPATH):
-	print(f'❌ bump_build_nr.py failed finding FILEPATH - please correct the path: {FILEPATH}')
 
-
-def incrementLastInt(input_line: str, line_index: int, addInt: int) -> str:
+def incrementLastInt(line: str, addInt: int) -> str:
     global regex
     global regex_key
 
     # will either return the same line it recieved, or change the line if it contains the contains string, looking for an int to increase by addInt amount
-    result: str = input_line
+    result: str = line
     # match with the regex:
     match = re.search(regex, result)
     if match:
@@ -46,36 +42,43 @@ def incrementLastInt(input_line: str, line_index: int, addInt: int) -> str:
                     new_value = value + addInt
                     # Replace at span:
                     result = result[:start] + f'{new_value}' + result[end:]
-                    print(f'    Found and bumped build nr line #{line_index} from: {value} to: {new_value}')
+                    print(f'    Found and bumped build nr from: {value} to: {new_value}')
     return result
 
 
-# open Version file
 def processfile(filepath: str):
-	temp_file_name: str = ''
-	was_changed = False
-	with open(filepath, mode='r+', encoding='utf-8') as f:
-		with NamedTemporaryFile(delete=False, mode='w+', encoding='utf-8') as fout:
-			temp_file_name = fout.name
-			line_index = 0
-			for line in f:
-				print(f'#{line_index} {line.strip()}')
-				new_line = incrementLastInt(line, line_index, +1)
-				line_index += 1
-				fout.write(new_line)
-				if new_line != line:
-					was_changed = True
-	if was_changed:
-		# os.rename(temp_file_name, filepath)
-		print(f'✅  {FILEPATH} was successfully updated')
-	else:
-		print(f'✅  {FILEPATH} was NOT updated')
+    # open Version file
+    
+    temp_file_name = ''
+    with open(filepath, mode='r+', encoding='utf-8') as f:
+        with NamedTemporaryFile(delete=False, mode='w+', encoding='utf-8') as fout:
+            temp_file_name = fout.name
+            for aline in f:
+                newline = incrementLastInt(aline, +1)
+                fout.write(newline)
 
+    os.rename(temp_file_name, filepath)
+    print(f'✅  {filepath} was successfully updated')
 
 # main run:
-processfile(FILEPATH)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        prog='Bump',
+        description='Bumps build number or version by finding files with lines where the apps\' version appears using regexes, and bumping the version. Saves a valid version in all the needed locations. User may explicitly specify the root dir for the search (-p / -path arguments) or we are assuming the search should start one folder above the "current" run folder',
+        epilog='Thanks')
+    
+    parser.add_argument('-b', '--base_folder', required=False, default='', type=str, help='The base - root folder to start the search')
+    
+    args = parser.parse_args()
+    path = FILEPATH
+    if args.base_folder is not None and len(args.base_folder) > 0:
+        print(f'== base path argument: {path}')
+        path = args.base_folder
+    if os.path.isfile(path):
+        processfile(path)
+    else:
+        print(f'❌ bump_build_nr.py failed finding path - please correct the path: {path}')
 
-## TODO:
-# commit annotated tag
-# git tag -a 1.4.2 -m "my version 1.4.2"
-# -- DO NOT PUSH: git push --tags
+# TODO:
+# git tag 1.2.3
+# git push --tags
