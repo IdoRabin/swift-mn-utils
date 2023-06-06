@@ -23,9 +23,9 @@ public class MNDebug {
 public class MNConstants {
     let dlog : MNLogger? = MNLog.forClass("MNUtils")
     
-    let BASE_64_PARAM_KEY = "e64"
-    let PROTOBUF_PARAM_KEY = "ptb"
-    let PERCENT_ESCAPED_HINTS = [
+    public let BASE_64_PARAM_KEY = "e64"
+    public let PROTOBUF_PARAM_KEY = "ptb"
+    public let PERCENT_ESCAPED_HINTS = [
         "%3D" : "=",
         "%26" : "&",
         "%5F" : "_",
@@ -36,7 +36,7 @@ public class MNConstants {
         "%2F" : "/",
     ]
     
-    let PERCENT_DOUBLY_ESCAPED_HINTS = [
+    public let PERCENT_DOUBLY_ESCAPED_HINTS = [
         "%253D" : "=",
         "%2526" : "&",
         "%257C" : "|",
@@ -46,7 +46,7 @@ public class MNConstants {
         "%252F" : "/",
     ]
     
-    let IS_VAPOR_SERVER : Bool = {
+    public let IS_VAPOR_SERVER : Bool = {
         #if VAPOR
         return true
         #else
@@ -54,7 +54,7 @@ public class MNConstants {
         #endif
     }()
     
-    var IS_RTL_LAYOUT : Bool = {
+    public var IS_RTL_LAYOUT : Bool = {
         #if VAPOR
         return false
         #else
