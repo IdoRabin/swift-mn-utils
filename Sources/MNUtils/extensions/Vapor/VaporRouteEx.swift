@@ -15,7 +15,7 @@ fileprivate let dlog : MNLogger? = MNLog.forClass("VaporRouteEx")
 
 // Convenience, Brevity
 // MARK: Vapor.Route extension {
-extension Vapor.Route {
+public extension Vapor.Route {
     
     // MARK: extending new computed Properties
     
@@ -146,7 +146,7 @@ extension Vapor.Route {
 }
 
 
-extension Vapor.Route /* Rabac rules */ {
+public extension Vapor.Route /* Rabac rules */ {
     func setting(rules : [RabacRule]) {
         let appRoute = self.get(orMake:{AppRoute(route: self)})
         dlog?.todo("Route[\(self.fullPath)].setting(rules:) appRoute:\(appRoute)")
@@ -167,7 +167,7 @@ extension Vapor.Route /* Rabac rules */ {
     }
 }
 
-extension Sequence where Element == Vapor.Route {
+public extension Sequence where Element == Vapor.Route {
     var fullPaths : [String] {
         return self.compactMap { route in
             return route.fullPath

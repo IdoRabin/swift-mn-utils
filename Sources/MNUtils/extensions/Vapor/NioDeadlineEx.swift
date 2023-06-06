@@ -11,7 +11,7 @@ import Foundation
 #if NIO || VAPOR || FLUENT || POSTGRES
 import NIOCore
 
-extension NIODeadline /* delayFromNow : TimeInterval */ {
+public extension NIODeadline /* delayFromNow : TimeInterval */ {
     public static func delayFromNow(_ delay : TimeInterval)->NIODeadline {
         return NIODeadline.now() + .milliseconds(Int64(delay*1000))
     }

@@ -10,7 +10,7 @@
 import Foundation
 import Vapor
 
-extension Abort {
+public extension Abort {
     init(mnErrorCode mneCode:MNErrorCode, reason areason:String? = nil) {
         if mneCode.isHTTPStatus {
             self.init(mneCode.httpStatusCode!)

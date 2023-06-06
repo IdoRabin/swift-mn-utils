@@ -11,7 +11,7 @@ import Foundation
 import Vapor
 
 
-extension ErrorSource : Codable {
+public extension ErrorSource : Codable {
     
     private enum CodingKeys: String, CodingKey {
         case file = "file"

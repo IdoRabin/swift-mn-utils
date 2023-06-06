@@ -22,7 +22,7 @@ fileprivate let ALL_SUSPECTED_PERCENT_ESCAPED_KEYS = MNUtils.constants.PERCENT_E
 
 fileprivate let URL_ESCAPE_ENCODED_DETECTION_CHARACTERSET = CharacterSet(charactersIn: "%+&=") // See also in MNUtils.constants?
 
-extension String /* helper functions relevant to vapor URL requests, params, base64 params and more  */ {
+public extension String /* helper functions relevant to vapor URL requests, params, base64 params and more  */ {
     
     /// Removes url percent encoding from the string and returns the unencoded string. Handles a few end cases that the removingPercentEncoding does not handle.
     /// - Parameter isLogIssues: will log issues is encountered
@@ -307,7 +307,7 @@ extension String /* helper functions relevant to vapor URL requests, params, bas
     }
 }
 
-extension Dictionary where Key : Codable, Value : Codable {
+public extension Dictionary where Key : Codable, Value : Codable {
     
     private static func encodeValToString(value:Codable, encoder:JSONEncoder, isPercentEscape:Bool = false) throws ->String {
 
@@ -419,7 +419,7 @@ extension Dictionary where Key : Codable, Value : Codable {
 
 
 // Extension
-extension RedirectEncoding {
+public extension RedirectEncoding {
     
     func encode(urlQuery:String?)->String? {
         guard let urlQuery = urlQuery else {

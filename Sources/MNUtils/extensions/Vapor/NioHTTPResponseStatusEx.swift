@@ -11,7 +11,7 @@ import Foundation
 import Vapor
 
 // Seift nio
-extension HTTPResponseStatus {
+public extension HTTPResponseStatus {
     
     // We have a mapping of real http status codes to our own - this allows changing the mapped statuses later:
     

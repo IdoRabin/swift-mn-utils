@@ -19,7 +19,7 @@ import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("VaporRequestEx")
 
-extension Vapor.Request /* App-specific components */ {
+public extension Vapor.Request /* App-specific components */ {
     
     static var appHasSessionMiddleWare = true
     
@@ -117,7 +117,7 @@ extension Vapor.Request /* App-specific components */ {
     }
 
 }
-extension Vapor.Request /* redirects */ {
+public extension Vapor.Request /* redirects */ {
     
     /// redirects the request to a new url using 3xx redirect status codes. The function is wrapped to allow interception and modification of the redirect.
     /// - Parameters:
@@ -269,7 +269,7 @@ extension Vapor.Request /* redirects */ {
     }
 }
 
-extension Vapor.Request /* selfUser and access token */ {
+public extension Vapor.Request /* selfUser and access token */ {
     
     static let REQUEST_UUID_STRING_PREFIX = "REQ|"
     static let URL_ESCAPE_ENCODED_DETECTION_CHARACTERSET = CharacterSet(charactersIn: "%+&=")
@@ -461,7 +461,7 @@ extension Vapor.Request /* App-specific : route context and history */ {
  
  */
 /*
-extension ContentContainer {
+ public extension ContentContainer {
     // MARK: Decode
     
     public func decodeAsAppResult<D>(_ content: D.Type)->AppResult<D> where D: Decodable {
@@ -474,7 +474,7 @@ extension ContentContainer {
     }
 }
 
-extension Vapor.URI {
+ public extension Vapor.URI {
     
     var queryParams : [String:String] {
         let parts = self.query?.components(separatedBy: "&")
@@ -487,7 +487,7 @@ extension Vapor.URI {
     }
 }
 
-extension Vapor.Parameters {
+ public extension Vapor.Parameters {
     /// Vapor.Parameters: Holds dynamic path components that were discovered while routing.
     ///
     /// After this struct has been filled with parameter values, you can fetch
@@ -518,7 +518,7 @@ extension Vapor.Parameters {
 
 }
 
-extension Vapor.Request {
+public extension Vapor.Request {
     
 
     
