@@ -28,6 +28,15 @@ let package = Package(
             dependencies: [
                 // In-House pakcages
                 .product(name: "DSLogger", package: "DSLogger"),
+            ],
+            swiftSettings: [
+                // Enables better optimizations when building in Release
+                .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release)),
+                
+                .define("PRODUCTION", .when(configuration: .release)),
+                .define("DEBUG", .when(configuration: .debug)),
+                .define("VAPOR"), // Vapor framework, to distinguish in classes that are also used in iOS / macOS.
+                .define("NIO"),
             ]
         ),
         .testTarget(

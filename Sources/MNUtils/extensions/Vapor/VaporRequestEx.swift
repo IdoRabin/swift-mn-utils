@@ -21,10 +21,10 @@ fileprivate let dlog : MNLogger? = MNLog.forClass("VaporRequestEx")
 
 public extension Vapor.Request /* App-specific components */ {
     
-    static var appHasSessionMiddleWare = true
+    public static var appHasSessionMiddleWare = true
     
     // MARK: Saving info to session store
-    func saveToSessionStore(key:any ReqStorageKey.Type, value:(any JSONSerializable)?) {
+    public func saveToSessionStore(key:any ReqStorageKey.Type, value:(any JSONSerializable)?) {
         guard Self.appHasSessionMiddleWare else {
             return
         }
@@ -41,7 +41,7 @@ public extension Vapor.Request /* App-specific components */ {
         }
     }
     
-    func getFromSessionStore<Value:JSONSerializable>(key:any ReqStorageKey.Type, required:Bool = false)->Value? {
+    public func getFromSessionStore<Value:JSONSerializable>(key:any ReqStorageKey.Type, required:Bool = false)->Value? {
         guard Self.appHasSessionMiddleWare else {
             return nil
         }
@@ -58,7 +58,7 @@ public extension Vapor.Request /* App-specific components */ {
         return nil
     }
     
-    func saveToSessionStore(userId:String?) {
+    public func saveToSessionStore(userId:String?) {
         guard Self.appHasSessionMiddleWare else {
             return
         }
@@ -66,7 +66,7 @@ public extension Vapor.Request /* App-specific components */ {
         self.saveToSessionStore(key: ReqStorageKeys.selfUserID, value: userId)
     }
 
-    func saveToSessionStore(selfUser:User?, selfAccessToken:AccessToken?) {
+    public func saveToSessionStore(selfUser:User?, selfAccessToken:AccessToken?) {
         guard Self.appHasSessionMiddleWare else {
             return
         }
@@ -77,7 +77,7 @@ public extension Vapor.Request /* App-specific components */ {
     }
 
     // MARK: Saving info to request store
-    func saveToReqStore<RSK:ReqStorageKey>(key:RSK.Type, value:RSK.Value?, alsoSaveToSession:Bool = false) {
+    public func saveToReqStore<RSK:ReqStorageKey>(key:RSK.Type, value:RSK.Value?, alsoSaveToSession:Bool = false) {
         // Will also save nil (and remove that key)
         self.storage[key] = value
         
@@ -98,7 +98,7 @@ public extension Vapor.Request /* App-specific components */ {
     // MARK: Fetching info from session and req. stroage
     /// Returns the stored current self user for this request -
     /// meaning, the request had an access token and the user associaced wth that token was saved in request storage as the self user.
-    func getFromReqStore<Value:JSONSerializable>(key:any ReqStorageKey.Type, getFromSessionIfNotFound:Bool = true)->Value? {
+    public func getFromReqStore<Value:JSONSerializable>(key:any ReqStorageKey.Type, getFromSessionIfNotFound:Bool = true)->Value? {
         if let anyInfo = self.storage.get(key) {
             if let info = anyInfo as? Value {
                 return info
@@ -271,12 +271,12 @@ public extension Vapor.Request /* redirects */ {
 
 public extension Vapor.Request /* selfUser and access token */ {
     
-    static let REQUEST_UUID_STRING_PREFIX = "REQ|"
-    static let URL_ESCAPE_ENCODED_DETECTION_CHARACTERSET = CharacterSet(charactersIn: "%+&=")
+    public static let REQUEST_UUID_STRING_PREFIX = "REQ|"
+    public static let URL_ESCAPE_ENCODED_DETECTION_CHARACTERSET = CharacterSet(charactersIn: "%+&=")
     
     /// Returns the request's ID: each request gets its own uuid for logging purposes.
     /// Example: "2D1ED539-CACF-4DB1-A6E6-2F8343135B3F"
-    var requestUUIDString: String {
+    public var requestUUIDString: String {
         get {
             let result : Logger.MetadataValue? = self.logger[metadataKey: "request-id"]
             if let result = result {
@@ -292,15 +292,15 @@ public extension Vapor.Request /* selfUser and access token */ {
         }
     }
     
-    var selfUserUUIDString: String? {
+    public var selfUserUUIDString: String? {
         return self.selfUserUUID?.uuidString
     }
     
-    var selfUserUUID: UUID? {
+    public var selfUserUUID: UUID? {
         return self.selfUser?.id
     }
     
-    var selfUser : User? {
+    public var selfUser : User? {
         if let user : User = self.getFromReqStore(key: ReqStorageKeys.selfUser) {
             return user
         }
@@ -317,7 +317,7 @@ public extension Vapor.Request /* selfUser and access token */ {
         return result
     }
     
-    var accessToken : AccessToken? {
+    public var accessToken : AccessToken? {
         return self.getAccessToken(context: "VaporRequestEx.accessToken property")
     }
     
@@ -339,7 +339,7 @@ public extension Vapor.Request /* selfUser and access token */ {
         return result
     }
     
-    func getAccessToken(context:String?)->AccessToken? {
+    public func getAccessToken(context:String?)->AccessToken? {
         // Cached value
         guard let accessToken : AccessToken = self.getFromReqStore(key: ReqStorageKeys.selfAccessToken) else {
             self.saveToReqStore(key: ReqStorageKeys.selfAccessToken, value: AccessToken.emptyToken)
@@ -374,15 +374,15 @@ public extension Vapor.Request /* selfUser and access token */ {
 
 extension Vapor.Request /* App-specific : route context and history */ {
     
-    var routeContext : AppRouteContext? {
+    public var routeContext : AppRouteContext? {
         return self.getFromReqStore(key: AppRouteContextStorageKey.self, getFromSessionIfNotFound: true)
     }
     
-    var routeHistory : RoutingHistory? {
+    public var routeHistory : RoutingHistory? {
         return self.getFromSessionStore(key: ReqStorageKeys.appRouteHistory)
     }
     
-    func getError(byReqId:String)->(err:MNError, path:String, requestId:String)? {
+    public func getError(byReqId:String)->(err:MNError, path:String, requestId:String)? {
         var reqId = byReqId
         if reqId.contains("%") {
             reqId = reqId.removingPercentEncodingEx ?? reqId
@@ -396,7 +396,7 @@ extension Vapor.Request /* App-specific : route context and history */ {
         return nil
     }
     
-    func getLastError()->(err:MNError, path:String, requestId:String)? {
+    public func getLastError()->(err:MNError, path:String, requestId:String)? {
         let possibles = self.routeHistory?.items.filter { item in
             if let err = item.appError {
                 return err.httpStatus != HTTPStatus.ok
@@ -421,7 +421,7 @@ extension Vapor.Request /* App-specific : route context and history */ {
         return result
     }
     
-    var productType : RouteProductType {
+    public var productType : RouteProductType {
         var result : RouteProductType = .unknown
         let arcontext = self.routeContext ?? AppRouteContext.setupRouteContext(for: self)
 

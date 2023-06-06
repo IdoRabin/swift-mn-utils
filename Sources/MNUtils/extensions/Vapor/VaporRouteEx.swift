@@ -21,12 +21,12 @@ public extension Vapor.Route {
     
     
     /// Full path for the Vapor route, formatted and normalized as path only
-    var fullPath : String {
+    public var fullPath : String {
         return self.path.fullPath.asNormalizedPathOnly()
     }
     
     /// Returns an AppRoute instance for the Vapor.Route. (instances are unique and kept in the AppRoutes cache as implementor of AppRouteManager)
-    var appRoute  : AppRoute {
+    public var appRoute  : AppRoute {
         get {
             return self.get(orMake:{AppRoute(route: self)})
         }
@@ -37,7 +37,7 @@ public extension Vapor.Route {
     }
     
     // MARK: AppRouteManager - Indirect access to AppServer.shared.routes
-    static var appRouteManager : AppRouteManager {
+    public static var appRouteManager : AppRouteManager {
         return AppServer.shared.routes
     }
     

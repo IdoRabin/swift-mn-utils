@@ -88,7 +88,7 @@ public class AverageAccumulator : Codable {
         return self._isPersistentInFile && self._isNeedsSave
     }
     
-    var valuesTotalSum : Double {
+    public var valuesTotalSum : Double {
         var sum : Double = 0.0
         self._lock.lock {
             for tuple in payload.tuples {
@@ -98,7 +98,7 @@ public class AverageAccumulator : Codable {
         return sum
     }
     
-    var amountsTotalSum : Int {
+    public var amountsTotalSum : Int {
         var count = 0
         self._lock.lock {
             for tuple in payload.tuples {
@@ -108,11 +108,11 @@ public class AverageAccumulator : Codable {
         return count
     }
     
-    var intAverage : Int {
+    public var intAverage : Int {
         return Int(round(self.average))
     }
     
-    var mean : Double {
+    public var mean : Double {
         guard self.count > 0 else {
             return 0.0
         }
@@ -133,7 +133,7 @@ public class AverageAccumulator : Codable {
         }
     }
     
-    var average : Double {
+    public var average : Double {
         guard self.count > 0 else {
             return 0.0
         }
@@ -144,7 +144,7 @@ public class AverageAccumulator : Codable {
         return Double(self.valuesTotalSum) / sum
     }
     
-    func rollingAverage(forLast:Int)->Double {
+    public func rollingAverage(forLast:Int)->Double {
         guard self.count > 0 else {
             return 0.0
         }
@@ -164,18 +164,18 @@ public class AverageAccumulator : Codable {
         return Double(sum) / count
     }
     
-    var entriesCount : Int {
+    public var entriesCount : Int {
         return self.count
     }
     
-    func popIfNeeded() {
+    public func popIfNeeded() {
         if self.payload.maxSize > 0 && self.count > self.payload.maxSize {
             let delta = self.count - self.payload.maxSize
             self.removeFirst(delta)
         }
     }
     
-    func add(amount: Int, value : Double) {
+    public func add(amount: Int, value : Double) {
         self._lock.lock {
             self.payload.tuples.append(AccumTuple(amount: amount, value: value))
             self._isNeedsSave = true
@@ -183,7 +183,7 @@ public class AverageAccumulator : Codable {
         }
     }
     
-    func add(amount: Int, value : Int) {
+    public func add(amount: Int, value : Int) {
         self._lock.lock {
             self.payload.tuples.append(AccumTuple(amount: amount, value: Double(value)))
             self._isNeedsSave = true
@@ -191,7 +191,7 @@ public class AverageAccumulator : Codable {
         }
     }
     
-    func add(amount: Int, value : CGFloat) {
+    public func add(amount: Int, value : CGFloat) {
         self._lock.lock {
             self.payload.tuples.append(AccumTuple(amount: amount, value: Double(value)))
             self._isNeedsSave = true
@@ -199,7 +199,7 @@ public class AverageAccumulator : Codable {
         }
     }
     
-    func add(amount: Int, value : Float) {
+    public func add(amount: Int, value : Float) {
         self._lock.lock {
             self.payload.tuples.append(AccumTuple(amount: amount, value: Double(value)))
             self._isNeedsSave = true
@@ -207,7 +207,7 @@ public class AverageAccumulator : Codable {
         }
     }
     
-    func values()->[Double] {
+    public func values()->[Double] {
         var result : [Double] = []
         self._lock.lock {
             result = self.payload.tuples.map { (tuple) -> Double in
@@ -218,7 +218,7 @@ public class AverageAccumulator : Codable {
         return result
     }
     
-    func amounts()->[Int] {
+    public func amounts()->[Int] {
         var result : [Int] = []
         
         self._lock.lock {
@@ -230,7 +230,7 @@ public class AverageAccumulator : Codable {
         return result
     }
     
-    func remove(where test:(Int,Double)->Bool) {
+    public func remove(where test:(Int,Double)->Bool) {
         var indexes : [Int] = []
         
         self._lock.lock {
@@ -250,7 +250,7 @@ public class AverageAccumulator : Codable {
         }
     }
     
-    func removeLast(_ amount : Int = 1) {
+    public func removeLast(_ amount : Int = 1) {
         if entriesCount > amount {
             self._lock.lock {
                 self.payload.tuples.removeLast(amount)
@@ -259,7 +259,7 @@ public class AverageAccumulator : Codable {
         }
     }
     
-    func removeFirst(_ amount : Int = 1) {
+    public func removeFirst(_ amount : Int = 1) {
         if entriesCount > amount {
             self._lock.lock {
                 self.payload.tuples.removeFirst(amount)
@@ -268,12 +268,12 @@ public class AverageAccumulator : Codable {
         }
     }
     
-    func clear() {
+    public func clear() {
         payload.tuples.removeAll()
         self.save()
     }
     
-    func sort() {
+    public func sort() {
         
         // Will sort all tuples by their average value
         self._lock.lock {
@@ -301,7 +301,7 @@ public class AverageAccumulator : Codable {
 }
 
 /* saving of cache as a whole */
-extension AverageAccumulator /* saving */ {
+public extension AverageAccumulator /* saving */ {
     
     func filePath(forKeys:Bool)->URL? {
         // .libraryDirectory -- not accessible to user by Files app

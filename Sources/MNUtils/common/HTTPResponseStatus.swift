@@ -237,9 +237,9 @@ public enum HTTPResponseStatus {
     }
 }
 
-extension HTTPResponseStatus {
+public extension HTTPResponseStatus {
     /// The numerical status code for a given HTTP response status.
-    public var code: UInt {
+    var code: UInt {
         get {
             switch self {
             case .continue:
@@ -369,7 +369,7 @@ extension HTTPResponseStatus {
     }
 
     /// The string reason phrase for a given HTTP response status.
-    public var reasonPhrase: String {
+    var reasonPhrase: String {
         get {
             switch self {
             case .continue:
