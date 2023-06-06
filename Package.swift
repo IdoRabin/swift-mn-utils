@@ -35,8 +35,6 @@ let package = Package(
                 
                 .define("PRODUCTION", .when(configuration: .release)),
                 .define("DEBUG", .when(configuration: .debug)),
-                .define("VAPOR"), // Vapor framework, to distinguish in classes that are also used in iOS / macOS.
-                .define("NIO"),
             ]
         ),
         .testTarget(

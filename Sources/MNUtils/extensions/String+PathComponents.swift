@@ -7,8 +7,10 @@
 
 import Foundation
 
+
+
 #if VAPOR
-// This is implemented in Vapor: see framework RoutingKit/Sources/RoutingKit/PathComponent.swift
+// This is implemented in Vapor frameowrk / sdk: see framework RoutingKit/Sources/RoutingKit/PathComponent.swift
 #else
 // We implement a complimentary extension for when Vapor is absent
 /// A single path component of a `Route`. An array of these components describes
