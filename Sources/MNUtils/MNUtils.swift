@@ -9,7 +9,7 @@ public struct MNUtils {
     // MARK: Singleton
 }
 
-let mnUtils = MNUtils()
+public let mnUtils = MNUtils()
 
 
 public class MNDebug {
