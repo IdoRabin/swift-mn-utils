@@ -68,7 +68,7 @@ public extension String {
     ///   - range: Int Range (CountableClosedRange)
     ///   - replacementString: string to insert instead of the given range of charahters
     /// - Returns: resulting manipulated string
-    public func replacing(range: CountableClosedRange<Int>, with replacementString: String) -> String {
+    func replacing(range: CountableClosedRange<Int>, with replacementString: String) -> String {
         let rng = NSRange(location: range.lowerBound, length: max(range.upperBound - range.lowerBound, 1))
         if let range = self.range(from: rng) {
             return self.replacingCharacters(in: range, with: replacementString)
@@ -76,7 +76,7 @@ public extension String {
         preconditionFailure("String replacing(range: CountableClosedRange<Int> range out of bounds!")
     }
     
-    public func replacing(range: CountableRange<Int>, with replacementString: String) -> String {
+    func replacing(range: CountableRange<Int>, with replacementString: String) -> String {
         let rng = NSRange(location: range.lowerBound, length: max(range.upperBound - range.lowerBound, 1))
         if let range = self.range(from: rng) {
             return self.replacingCharacters(in: range, with: replacementString)
@@ -683,7 +683,7 @@ public extension String {
     }
     /// Substring for a string with a given NSRange
     
-    public func split(atIndex index:Int)->[String]? {
+    func split(atIndex index:Int)->[String]? {
         if index == 0 {
             return ["", self.substring(from: 1)]
         }
@@ -704,7 +704,7 @@ public extension String {
     ///
     /// - Parameter string: a string to trim either from the start or end of the string.
     /// - Returns: a new string with its prefix of suffix or both trimmed, or the original string if the given string is not a prefix nor a suffix
-    public func trimming(string:String)->String {
+    func trimming(string:String)->String {
         var result = self
         if self == string {
             return ""
@@ -743,7 +743,7 @@ public extension String {
         return _indices.map({ index(startIndex, offsetBy: $0)..<index(startIndex, offsetBy: $0+count) })
     }
     
-    public func substrings(between prefix:String, suffix:String)->[String]? {
+    func substrings(between prefix:String, suffix:String)->[String]? {
         var result : [String]? = []
         let ranges = self.ranges(of: prefix)
         ranges.forEachIndex { (index, range) in
@@ -763,7 +763,7 @@ public extension String {
         return result
     }
     
-    public func hasAnyOfPrefixes(_ prefixes : [String])->Bool {
+    func hasAnyOfPrefixes(_ prefixes : [String])->Bool {
         for prefix in prefixes {
             if self.hasPrefix(prefix) {
                 return true
@@ -772,7 +772,7 @@ public extension String {
         return false
     }
     
-    public func hasAnyOfSuffixes(_ suffixes : [String])->Bool {
+    func hasAnyOfSuffixes(_ suffixes : [String])->Bool {
         for suffix in suffixes {
             if self.hasSuffix(suffix) {
                 return true
@@ -788,7 +788,7 @@ public extension String {
     /// will codense into:
     /// "mY TEXT 123 new"
     /// - Returns: a condensed string
-    public func condenseWhitespacesAndNewlines() -> String {
+    func condenseWhitespacesAndNewlines() -> String {
         let components = self.components(separatedBy: .whitespacesAndNewlines)
         return components.filter { !$0.isEmpty }.joined(separator: " ")
     }
@@ -799,14 +799,14 @@ public extension String {
     /// will codense into:
     /// "mY TEXT 123\n \tnew"
     /// - Returns: a condensed string
-    public func condenseWhitespaces() -> String {
+    func condenseWhitespaces() -> String {
         let components = self.components(separatedBy: .whitespaces)
         return components.filter { !$0.isEmpty }.joined(separator: " ")
     }
     
     
     /// tries to detect the direction of the best found language is the string
-    public func detectBestLanguage()->String? {
+    func detectBestLanguage()->String? {
         guard self.count > 0 else {
             return nil
         }
@@ -816,7 +816,7 @@ public extension String {
     }
     
     /// tries to detect the direction of the best found language is the string
-    public func detectBestTextAlignment()->NSTextAlignment? {
+    func detectBestTextAlignment()->NSTextAlignment? {
         if let lang = self.detectBestLanguage() {
             let rtlLangs = ["ar", "he"]
             return lang.lowercased().contains(anyOf: rtlLangs) ? .right : .left

@@ -7,7 +7,7 @@
 
 import Foundation
 
-class MNJSONEncoder : JSONEncoder {
+public class MNJSONEncoder : JSONEncoder {
     override init() {
         super.init()
         self.isStringPreference = MNUtils.debug.IS_DEBUG

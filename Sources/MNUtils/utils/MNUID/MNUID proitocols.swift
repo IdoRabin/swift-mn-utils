@@ -47,6 +47,6 @@ public extension MNUIDProtocol /* Default implementations */ {
     }
 }
 
-extension MNUIDProtocol {
+public extension MNUIDProtocol {
     
 }

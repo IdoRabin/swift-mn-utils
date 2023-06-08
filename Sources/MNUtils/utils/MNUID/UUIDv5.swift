@@ -14,7 +14,7 @@ public let UID_EMPTY_STRING : String = "00000000-0000-0000-0000-000000000000";
 
 fileprivate let dlog : DSLogger? = DLog.forClass("UUIDv5")
 
-extension UUID {
+public extension UUID {
     
     
     public enum UUIDVariant: Hashable {
@@ -29,13 +29,13 @@ extension UUID {
     }
     
 
-    public enum UUIDVersion: Int {
+    enum UUIDVersion: Int {
         case v3 = 3
         case v4 = 4
         case v5 = 5
     }
 
-    public enum UUIDv5Namespace {
+    enum UUIDv5Namespace {
         case dns
         case url
         case oid
@@ -166,7 +166,7 @@ extension UUID {
         return result;
     }
     
-    public var variant: UUIDVariant {
+    var variant: UUIDVariant {
         switch uuid.8 {
         case 0x80 ... 0xbf:
             return .rfc4122

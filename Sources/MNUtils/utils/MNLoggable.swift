@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol MNLoggable {
+public protocol MNLoggable {
     var output : [MNLogGranularity:MNLogOutput] { get set }
     var granularity : MNLogGranularity { get set }
     var defaultLogLevel : MNLogLevel { get }

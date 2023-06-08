@@ -55,7 +55,7 @@ public enum MNLogLevel : String {
 }
 
 // TODO: Transition to a filter set
-//struct MNLogFilter {
+//public struct MNLogFilter {
 //    let granularity : MNLogGranularity
 //    let level : MNLogLevel
 //    let including : [String]

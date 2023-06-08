@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct MNIndexPathTuple<Element:Any> {
+public struct MNIndexPathTuple<Element:Any> {
     let element : Element?
     let indexpath : IndexPath?
     var isEmpty : Bool { return element == nil && indexpath == nil }
 }
 
-extension Dictionary where Key == IndexPath {
+public extension Dictionary where Key == IndexPath {
     func toIIndexPathTuples()->[MNIndexPathTuple<Value>] {
         return self.map { key, val in
             return MNIndexPathTuple(element: val, indexpath: key)
@@ -21,46 +21,46 @@ extension Dictionary where Key == IndexPath {
     }
 }
 
-struct MNMoveIndexPathTuple : Hashable {
-    let fromIndexpath : IndexPath
-    let toIndexpath : IndexPath
+public struct MNMoveIndexPathTuple : Hashable {
+    public let fromIndexpath : IndexPath
+    public let toIndexpath : IndexPath
     
-    init(from:IndexPath, to:IndexPath) {
+    public init(from:IndexPath, to:IndexPath) {
         fromIndexpath = from
         toIndexpath = to
     }
     
-    init(from:Int, to:Int) {
+    public init(from:Int, to:Int) {
         fromIndexpath = IndexPath(index: from)
         toIndexpath = IndexPath(index: to)
     }
     
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(fromIndexpath)
         hasher.combine(toIndexpath)
     }
 }
 
-extension Sequence where Element == MNMoveIndexPathTuple {
-    var fromIndexPaths : [IndexPath] {
+public extension Sequence where Element == MNMoveIndexPathTuple {
+    public var fromIndexPaths : [IndexPath] {
         return self.compactMap { item in
             item.fromIndexpath
         }
     }
 
-    var toIndexPaths : [IndexPath] {
+    public var toIndexPaths : [IndexPath] {
         return self.compactMap { item in
             item.toIndexpath
         }
     }
     
-    var fromIndexes : [Int] {
+    public var fromIndexes : [Int] {
         return self.compactMap { item in
             item.fromIndexpath.first
         }
     }
     
-    var toIndexes : [Int] {
+    public var toIndexes : [Int] {
         return self.compactMap { item in
             item.toIndexpath.first
         }

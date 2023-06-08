@@ -71,14 +71,14 @@ public enum PathComponent: ExpressibleByStringInterpolation, CustomStringConvert
     }
 }
 
-extension String {
+public extension String {
     /// Converts a string into `[PathComponent]`.
     public var pathComponents: [PathComponent] {
         return self.split(separator: "/").map { .init(stringLiteral: .init($0)) }
     }
 }
 
-extension Sequence where Element == PathComponent {
+public extension Sequence where Element == PathComponent {
     /// Converts an array of `PathComponent` into a readable path string.
     ///
     ///     galaxies/:galaxyID/planets
@@ -115,13 +115,13 @@ extension PathComponent : Codable, Hashable {
     }
 }
 
-extension Sequence where Element == PathComponent {
+public extension Sequence where Element == PathComponent {
     var fullPath:String {
         return "/" + self.descriptions().joined(separator: "/")
     }
 }
 
-extension Array where Element == PathComponent {
+public extension Array where Element == PathComponent {
     var fullPath:String {
         return self.map { elem in
             "\(elem)"
