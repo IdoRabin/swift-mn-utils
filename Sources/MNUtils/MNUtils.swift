@@ -18,6 +18,14 @@ public class MNDebug {
     fileprivate init(){
         
     }
+    
+    func StringOrNil(_ str:String)->String? {
+        return self.IS_DEBUG ? str : nil
+    }
+    
+    func StringOrEmpty(_ str:String)->String {
+        return self.IS_DEBUG ? str : ""
+    }
 }
 
 public class MNConstants {

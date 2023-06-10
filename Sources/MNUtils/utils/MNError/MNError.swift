@@ -122,7 +122,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
         self.trackError(error: self)
     }
     
-    convenience init(domain newDomain:String? = nil, errcode newCode:MNErrorCode, description newDescription:String, reasons newReasons:[String]? = nil, underlyingError newUnderlyingError:MNError?) {
+    public convenience init(domain newDomain:String? = nil, errcode newCode:MNErrorCode, description newDescription:String, reasons newReasons:[String]? = nil, underlyingError newUnderlyingError:MNError?) {
         let adomain = newDomain ?? newCode.domain
         self.init(domain: adomain, code: newCode.rawValue, description: newDescription, reasons: newReasons, underlyingError: newUnderlyingError)
     }
@@ -137,6 +137,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
                   reasons: curError.reasons,
                 underlyingError: newUnderlyingErr)
     }
+    
     /// Init using a given NSError
     ///
     /// - Parameter nserror: NSError to convert to MNError
@@ -214,7 +215,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     }
     
 
-    convenience init(code:MNErrorCode, reason : String?, underlyingError:Error? = nil){
+    public convenience init(code:MNErrorCode, reason : String?, underlyingError:Error? = nil){
         self.init(code: code, reasons: reason != nil ? [reason!] : nil, underlyingError:underlyingError)
     }
     

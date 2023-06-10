@@ -21,6 +21,28 @@ public typealias AnyEquatable = Any & Equatable
 public struct TypeDescriptor {
     let name : String
     let type : Any.Type
+    
+    init(name:String, type:Any.Type) {
+        self.name = name
+        self.type = type
+    }
+    
+    init(type:Any.Type) {
+        self.init(name: "\(type)", type: type)
+    }
+}
+
+extension TypeDescriptor : Hashable {
+    
+    // MARK: Equatable
+    public static func == (lhs: TypeDescriptor, rhs: TypeDescriptor) -> Bool {
+        return lhs.name == rhs.name && lhs.type == rhs.type
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine("\(type)")
+    }
 }
 
 //typealias AnyCodableEquatable = Any & Codable & Equatable

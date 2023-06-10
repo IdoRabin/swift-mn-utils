@@ -12,7 +12,7 @@ import DSLogger
 fileprivate let dlog : DSLogger? = DLog.forClass("CachesHelper")
 
 class MNCachesHelper : NSObject {
-    var observers = ObserversArray<MNCachesEventObserver>()
+    public var observers = ObserversArray<MNCachesEventObserver>()
     
     // MARK: Singleton
     public static let shared = MNCachesHelper()

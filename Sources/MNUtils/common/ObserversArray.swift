@@ -12,7 +12,6 @@ import DSLogger
 fileprivate let dlog : DSLogger? = DLog.forClass("ObserversArray")
 
 public class ObserversArrayLock : NSLock {
-    
     fileprivate static let DEBUG_LONG_LOCKS = false
     fileprivate static var locksDebugged : [String] = []
     
@@ -69,9 +68,12 @@ public protocol Observer : AnyObject {
 /// Note that the observers are expected to be classes or structs who conform to protocol T
 /// All observers are assumed to be of AnyObject type at least.
 public class ObserversArray <T> {
+    // MARK: Properties
     private var weakObservers = WeakArray<AnyObject>()
     private var lock : ObserversArrayLock = ObserversArrayLock()
-
+    var isInvalidatesEagerly = true // After every action, not just after count
+    
+    // MARK: Private
     /// Cast an observer as any object
     ///
     /// - Parameter observer: observer to be cast
@@ -85,10 +87,16 @@ public class ObserversArray <T> {
         return result
     }
     
+    // MARK: Lifecycle
+    public init() {
+        
+    }
+    
     deinit {
         self.clear()
     }
     
+    // MARK: Public
     public var count : Int {
         get {
             var result : Int = 0
@@ -100,7 +108,7 @@ public class ObserversArray <T> {
         }
     }
     
-    private func invalidate() {
+    public func invalidate() {
         // Enumerating in reverse order prevents a race condition from happening when removing elements.
         lock.lock {
             for (index, observerInArray) in self.weakObservers.enumerated().reversed() {
@@ -118,14 +126,14 @@ public class ObserversArray <T> {
     /// Add observers objects to the Array (if not already in it)
     ///
     /// - Parameter observers: observers to be added, assumed to conform with protocol T
-    func add(observers: [T]) {
+    public func add(observers: [T]) {
         lock.lockBlock {
             for observer in observers {
                 // If observer is a class, add it to our weak reference array
                 if let observerObj = ObserversArray.castAsAnyObject(observer: observer) {
                     var isAlreadyExists = false
                     for (_, observerInArray) in self.weakObservers.enumerated() {
-                        // If we have a match, do not add twice
+                        // If we have a match, do not add same object twice
                         if observerInArray.value === observerObj {
                             isAlreadyExists = true
                             break
@@ -134,6 +142,9 @@ public class ObserversArray <T> {
                     
                     if (!isAlreadyExists) {
                         self.weakObservers.append(Weak(value: observerObj))
+                        if isInvalidatesEagerly {
+                            self.invalidate()
+                        }
                     }
                 } else {
                     // Observer being passed is "by value" (not supported)
@@ -144,7 +155,7 @@ public class ObserversArray <T> {
         }
     }
     
-    func array()->[T] {
+    public func array()->[T] {
         var result : [T] = []
         self.enumerateOnCurrentThread { (observer) in
             result.append(observer)
@@ -152,7 +163,7 @@ public class ObserversArray <T> {
         return result
     }
     
-    func list()->[T]
+    public func list()->[T]
     {
         return self.array()
     }
@@ -160,12 +171,15 @@ public class ObserversArray <T> {
     /// Add an observer object to the Array (if not already in it)
     ///
     /// - Parameter observer: observer to be added, assumed to conform with protocol T
-    func add(observer: T) {
+    public func add(observer: T) {
+        if isInvalidatesEagerly {
+            self.invalidate()
+        }
         self.add(observers: [observer])
     }
     
     /// Clear all observers in this ObserversArray instance
-    func clear() {
+    public func clear() {
         lock.lockBlock {
             self.weakObservers.removeAll()
         }
@@ -174,21 +188,53 @@ public class ObserversArray <T> {
     /// Remove an observer object from the Array (if not already amiss)
     ///
     /// - Parameter observer: observer to remove
-    func remove(observer: T) {
+    public func remove(observer: T) {
+        self.remove(observers:[observer])
+        
+        // DEPRECATED:
+//        if isInvalidatesEagerly {
+//            self.invalidate()
+//        }
+//
+//        // If observer is an object, let's loop through weakObseervers to
+//        // find it.  We
+//        lock.lockBlock {
+//            if let observerObj = ObserversArray.castAsAnyObject(observer: observer) {
+//                for (index, observerInArray) in self.weakObservers.enumerated().reversed() {
+//                    // If we have a match, remove the observer from our array
+//                    if observerInArray.value === observerObj {
+//                        self.weakObservers.remove(at:index)
+//                    }
+//                }
+//            }
+//
+//            // Else, it's a value type and we don't need to do anything
+//        }
+    }
+    
+    public func remove(observers toRemove: [T]) {
+        
+        if isInvalidatesEagerly {
+            self.invalidate()
+        }
         
         // If observer is an object, let's loop through weakObseervers to
-        // find it.  We
+        // find it.
+        var indexesToRemove : [Int] = []
         lock.lockBlock {
-            if let observerObj = ObserversArray.castAsAnyObject(observer: observer) {
-                for (index, observerInArray) in self.weakObservers.enumerated().reversed() {
-                    // If we have a match, remove the observer from our array
-                    if observerInArray.value === observerObj {
-                        self.weakObservers.remove(at:index)
+            let runSequence = self.weakObservers.enumerated()
+            for (index, weakObserver) in runSequence {
+                for observer in toRemove {
+                    if let observerObj = ObserversArray.castAsAnyObject(observer: observer) {
+                        if weakObserver.value === observerObj {
+                            indexesToRemove.append(index)
+                        }
                     }
                 }
             }
-            
-            // Else, it's a value type and we don't need to do anything
+            for index in indexesToRemove.reversed() {
+                self.weakObservers.remove(at: index)
+            }
         }
     }
     
@@ -196,7 +242,7 @@ public class ObserversArray <T> {
     ///
     /// - Parameter observer: observer to test for presence in the array
     /// - Returns: true when observer is already part of this ObserversArray instance
-    func containsObserver(observer: T)->Bool {
+    public func containsObserver(observer: T)->Bool {
         var result = false
         // If observer is an object, let's loop through weakObservers to
         // find it.  We
@@ -219,7 +265,7 @@ public class ObserversArray <T> {
     /// - Parameters:
     ///   - block: a block for the caller to handle each observer at a time (will be called on mainThread) - (syncs / blocks the calling queue)
     ///   - completed: when all observers have been called on the main thread, this block is called on the original thread
-    func enumerateOnMainThread(block:@escaping (_ observer:T)->Void, completed : (()->Void)? = nil) {
+    public func enumerateOnMainThread(block:@escaping (_ observer:T)->Void, completed : (()->Void)? = nil) {
         
         if (Thread.isMainThread) {
             self.enumerateOnCurrentThread(block: block)
@@ -263,7 +309,7 @@ public class ObserversArray <T> {
     /// - Parameters:
     ///   - block: a block for the caller to handle each observer at a time (will be called on current thread / queue)
     ///   - completed: when all observers have been called, this block is called on the original thread
-    func enumerateOnCurrentThread(block:(_ observer:T)->Void, completed : (()->Void)? = nil) {
+    public func enumerateOnCurrentThread(block:(_ observer:T)->Void, completed : (()->Void)? = nil) {
         self.lock.lockBlock {
             
             // Enumerating in reverse order prevents a race condition from happening when removing elements.
@@ -289,7 +335,7 @@ public class ObserversArray <T> {
     ///   - queue: the queue on which all the observers should be called
     ///   - block: a block for the caller to handle each observer at a time (will be called on the givven queue)
     ///   - completed: when all observers have been called, this block is called on the original thread
-    func enumerateOnQueue(queue:DispatchQueue, block:@escaping(_ observer:T)->Void, completed : (()->Void)? = nil) {
+    public func enumerateOnQueue(queue:DispatchQueue, block:@escaping(_ observer:T)->Void, completed : (()->Void)? = nil) {
         queue.safeSync {
             self.lock.lockBlock {
                 
@@ -324,6 +370,34 @@ extension ObserversArray : CustomStringConvertible {
             strs.append("\(observer)")
         }
         return strs.joined(separator: "\n")
+    }
+}
+
+// TODO: Make sutre this works correctly : test!
+public class CodableObserversArray<T:Codable> : ObserversArray<T>, Codable {
+    // MARK: Coding keys
+    public enum CodingKeys : String, CodingKey {
+        case observers = "observers"
+        case isInvalidatesEagerly = "is_invalidates_eagerly"
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        self.invalidate()
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.list(), forKey: .observers)
+        try container.encode(isInvalidatesEagerly, forKey: .isInvalidatesEagerly)
+    }
+    
+    required public init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        isInvalidatesEagerly = try container.decode(Bool.self, forKey: .isInvalidatesEagerly)
+        let list = try container.decode([T].self, forKey: .observers)
+        // list.forEach { item in
+        //    item... do something?
+        //}
+        self.add(observers: list)
+        
     }
 }
 

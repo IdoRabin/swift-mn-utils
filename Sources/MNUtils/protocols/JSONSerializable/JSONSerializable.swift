@@ -270,7 +270,7 @@ public protocol JSONFileSerializable : JSONSerializable {
     /// Will load (decode) self, expecting a JSON file in the given path
     /// - Parameter fileurl: file url for the file. NOTE: the function checks for "file exists" and returns nil if not.
     /// - Returns: a loaded instance of Self type
-    static func loadFromJSON(_ fileurl:URL)->Result<Self, Error>
+    static func loadFromJSON<T:JSONFileSerializable>(_ fileurl:URL)->Result<T, Error>
 }
 
 public extension JSONFileSerializable {
