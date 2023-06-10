@@ -8,19 +8,29 @@
 import Foundation
 import DSLogger
 
-//  --    --  #if canImport(UIKit)
-#if VAPOR
-    import Vapor
-    public typealias AppType = Vapor.Application
-#elseif os(OSX)
-    import AppKit
-    public typealias AppType = NSApplication
-#elseif os(iOS)
-    import AppKit
-    public typealias AppType = UIApplication
-#endif
-
 fileprivate let dlog : DSLogger? = DLog.forClass("MNBoot")?.setting(verbose: true)
+
+//  --    --  #if canImport(UIKit)
+//#if canImport(vapor) || VAPOR || NIO
+//    import Vapor
+//    public typealias AppType = Vapor.Application
+//#elseif os(OSX)
+//    import AppKit
+//    public typealias AppType = NSApplication
+//#elseif os(iOS)
+//    import AppKit
+//    public typealias AppType = UIApplication
+//#endif
+//public var AppType : Any.Type = AnyObject.self
+//public func MNSetAppType(_ type : Any.Type) {
+//    AppType = type
+//}
+
+public enum AppType {
+    case VaporServerApp // Vapor.Application
+    case MacOSNSApp // NSApplication
+    case iOSUIApp  // UIApplication
+}
 
 
 /// Apply this protocol on the object that needs to have lifecycle states and notifications

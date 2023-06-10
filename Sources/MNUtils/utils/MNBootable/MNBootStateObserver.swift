@@ -10,21 +10,22 @@ import DSLogger
 
 fileprivate let dlog : DSLogger? = DLog.forClass("MNBootStateObserver")?.setting(verbose: true)
 
+typealias AppInstanceType = AnyObject
 public protocol MNBootStateObserver<ObjectType> {
     associatedtype ObjectType
     
-    func willBoot(object:ObjectType, inApp:AppType?)
-    func didBoot(object:ObjectType, inApp:AppType?)
+    func willBoot<App:AnyObject>(object:ObjectType, inApp:App?)
+    func didBoot<App:AnyObject>(object:ObjectType, inApp:App?)
     
-    func needsSaving(object:ObjectType, inApp:AppType?)
-    func willSave(object:ObjectType, inApp:AppType?)
-    func didSave(object:ObjectType, inApp:AppType?)
+    func needsSaving<App:AnyObject>(object:ObjectType, inApp:App?)
+    func willSave<App:AnyObject>(object:ObjectType, inApp:App?)
+    func didSave<App:AnyObject>(object:ObjectType, inApp:App?)
     
-    func willLoad(object:ObjectType, inApp:AppType?)
-    func didLoad(object:ObjectType, inApp:AppType?)
+    func willLoad<App:AnyObject>(object:ObjectType, inApp:App?)
+    func didLoad<App:AnyObject>(object:ObjectType, inApp:App?)
     
-    func willShutdown(object:ObjectType, inApp:AppType?)
-    func didShutdown(object:ObjectType, inApp:AppType?)
+    func willShutdown<App:AnyObject>(object:ObjectType, inApp:App?)
+    func didShutdown<App:AnyObject>(object:ObjectType, inApp:App?)
     
 }
 

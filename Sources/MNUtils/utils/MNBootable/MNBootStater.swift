@@ -15,7 +15,7 @@ public protocol MNBootStaterProtocol<ObjectType> {
     
     var state : MNBootState { get }
     var observers : ObserversArray<any MNBootStateObserver<ObjectType>> { get }
-    var app : AppType? { get }
+    var app : AnyObject? { get }
     var originObject : ObjectType? { get }
     
 }
@@ -26,12 +26,12 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
     public typealias ObserverType = MNBootStateObserver<TObject>
     
     private struct MNBootEvent {
-        let block : (_ t:TObject, _ app:AppType) throws ->Void
+        let block : (_ t:TObject, _ app:AnyObject) throws ->Void
         let isClears : Bool
     }
     
     // MARK: Private properties
-    public weak var app : AppType? = nil
+    public weak var app : AnyObject? = nil
     public weak var originObject : ObjectType? = nil
     private var whenEvents : [MNBootState : [MNBootEvent]] = [:]
     private var _state : MNBootState = .unbooted
@@ -105,7 +105,7 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
     /// - Parameters:
     ///   - originObject: The owner, or object that changes state and for which the state change notifications refer to.
     ///   - app: The currently running app instance (considering various platforms)
-    public init(originObject: ObjectType? = nil, app: AppType? = nil) {
+    public init(originObject: ObjectType? = nil, app: AnyObject? = nil) {
         self.app = app
         self.originObject = originObject
     }
@@ -217,7 +217,7 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
         return self.observers.list()
     }
     
-    public func when(state:MNBootState, perform block:@escaping (_ t:TObject, _ app:AppType) throws ->Void, isClears:Bool) {
+    public func when(state:MNBootState, perform block:@escaping (_ t:TObject, _ app:AnyObject) throws ->Void, isClears:Bool) {
         var events = whenEvents[state] ?? []
         events.append(MNBootEvent(block: block, isClears: isClears))
     }
