@@ -145,6 +145,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable {
     case misc_failed_validation = 9033
     case misc_already_exists = 9034
     case misc_security = 9050
+    case misc_concurrency = 9060
     // MAXRANGE: 9999
     
     static let allMisc: [MNErrorCode] = [
@@ -152,7 +153,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable {
         .misc_failed_removing, .misc_failed_inserting, .misc_failed_updating, .misc_failed_reading,
         .misc_no_permission_for_operation, .misc_readonly_permission_for_operation, .misc_failed_crypto,
         .misc_failed_parsing, .misc_failed_encoding, .misc_failed_decoding,
-        .misc_failed_validation, .misc_already_exists, .misc_security,
+        .misc_failed_validation, .misc_already_exists, .misc_security, .misc_concurrency
     ]
 
     // Web

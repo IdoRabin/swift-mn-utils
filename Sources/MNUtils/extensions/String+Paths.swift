@@ -93,7 +93,6 @@ public extension String /* helper functions relevant to vapor URL requests, para
             
             if result != self {
                 return result
-                return result
             }
         } else if result != self {
             return result
@@ -305,7 +304,7 @@ public extension String /* helper functions relevant to vapor URL requests, para
 
 public extension Dictionary where Key : Codable, Value : Codable {
     
-    public static func encodeValToString(value:Codable, encoder:JSONEncoder, isPercentEscape:Bool = false) throws ->String {
+    static func encodeValToString(value:Codable, encoder:JSONEncoder, isPercentEscape:Bool = false) throws ->String {
 
         var result : String = ""
         var valCanBeEmpty = false
@@ -342,11 +341,11 @@ public extension Dictionary where Key : Codable, Value : Codable {
         return result
     }
     
-    public func encodeValToString(value:Codable, encoder:JSONEncoder, isPercentEscape:Bool = false) throws ->String {
+    func encodeValToString(value:Codable, encoder:JSONEncoder, isPercentEscape:Bool = false) throws ->String {
         return try Self.encodeValToString(value: value, encoder: encoder, isPercentEscape: isPercentEscape)
     }
     
-    public func encodeKeyValAsStrings(key:Key, encoder:JSONEncoder, isPercentEscape:Bool = false) throws -> (key:String, val:String)? {
+    func encodeKeyValAsStrings(key:Key, encoder:JSONEncoder, isPercentEscape:Bool = false) throws -> (key:String, val:String)? {
         
         let keyStr = try self.encodeValToString(value: key, encoder: encoder, isPercentEscape: isPercentEscape)
         var valStr : String? = nil

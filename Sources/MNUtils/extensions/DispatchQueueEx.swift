@@ -23,6 +23,7 @@ public enum WaitResult
 {
     case success
     case timeout
+    case canceled
     
     var isTimeout : Bool {
         return self == .timeout
@@ -31,7 +32,12 @@ public enum WaitResult
     var isSuccess : Bool {
         return self == .success
     }
+    
+    var isCanceled : Bool {
+        return self == .canceled
+    }
 }
+
 public enum WaitForLogType : Int {
     case never              // never log any part of the waitForLoop
     case onlyAnyResult      // log only when the waitFor is done (success or timeout)

@@ -257,7 +257,7 @@ public protocol JSONFileSerializable : JSONSerializable {
     
     ///
     /// - Parameter path: path to save into
-
+    
     
     
     /// Save (encode) self as JSON into the given path
@@ -270,7 +270,7 @@ public protocol JSONFileSerializable : JSONSerializable {
     /// Will load (decode) self, expecting a JSON file in the given path
     /// - Parameter fileurl: file url for the file. NOTE: the function checks for "file exists" and returns nil if not.
     /// - Returns: a loaded instance of Self type
-    static func loadFromJSON<T:JSONFileSerializable>(_ fileurl:URL)->Result<T, Error>
+    static func loadFromJSON<T>(_ fileurl: URL) -> Result<T, Error> where T : JSONFileSerializable
 }
 
 public extension JSONFileSerializable {
@@ -302,7 +302,11 @@ public extension JSONFileSerializable {
         }
     }
     
-    static func loadFromJSON(_ fileurl:URL)->Result<Self, Error> {
+    static func loadFromJSON<T>(_ fileurl: URL) -> Result<T, Error> where T : JSONFileSerializable {
+        guard T.self == Self.self else {
+            return .failure(MNError(code: .misc_failed_loading, reason: "loadFromJSON<T> where T must equal Self (type of class being operated on)"))
+        }
+    // static func loadFromJSON(_ fileurl:URL)->Result<Self, Error> {
         if FileManager.default.fileExists(atPath: fileurl.path) {
             do {
                 let data = try Data(contentsOf: fileurl)
@@ -315,7 +319,7 @@ public extension JSONFileSerializable {
                         dlog?.note("Maybe loading a > 1MB JSON as string is not efficient, consider using another encoder!")
                     }
                 }
-                return .success(result)
+                return .success(result as! T)
                 
             } catch let error {
                 let desc = "loadFromJSON File \"...\(fileurl.lastPathComponents(count: 3))\" parse / load error:\(MNError(error: error))"

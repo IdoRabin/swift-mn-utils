@@ -18,7 +18,7 @@ func MNResultOrErr<Success:Any>(_ result:Success?, error:MNError)->MNResult<Succ
     }
 }
 
-extension Result {
+public extension Result {
     
     static func failure<Success:Any>(fromError error:Error)->MNResult<Success> {
         if let mnerror = error as? MNError {
@@ -33,12 +33,20 @@ extension Result {
         return MNResult.failure(mnError)
     }
     
+    static func failure<Success:Any>(code mnErrorCode:MNErrorCode, reason:String? = nil, underlyingError:Error? = nil)->MNResult<Success> {
+        return MNResult.failure(MNError(code:mnErrorCode, reason: reason, underlyingError: underlyingError))
+    }
+    
     static func failure<Success:Any>(code mnErrorCode:MNErrorCode, reason:String? = nil)->MNResult<Success> {
-        return MNResult.failure(MNError(code:mnErrorCode, reason: reason))
+        return self.failure(code: mnErrorCode, reason: reason, underlyingError: nil)
+    }
+    
+    static func failure<Success:Any>(code mnErrorCode:MNErrorCode, reasons:[String]? = nil, underlyingError:Error? = nil)->MNResult<Success> {
+        return MNResult.failure(MNError(code:mnErrorCode, reasons: reasons, underlyingError: underlyingError))
     }
     
     static func failure<Success:Any>(code mnErrorCode:MNErrorCode, reasons:[String]? = nil)->MNResult<Success> {
-        return MNResult.failure(MNError(code:mnErrorCode, reasons: reasons))
+        return self.failure(code: mnErrorCode, reasons: reasons, underlyingError: nil)
     }
     
     static func fromError<Success:Any>(_ error:Error?, orSuccess:Success)->MNResult<Success> {
