@@ -31,6 +31,8 @@ public class MNDebug {
 public class MNConstants {
     let dlog : MNLogger? = MNLog.forClass("MNUtils")
     
+    
+    
     public let BASE_64_PARAM_KEY = "e64"
     public let PROTOBUF_PARAM_KEY = "ptb"
     public let PERCENT_ESCAPED_HINTS = [

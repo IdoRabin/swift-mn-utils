@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Character {
+public extension Character {
     /// A simple emoji is one scalar and presented to the user as an Emoji
     var isSimpleEmoji: Bool {
         guard let firstScalar = unicodeScalars.first else { return false }
@@ -20,7 +20,7 @@ extension Character {
     var isEmoji: Bool { isSimpleEmoji || isCombinedIntoEmoji }
 }
 
-extension String {
+public extension String {
     
     var isSingleEmoji: Bool { count == 1 && containsEmoji }
 
@@ -29,8 +29,14 @@ extension String {
     var containsOnlyEmoji: Bool { !isEmpty && !contains { !$0.isEmoji } }
 
     var emojiString: String { emojis.map { String($0) }.reduce("", +) }
-
+    var noEmojiString: String { nonEmojis.map { String($0) }.reduce("", +) }
+    
     var emojis: [Character] { filter { $0.isEmoji } }
+    var nonEmojis: [Character] { filter { !$0.isEmoji } }
 
     var emojiScalars: [UnicodeScalar] { filter { $0.isEmoji }.flatMap { $0.unicodeScalars } }
+
+    var removingEmojis : String {
+        return self.noEmojiString
+    }
 }

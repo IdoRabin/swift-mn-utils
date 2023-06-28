@@ -147,5 +147,9 @@ open class MNUID : MNUIDProtocol, LosslessStringConvertible, Comparable, Codable
         }
         self.init(uid:auid, typeStr:typeStr ?? MNUID.NO_TYPE)
     }
+    
+    public var isEmpty : Bool {
+        return self.uid.uuidString == UID_EMPTY_STRING || self.type.count == 0
+    }
 }
 

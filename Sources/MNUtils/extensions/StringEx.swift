@@ -186,7 +186,7 @@ public extension String {
     /// Conditions are that the string ahs at least 2 chars on either side of a whitespae charahter
     ///
     /// - Returns: true
-    func isValidFullName()->Bool {
+    func isValidPossibleFullName()->Bool {
         if self.count < 4 {return false}
         
         let comps = self.components(separatedBy: CharacterSet.whitespaces)
@@ -207,7 +207,7 @@ public extension String {
     ///
     /// - Returns: first name and last name tuple when the name is valid
     func componentsAsFullName()->(givenName:String, familyName:String)? {
-        if !isValidFullName() {
+        if !isValidPossibleFullName() {
             return nil
         }
         
@@ -698,7 +698,6 @@ public extension String {
         
         return nil
     }
-    
     
     /// Trim a string from either a prefix and / or suffix string
     ///

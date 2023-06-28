@@ -29,6 +29,9 @@ public extension String  /* base64 */ {
         return str
     }
     
+    
+    /// Will try to convert the string back from base64 into a string, trying first utf8 encoding, and as a fallback utf16 encoding. If both methods fail, will return nil
+    /// - Returns: Original string before it was converted to base 64, or nil if attempts at decoding in utf8 AND utf16 fails.
     func fromBase64() -> String? {
         guard let data = Data(base64Encoded: self), data.count > 0 else {
             return nil

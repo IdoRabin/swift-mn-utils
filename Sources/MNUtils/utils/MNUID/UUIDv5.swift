@@ -15,9 +15,11 @@ public let UID_EMPTY_STRING : String = "00000000-0000-0000-0000-000000000000";
 fileprivate let dlog : DSLogger? = DLog.forClass("UUIDv5")
 
 public extension UUID {
+    static var UUID_EMPTY_STRING : String {
+        return UID_EMPTY_STRING
+    }
     
-    
-    public enum UUIDVariant: Hashable {
+    enum UUIDVariant: Hashable {
         /// A variant reserved for NCS backward compatibility.
         case reservedNCS
         /// The variant specified in specified in [RFC 4122](https://tools.ietf.org/html/rfc4122).

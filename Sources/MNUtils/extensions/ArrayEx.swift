@@ -475,9 +475,38 @@ public extension Array where Element: Equatable {
     
     /// Mutating: adds the element to the array if it does not already exist in the array (using equatable)
     /// - Parameter object: object to append if not already in the array
-    /// - Returns: true when element is added, false when element equal to the object param already exists in the array
+    /// - Returns: ttrue when element was added, false when element is equal to an element already  in the array (using equatable)
     @discardableResult
     mutating func appendIfNotAlready(_ object : Element)->Bool {
+        if !self.contains(object) {
+            self.append(object)
+            return true
+        }
+        return false
+    }
+    
+    /// Mutating: adds the element to the array if it is not nil
+    /// - Parameter object: object to append if not nil
+    /// - Returns: true when element was added, false when element is nil
+    @discardableResult
+    mutating func appendIfNotNil(_ object : Element?)->Bool {
+        guard let object = object else {
+            return false
+        }
+        
+        self.append(object)
+        return true
+    }
+    
+    /// Mutating: adds the element to the array if it is not nil AND does not already exist in the array (using equatable)
+    /// - Parameter object: object to append if not nil AND not already in the array
+    /// - Returns: true when element was added, false when element is nil or is equal to an element already  in the array (using equatable)
+    @discardableResult
+    mutating func appendIfNotAlreadyOrNil(_ object : Element?)->Bool {
+        guard let object = object else {
+            return false
+        }
+        
         if !self.contains(object) {
             self.append(object)
             return true
