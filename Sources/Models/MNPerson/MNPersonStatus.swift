@@ -7,20 +7,31 @@
 
 import Foundation
 
+
+/// Lifecycle status for a user in a website / social network / data collection
 public struct MNPersonStatus {
-    public enum MNPStatusType {
+    
+    public enum MNPStatusType : Int {
         case unknown
         case creating
         case active
         case frozen
+        case pending
         case blacklisted
         case deleted
     }
     
-    var value : MNPStatusType = .creating {
-        didSet {
-            self.prev = oldValue
-            lastChangeDate = Date.now
+    private var _value : MNPStatusType = .creating
+    public var value : MNPStatusType {
+        get {
+            return self._value
+        }
+        set {
+            if newValue != _value {
+                _value = newValue
+                self.prev = oldValue
+                lastChangeDate = Date.now
+            }
         }
     }
     
@@ -36,4 +47,8 @@ public struct MNPersonStatus {
     init () {
         lastChangeDate = Date.now
     }
-}
+    
+    func setStatus(_ stat : MNPersonStatus) {
+        self.value = stat
+    }
+ }
