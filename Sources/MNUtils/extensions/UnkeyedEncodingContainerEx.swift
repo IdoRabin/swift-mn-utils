@@ -281,7 +281,7 @@ public class UnkeyedDecodingUtil {
 
 public extension UnkeyedDecodingContainer {
     
-    mutating public func decode(decoder:Decoder, key:String, typeName:String, value:String) throws ->Any? {
+    mutating func decode(decoder:Decoder, key:String, typeName:String, value:String) throws ->Any? {
         return try UnkeyedDecodingUtil.decode(decoder: decoder, key: key, typeName: typeName, value: value)
     }
     

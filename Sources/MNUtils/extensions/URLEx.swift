@@ -15,7 +15,7 @@ fileprivate let dlog : MNLogger? = MNLog.forClass("URLEx")
 //    
 //}
 
-extension URL {
+public extension URL {
     
     /// Return components of the url query (after the ?) as a dictionary
     ///
@@ -50,7 +50,7 @@ extension URL {
     }
 }
 
-extension Sequence where Element == URLQueryItem {
+public extension Sequence where Element == URLQueryItem {
     func asDictionary() -> [String:String]? {
         var result : [String:String] = [:]
         for queryItem in self {
@@ -62,7 +62,7 @@ extension Sequence where Element == URLQueryItem {
     }
 }
 
-extension URLComponents {
+public extension URLComponents {
     
     func asDictionaey() -> [String:String]? {
         return self.queryItems?.asDictionary()

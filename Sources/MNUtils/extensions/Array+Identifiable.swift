@@ -10,7 +10,7 @@ import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("Array+id")
 
-extension Array {
+public extension Array {
 
     func elementsAt(indexPaths:[IndexPath])->[IndexPath:Element] {
         guard indexPaths.count > 0 else {
@@ -36,7 +36,7 @@ extension Array {
 }
 
 @available(macOS 10.15, iOS 14.0, *)
-extension Sequence where Element : Identifiable {
+public extension Sequence where Element : Identifiable {
     var ids : [Element.ID] {
         return self.map { element in
             return element.id
@@ -79,7 +79,7 @@ extension Sequence where Element : Identifiable {
 //}
 
 @available(macOS 10.15, iOS 14.0, *)
-extension Array where Element : Identifiable {
+public extension Array where Element : Identifiable {
     
     func indexPathsFor(elements:[Element]?)->[IndexPath:Element] {
         guard let elements = elements else {

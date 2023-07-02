@@ -8,7 +8,7 @@
 
 import Foundation
 
-extension TimeInterval {
+public extension TimeInterval {
     func asString(decimalPlaces:Int = 3)->String {
         return String(format: "%0.\(decimalPlaces)f", self) // %0.{3}f
     }

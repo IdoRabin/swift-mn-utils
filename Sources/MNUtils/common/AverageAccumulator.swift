@@ -285,7 +285,7 @@ public class AverageAccumulator : Codable {
     }
     
     // MARK: Codable
-    enum CodingKeys : CodingKey {
+    enum CodingKeys : String, CodingKey, CaseIterable {
         case payload
     }
     

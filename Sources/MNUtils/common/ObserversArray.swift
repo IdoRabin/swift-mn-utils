@@ -376,7 +376,7 @@ extension ObserversArray : CustomStringConvertible {
 // TODO: Make sutre this works correctly : test!
 public class CodableObserversArray<T:Codable> : ObserversArray<T>, Codable {
     // MARK: Coding keys
-    public enum CodingKeys : String, CodingKey {
+    public enum CodingKeys : String, CodingKey, CaseIterable {
         case observers = "observers"
         case isInvalidatesEagerly = "is_invalidates_eagerly"
     }

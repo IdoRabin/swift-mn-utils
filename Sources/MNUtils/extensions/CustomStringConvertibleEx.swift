@@ -8,7 +8,7 @@
 
 import Foundation
 
-//extension CustomStringConvertible {
+//public extension CustomStringConvertible {
 //    var description : String {
 //        get {
 //            return String(describing: self)

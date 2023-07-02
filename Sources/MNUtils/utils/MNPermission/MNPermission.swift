@@ -24,7 +24,7 @@ public protocol MNPermissionable : Hashable, Equatable {
 }
 
 // MARK: Codable
-fileprivate enum CodingKeys: String, CodingKey {
+fileprivate enum CodingKeys: String, CodingKey, CaseIterable {
     case allowed = "allowed"
     case forbidden = "forbidden"
     case undetermined = "undetermined"

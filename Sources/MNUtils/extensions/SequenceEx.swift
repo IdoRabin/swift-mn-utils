@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Sequence where Element == String {
+public extension Sequence where Element == String {
     var descriptionLines : String {
         return self.joined(separator: "\n")
     }
@@ -17,7 +17,7 @@ extension Sequence where Element == String {
     }
 }
 
-extension Sequence where Element : CustomStringConvertible {
+public extension Sequence where Element : CustomStringConvertible {
     var descriptionLines : String {
         let arr = self.map { item in
             return item.description

@@ -7,6 +7,8 @@
 
 import Foundation
 
+public var MNUTILS_DEFAULT_APP_NAME = "App"
+
 public extension Bundle {
     
     var versionNumber: String? {
@@ -52,19 +54,19 @@ public extension Bundle {
          */
         var result : String? = ""
         
-        // if (infoDictionary?.count ?? 0 == 0) {
-        //     // Fallback
-        // result = APP_NAME_STR
-        // } else {
-        let keys = ["CFBundleDisplayName", "CFBundleName", "CFBundleSpokenName"]
-        for key in keys {
-            let str = self.infoDictionary?[key] as? String;
-            if (str?.count ?? 0 > 0) {
-                result = str
-                break;
-            }
-        }
-        // }
+         if (infoDictionary?.count ?? 0 == 0) {
+             // Fallback
+             result = MNUTILS_DEFAULT_APP_NAME
+         } else {
+             let keys = ["CFBundleDisplayName", "CFBundleName", "CFBundleSpokenName"]
+             for key in keys {
+                 let str = self.infoDictionary?[key] as? String;
+                 if (str?.count ?? 0 > 0) {
+                     result = str
+                     break;
+                 }
+             }
+         }
         
         return result
     }

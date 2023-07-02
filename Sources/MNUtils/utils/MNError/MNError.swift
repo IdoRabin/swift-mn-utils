@@ -15,7 +15,7 @@ fileprivate let dlog : MNLogger? = MNLog.forClass("MNError")
 open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConvertible {
     
     // Codable
-    private enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey, CaseIterable {
         case domain = "domain"
         case code = "code"
         case underlyingError = "underlyingError"

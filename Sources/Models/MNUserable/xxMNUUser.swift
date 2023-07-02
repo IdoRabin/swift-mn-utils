@@ -49,7 +49,7 @@ open class MNUUser : MNUserable, Hashable, Codable, Equatable, JSONSerializable,
     
     
     // MARK: Coding keys
-    public enum CodingKeys : String, CodingKey {
+    public enum CodingKeys : String, CodingKey, CaseIterable {
         case id = "id"
         case username = "username"
         case useremail = "useremail"

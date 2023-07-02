@@ -20,7 +20,7 @@ fileprivate func formattedValue(_ any: Any) -> String {
 }
 
 // Extends optoinals:
-func descOrNil(_ any : Any?)->String {
+public func descOrNil(_ any : Any?)->String {
     guard let any = any else {
         return "<nil>"
     }

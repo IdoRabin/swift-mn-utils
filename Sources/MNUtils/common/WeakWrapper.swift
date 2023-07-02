@@ -34,7 +34,7 @@ public class Weak<Value: AnyObject> {
 
 public extension Weak /* : Codable */ where Value : Codable {
     // MARK: Codable
-    private enum CodingKeys : String, CodingKey {
+    private enum CodingKeys : String, CodingKey, CaseIterable {
         case value
     }
     
@@ -54,7 +54,7 @@ public extension Weak /* : Codable */ where Value : Codable {
 
 //public extension Weak /* : Codable */ where Value : Identifiable, Value.ID : Codable {
 //    // MARK: Codable
-//    private enum CodingKeysIdeable : String, CodingKey {
+//    private enum CodingKeysIdeable : String, CodingKey, CaseIterable {
 //        case id
 //    }
 //

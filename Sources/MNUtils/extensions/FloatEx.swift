@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Float {
+public extension Float {
     
     /// Round to the nth decimal digit
     /// The Float 100.45234 for the parameter dec == 2 should return a Float 100.45
@@ -27,7 +27,7 @@ extension Float {
     }
 }
 
-extension Double {
+public extension Double {
     
     /// Round to the nth decimal digit
     /// The Double 100.45234 for the parameter dec == 2 should return a Double 100.45
@@ -47,7 +47,7 @@ extension Double {
     }
 }
 
-extension CGFloat {
+public extension CGFloat {
     /// Round to the nth decimal digit
     /// The Double 100.45234 for the parameter dec == 2 should return a Double 100.45
     /// - Parameter num_places: number of decimal placees to keep

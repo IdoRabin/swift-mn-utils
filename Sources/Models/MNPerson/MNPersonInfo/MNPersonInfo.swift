@@ -14,7 +14,7 @@ open class MNPersonInfo : Codable, Hashable, Equatable, JSONSerializable, MNUIDa
     var lastFetchedDate : Date?
     var name = MNPersonName.empty
     
-    public enum CodingKeys : String, CodingKey {
+    public enum CodingKeys : String, CodingKey, CaseIterable {
         case userId = "id"
         case lastFetchedDate = "last_fetched_date"
         case name = "name"

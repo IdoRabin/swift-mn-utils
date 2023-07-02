@@ -61,7 +61,7 @@ open class MNAccessToken : MNAccessTokenable, JSONSerializable {
     typealias Consts = MNAccessTokenConsts
     
     // MARK: Coding keys
-    public enum CodingKeys : String, CodingKey {
+    public enum CodingKeys : String, CodingKey, CaseIterable {
         case id = "id"
         case expirationDate = "expiration_date"
         case lastUsedDate = "last_used_date"

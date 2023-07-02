@@ -74,8 +74,4 @@ enum MNSocialNetwork: Int, CaseIterable, CodableHashable, JSONSerializable {
             return "https://www.vk.com"
         }
     }
-
-    static var all: [SocialNetwork] {
-        return Array(self.allCases)
-    }
 }
