@@ -11,7 +11,7 @@ import DSLogger
 
 fileprivate let dlog : DSLogger? = DLog.forClass("ObserversArray")
 
-public class ObserversArrayLock : NSLock {
+public class ObserversArrayLock : NSRecursiveLock {
     fileprivate static let DEBUG_LONG_LOCKS = false
     fileprivate static var locksDebugged : [String] = []
     

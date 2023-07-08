@@ -11,8 +11,8 @@ public struct MNUtils {
 
 public let mnUtils = MNUtils()
 
-
 public class MNDebug {
+    // TODO: Check if IS_DEBUG should be an @inlinable var ?
     public var IS_DEBUG = true
     
     fileprivate init(){

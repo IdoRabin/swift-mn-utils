@@ -136,6 +136,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable {
     case misc_failed_inserting = 9012
     case misc_failed_updating = 9013
     case misc_failed_reading = 9014
+    case misc_no_permission_needed = 9019 //
     case misc_no_permission_for_operation = 9020 //
     case misc_readonly_permission_for_operation = 9021 //
     case misc_failed_crypto = 9022
@@ -151,7 +152,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable {
     static let allMisc: [MNErrorCode] = [
         .misc_unknown, .misc_failed_loading, .misc_failed_saving, .misc_operation_canceled, .misc_failed_creating,
         .misc_failed_removing, .misc_failed_inserting, .misc_failed_updating, .misc_failed_reading,
-        .misc_no_permission_for_operation, .misc_readonly_permission_for_operation, .misc_failed_crypto,
+        .misc_no_permission_needed, .misc_no_permission_for_operation, .misc_readonly_permission_for_operation, .misc_failed_crypto,
         .misc_failed_parsing, .misc_failed_encoding, .misc_failed_decoding,
         .misc_failed_validation, .misc_already_exists, .misc_security, .misc_concurrency
     ]

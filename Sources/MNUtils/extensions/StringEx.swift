@@ -891,8 +891,9 @@ public extension String {
     func camelCaseToSnakeCase() -> String {
         let acronymPattern = "([A-Z]+)([A-Z][a-z]|[0-9])"
         let normalPattern = "([a-z0-9])([A-Z])"
-        return self.processCamalCaseRegex(pattern: acronymPattern)?
+        let result = self.processCamalCaseRegex(pattern: acronymPattern)?
             .processCamalCaseRegex(pattern: normalPattern)?.lowercased() ?? self.lowercased()
+        return result.replacingOccurrences(of: .whitespacesAndNewlines, with: "_")
     }
     
     fileprivate func processCamalCaseRegex(pattern: String) -> String? {
@@ -902,7 +903,7 @@ public extension String {
     }
     
     func snakeCaseToCamelCase() -> String {
-        return self.components(separatedBy: "_").capitalized().joined(separator: "")
+        return self.components(separatedBy: "_").capitalized().joined(separator: "").replacingOccurrences(of: .whitespaces, with: "")
     }
 }
 

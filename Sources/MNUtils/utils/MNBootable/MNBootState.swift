@@ -10,7 +10,8 @@ import Foundation
 
 // fileprivate let dlog : DSLogger? = DLog.forClass("MNBootState")?.setting(verbose: true)
 
-public enum MNBootState : Int, Equatable {
+public enum MNBootState : Int, Equatable, Comparable, CaseIterable {
+    
     case unbooted = 0
     case booting
     case running
@@ -18,4 +19,9 @@ public enum MNBootState : Int, Equatable {
     case loading
     case shuttingDown
     case shutDown = 99
+    
+    // MARK: Comparable
+    public static func < (lhs: MNBootState, rhs: MNBootState) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
 }

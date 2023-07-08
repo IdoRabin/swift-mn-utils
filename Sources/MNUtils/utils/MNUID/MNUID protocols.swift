@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  MNUID protocols.swift
 //  
 //
 //  Created by Ido on 24/05/2023.
