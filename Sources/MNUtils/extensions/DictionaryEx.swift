@@ -155,6 +155,24 @@ public extension Dictionary where Key : Comparable {
     }
 }
 
+//public extension Dictionary where Key : RawRepresentable, Key.RawValue : Comparable {
+//    var sortedKeys : [Key] {
+//        return Array(self.keys.rawValues.sorted().compactMap({ raw in
+//            Key(rawValue: raw)
+//        })) // Do not: .reversed()
+//    }
+//    
+//    var valuesSortedByKeys : [Value] {
+//        var result : [Value] = []
+//        for sortedKey in self.sortedKeys {
+//            if let sortedValue = self[sortedKey] {
+//                result.append(sortedValue)
+//            }
+//        }
+//        return result
+//    }
+//}
+
 public extension Dictionary where Value : Comparable & Hashable {
     
     var keysForLargestValue : [Key] {

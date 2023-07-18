@@ -28,8 +28,6 @@ fileprivate enum CodingKeys: String, CodingKey, CaseIterable {
     case allowed = "allowed"
     case forbidden = "forbidden"
     case undetermined = "undetermined"
-    
-    static var all : [CodingKeys] = [.allowed, .forbidden, .undetermined]
 }
 
 @frozen public enum MNPermission<Allowed : MNAllowed, Forbidden: MNForbidden> : MNPermissionable where Forbidden : Error {

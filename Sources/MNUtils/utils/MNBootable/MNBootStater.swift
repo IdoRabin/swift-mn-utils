@@ -49,11 +49,11 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
                 let oldValue = _state
                 do {
                     _state = newValue
-                    dlog?.info("[\(self.labelString())] Changing state from \(oldValue) to \(newValue)")
+                    dlog?.info("\(self.logLabel()) Changing state from \(oldValue) to \(newValue)")
                     try performStateChange(old:oldValue, new:newValue)
                     try performWhenEvents(old:oldValue, new:newValue)
                 } catch let error {
-                    dlog?.warning("MNBootStater failed boot state change from: \(oldValue) to: \(newValue). Error: \(error)")
+                    dlog?.warning("\(self.logLabel()) failed boot state change from: \(oldValue) to: \(newValue). Error: \(error)")
                 }
             }
         }
@@ -105,9 +105,15 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
     /// - Parameters:
     ///   - originObject: The owner, or object that changes state and for which the state change notifications refer to.
     ///   - app: The currently running app instance (considering various platforms)
-    public init(originObject: ObjectType? = nil, app: AnyObject? = nil) {
+    public init(originObject: ObjectType? = nil, app: AnyObject? = nil, label:String? = nil) {
         self.app = app
         self.originObject = originObject
+        
+        if label == nil, let originObject = originObject {
+            self.label = "\(type(of:originObject))"
+        } else {
+            self.label = label
+        }
     }
     
     // MARK: Private funcs
@@ -122,7 +128,7 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
             return
         }
         
-        dlog?.info("[\(self.labelString())]   notifying \(observers.count) observers:")
+        dlog?.info("\(self.logLabel())   notifying \(observers.count) observers:")
         
         observers.invalidate()
         observers.enumerateOnCurrentThread { observer in
@@ -166,7 +172,7 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
             return
         }
         
-        dlog?.info("[\(self.labelString())]   calling \(events.count) call blocks:")
+        dlog?.info("\(self.logLabel()) calling \(events.count) call blocks:")
         var indexesToRemove : [Int] = []
         try events.forEachIndex { index, event in
             try event.block(obj, app)
@@ -186,6 +192,10 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
     // MARK: Public funcs
     public func labelString()->String {
         return label ?? "Unknown"
+    }
+    
+    public func logLabel()->String {
+        return "for \(self.labelString()) | "
     }
     
     public func clear() {

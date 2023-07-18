@@ -29,9 +29,7 @@ public extension JSONDecoder {
     }
 }
 
-extension String : JSONSerializable {
-    
-}
+extension String : JSONSerializable { }
 
 public extension Dictionary where Key : JSONSerializable, Value : JSONSerializable {
     /// Will Serialize each element in the array to a json dictionary
@@ -62,22 +60,37 @@ public extension Dictionary where Key : JSONSerializable, Value : JSONSerializab
         for (key, val) in self {
             // TODO: how to user isForRemote?
             let skey = (key is String) ? key as! String :  key.serializeToJsonString(prettyPrint: false)!
-            
             switch val {
                 // TODO: Add more base types etc
+//                if let valDict = val as? [String:any Codable] {
+//                    let kkeys = valDict.keys.sorted()
+//                    var resultStr = tab + "{" + ln
+//                    kkeys.forEach { kkey in
+//                        let kval = result[kkey]!
+//                        resultStr += tab + tab + "'\(kkey)' : '\(kval)'"
+//                    }
+//                    resultStr += tab + "}"
+//                } else {
+//            case is [String]:
+//                let vals = (val as! [String])
+//                result[skey] = vals.descriptionsJoined
             case is String:
-                result[skey] = val as! String
+                result[skey] = (val as! String)
+            case is CustomStringConvertible:
+                result[skey] = (val as! CustomStringConvertible).description
             default:
                 result[skey] = val.serializeToJsonString(prettyPrint: prettyPrint)!
             }
         }
         
         // Build string
-        let ln = prettyPrint ? "\n" : " "
-        let tab = prettyPrint ? "\t" : ""
+        let ln  = prettyPrint ? "\n" : " "
+        let tab = prettyPrint ? "\t\t" : ""
         var resultStr = "{" + ln
         var count = 0
-        for (key, val) in result {
+        let keys = result.sortedKeys
+        keys.forEach { key in
+            let val = result[key]!
             resultStr += tab + "'\(key)' : '\(val)'"
             count += count
             if count < result.count - 1 {
@@ -247,11 +260,12 @@ public extension JSONSerializable {
     }
 }
 
-public typealias StringStringDistionary = [String:String]
-
-extension StringStringDistionary : JSONSerializable {
+public typealias StringStringDictionary = [String:String]
+extension StringStringDictionary : JSONSerializable {
     
 }
+
+public typealias StringStringStringDictionary = [String:StringStringDictionary]
 
 public protocol JSONFileSerializable : JSONSerializable {
     

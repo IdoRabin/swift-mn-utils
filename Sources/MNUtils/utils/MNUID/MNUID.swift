@@ -15,7 +15,8 @@ fileprivate let IS_DEBUG = true
 fileprivate let IS_DEBUG = false
 #endif
 
-// MNUID is a wrapper for UUID(version 5) and type string, wrapping a v4 UUID as the namespace
+// MNUID is a wrapper for UUID(version 5 capable) which also contains a "type" string, wrapping a v4 UUID as the namespace
+// The "type" string allows indicating in real time the "type" of the owning instance, mainly for Debugging / Validation purposes
 // Using UUID v5 we can also embed the checksum of the type and namespace if we are the ones creating the UUID.
 // Using UUID v5 we can also validate the checksum of the type and namespace if we recieved the UUID as a string from remote sources.
 // reference:  https://www.rfc-editor.org/rfc/rfc4122
@@ -24,6 +25,7 @@ open class MNUID : MNUIDProtocol, LosslessStringConvertible, Comparable, Codable
     // Seperator
     public static let SEPARATOR : String = "|"
     public static let NO_TYPE : String = "?"
+    public static let DEFAULT_TYPE = NO_TYPE
     
     // Native iOS UUID is a RFC 4122 version 5 UUID:.
     private var _uid : UUIDv5
@@ -31,15 +33,28 @@ open class MNUID : MNUIDProtocol, LosslessStringConvertible, Comparable, Codable
         return _uid
     }
     
+    private var _type : String = MNUID.DEFAULT_TYPE
     open var type : String {
-        dlog?.warning("\(Swift.type(of: self)) subclass of MNUID must override .type getter!")
-        return Self.NO_TYPE
+        return _type
+    }
+    private func setTypeOnInit(str:String?) {
+        guard let str = str, str.count > 0 else {
+            self._type = Self.DEFAULT_TYPE
+            return
+        }
+        self._type = str
     }
     
-    open func setType(str:String? = MNUID.NO_TYPE) {
-        // Does nothing
-        // Future subclasses might override setType and store the value
-        dlog?.warning("\(Swift.type(of: self)) subclass of MNUID must override .setType()")
+    open func setType(str:String?) {
+        guard let newValue = str, newValue.count > 0 else {
+            self._type = Self.DEFAULT_TYPE
+            return
+        }
+
+        if newValue != self._type {
+            dlog?.note("Setting type from: [\(self._type)] to [\(newValue)]")
+            self._type = newValue
+        }
     }
     
     open func setType(type:LosslessStringConvertible) {
@@ -107,35 +122,33 @@ open class MNUID : MNUIDProtocol, LosslessStringConvertible, Comparable, Codable
         do {
             self._uid = try UUIDv5(version: .v5, name: typeStr, nameSpace: .uuidV4)
         } catch let error {
-            dlog?.warning("TUID.init(type:String) failed: \(error.description)")
-            self._uid = UUID();
+            dlog?.warning("\(Self.self).init(type:String) failed: \(error.description)")
+            self._uid = UUIDv5()
         }
-        self.setType(str:type)
+        self.setTypeOnInit(str: typeStr)
     }
 
     public required init(uid auid: UUID, typeStr atype:String = MNUID.NO_TYPE) {
+        
         switch auid.version {
         case .v5:
             // We re-use all components
             self._uid = auid
-            self.setType(str: atype)
-            break;
         case .v4:
             do {
                 self._uid = try UUID(version: .v5, name: atype, nameSpace: .custom(auid.uuidString));
             } catch let error {
-                dlog?.warning("TUID.init(uid:type) failed creating UUID: \(error.description)")
-                self._uid = UUID();
+                dlog?.warning("\(Self.self).init(uid:type) failed creating UUID: \(error.description)")
+                self._uid = UUIDv5();
             }
-            self.setType(str: atype);
-            break;
         default:
             self._uid = UUID(uuidString: UID_EMPTY_STRING)!;
-            break;
         }
         
-        if IS_DEBUG && !self._uid.isValid(name: atype) {
-            dlog?.warning("TUID.init(uid:type) auid hashed type does not match the provided type: \(atype)")
+        self.setTypeOnInit(str: atype)
+        
+        if IS_DEBUG && !self._uid.isValid(name: atype, nameSpace: .uuidV4) {
+            dlog?.warning("\(Self.self)..init(uid:type) auid hashed type does not match the provided type: \(atype)")
             return
         }
     }

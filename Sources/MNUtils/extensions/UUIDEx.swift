@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension UUID {
+public extension UUIDv5 {
     var isZeroUID : Bool {
         return self.uuidString == UID_EMPTY_STRING
     }
@@ -16,7 +16,7 @@ public extension UUID {
         return self.isZeroUID
     }
     
-    static var empty : UUID {
-        return UUID(uuidString: UID_EMPTY_STRING)!
+    static var empty : UUIDv5 {
+        return UUIDv5(uuidString: UID_EMPTY_STRING)!
     }
 }

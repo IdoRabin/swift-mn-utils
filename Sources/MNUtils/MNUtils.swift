@@ -1,15 +1,11 @@
 import AppKit
 import DSLogger
 
-public struct MNUtils {
+open class MNUtils {
     
     public static let debug = MNDebug()
     public static let constants = MNConstants()
-    
-    // MARK: Singleton
 }
-
-public let mnUtils = MNUtils()
 
 public class MNDebug {
     // TODO: Check if IS_DEBUG should be an @inlinable var ?

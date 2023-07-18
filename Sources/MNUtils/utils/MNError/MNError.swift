@@ -132,7 +132,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     /// - Parameters:
     ///   - fromError: curArror the error to duplicate with an additional underlying error
     ///   - withUnderlyingError: underlying erro to set in the new error
-    convenience init(fromError curError:MNError, withUnderlyingError newUnderlyingErr : MNError) {
+    public convenience init(fromError curError:MNError, withUnderlyingError newUnderlyingErr : MNError) {
         self.init(domain: curError.domain, code: curError.code, description: curError.desc,
                   reasons: curError.reasons,
                 underlyingError: newUnderlyingErr)
@@ -141,7 +141,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     /// Init using a given NSError
     ///
     /// - Parameter nserror: NSError to convert to MNError
-    init (nserror:NSError, reason:String? = nil) {
+    public init (nserror:NSError, reason:String? = nil) {
         
         // Init memebrs from the NSError:
         domain = nserror.domain
@@ -183,7 +183,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     ///   - fromOther: any AppErrorCodable to deraive the properties of the new error (see AppErrors)
     ///   - reason: (optional) reason describing the exact situation raising the error (developer eyes only)
     ///   - underlyingError: (optional) underlying error that has evoked this error
-    convenience init(fromOther other:MNErrorCodable, reason:String? = nil, underlyingError:Error? = nil) {
+    public convenience init(fromOther other:MNErrorCodable, reason:String? = nil, underlyingError:(any Error)? = nil) {
         var newReasons : [String]? = nil
         if let reason = reason {
             newReasons = [reason]
@@ -197,14 +197,14 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     ///   - fromOther:any AppErrorCodable to deraive the properties of the new error (see AppErrors)
     ///   - reasons: (optional) reasons array describing the exact situations raising the error (developer eyes only)
     ///   - underlyingError: (optional) underlying error that has evoked this error
-    convenience init(fromOther other:MNErrorCodable, /*we needed to use this name for disambiguation details->*/reasonsArray:[String]?, underlyingError:Error? = nil) {
+    public convenience init(fromOther other:MNErrorCodable, /*we needed to use this name for disambiguation details->*/reasonsArray:[String]?, underlyingError:(any Error)? = nil) {
         let saunderlying : MNError? = (underlyingError as? MNError) ?? MNError(error:underlyingError)
         
         self.init(domain:other.domain, code:other.code, description:other.desc, reasons: reasonsArray, underlyingError:saunderlying)
     }
     
     
-    convenience init(code:MNErrorCode, reasons newReasons:[String]?, underlyingError:Error? = nil) {
+    public convenience init(code:MNErrorCode, reasons newReasons:[String]?, underlyingError:(any Error)? = nil) {
         let saunderlying : MNError? = (underlyingError as? MNError) ?? MNError(error:underlyingError)
         let adomain = code.domain
         self.init(domain:adomain,
@@ -215,7 +215,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     }
     
 
-    public convenience init(code:MNErrorCode, reason : String?, underlyingError:Error? = nil){
+    public convenience init(code:MNErrorCode, reason : String?, underlyingError:(any Error)? = nil){
         self.init(code: code, reasons: reason != nil ? [reason!] : nil, underlyingError:underlyingError)
     }
     
@@ -225,7 +225,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     ///   - code: code for the error (see AppErrors)
     ///   - reasons: (optional) array of details describing the exact situation raising the error (developer eyes only)
     ///   - underlyingError: (optional) underlying error that has evoked this error
-    convenience init(_ code:MNErrorCodable, reasons newReasons:[String]?, underlyingError:Error? = nil) {
+    public convenience init(code:MNErrorCodable, reasons newReasons:[String]?, underlyingError:(any Error)? = nil) {
         let saunderlying : MNError? = (underlyingError as? MNError) ?? MNError(error:underlyingError)
         self.init(domain:code.domain, code:code.code, description:code.desc, reasons: newReasons, underlyingError: saunderlying)
     }
@@ -234,7 +234,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     /// Init an SAError using any Error
     ///
     /// - Parameter error: error to be converted to an SAError
-    convenience init(error:Error) {
+    public convenience init(error: any Error) {
         #if DEBUG
         if String(describing:type(of: error)) == "SAError" {
             dlog?.raiseAssertFailure("Error converted to error")
@@ -248,7 +248,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     /// May return nil if provided error is nil
     ///
     /// - Parameter error: error to be converted to an SAError
-    convenience init?(error:Error?) {
+    public convenience init?(error:(any Error)?) {
         #if DEBUG
             if String(describing:type(of: error)) == "SAError" {
                 dlog?.raiseAssertFailure("Error converted to error")
@@ -294,7 +294,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
         #endif
     }
     
-    private func trackError(error:Error) {
+    private func trackError(error:any Error) {
         var mnError = error as? MNError
         if mnError == nil {
             mnError = MNError(error: error)
@@ -306,11 +306,11 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
 
 public extension MNError /*mnErrors*/ {
     
-    convenience init(fromError input:Error?, defaultErrorCode:MNErrorCode, reason:String?) {
+    convenience init(fromError input:(any Error)?, defaultErrorCode:MNErrorCode, reason:String?) {
         self.init(fromError:input, defaultErrorCode:defaultErrorCode, reasons:reason != nil ? [reason!] : [])
     }
     
-    convenience init(fromError input:Error?, defaultErrorCode:MNErrorCode, reasons:[String]?) {
+    convenience init(fromError input:(any Error)?, defaultErrorCode:MNErrorCode, reasons:[String]?) {
         if let mnError = input as? MNError {
             self.init(domain:mnError.domain, code:mnError.code, description:mnError.desc, reasons: reasons, underlyingError: nil)
         } else if let nsError = input as? NSError {
@@ -329,14 +329,14 @@ public extension MNError /*mnErrors*/ {
         if let underError = underError {
             switch (underError.code, underError.domain) {
             case (-1009, NSURLErrorDomain), (-1003, NSURLErrorDomain), (-1004, NSURLErrorDomain), (-1001, NSURLErrorDomain):
-                self.init(MNErrorCode.web_internet_connection_error, reasons:reasons, underlyingError:underError)
+                self.init(code:MNErrorCode.web_internet_connection_error, reasons:reasons, underlyingError:underError)
             case (3, "Alamofire.AFError"):
-                self.init(MNErrorCode.web_unexpected_response, reasons:reasons, underlyingError:underError)
+                self.init(code:MNErrorCode.web_unexpected_response, reasons:reasons, underlyingError:underError)
             default:
-                self.init(defaultErrorCode, reasons: reasons, underlyingError: underError)
+                self.init(code:defaultErrorCode, reasons: reasons, underlyingError: underError)
             }
         } else {
-            self.init(defaultErrorCode, reasons: reasons, underlyingError: underError)
+            self.init(code:defaultErrorCode, reasons: reasons, underlyingError: underError)
         }
     }
 }

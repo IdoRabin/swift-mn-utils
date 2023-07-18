@@ -228,7 +228,7 @@ public extension String {
     /// Currently the password MUST be comprised of at least 8 chars, 1 uppercase, one digit
     ///
     /// - Returns: true when teh string is a valid password
-    func isValidPassword()->Bool {
+    func isCleartextValidPassword()->Bool {
         
         // Examples: (pick and use)
         /*
@@ -237,7 +237,7 @@ public extension String {
          (?=.*[!@#$&*])            Ensure string has one special case letter.
          (?=.*[0-9].*[0-9])        Ensure string has two digits.
          (?=.*[a-z].*[a-z].*[a-z]) Ensure string has three lowercase letters.
-         .{8}                      Ensure string is of length 8.
+         .{8}                      Ensure string is at least of length 8.
          $                         End anchor.
          */
         
@@ -388,7 +388,7 @@ public extension String {
         var loopLimit = min(self.count, 256) // safe(r) loop limit
         var str = self
         while str.count > 1 && str.hasSuffix(suffix) && loopLimit >= 0 {
-            str = str.substring(to: self.count - suffix.count)
+            str = str.substring(to: max(self.count - suffix.count - 1, 1))
             loopLimit -= 1
         }
         
@@ -500,6 +500,21 @@ public extension String {
         return substring(to: maxSize, suffixIfClipped:suffixIfClipped)
     }
 
+    
+    /// Return a string that is the original string repeated times amount.
+    /// for "N".repeated(times:3) we get "NNN"
+    /// - Parameter times: times to repeat
+    /// - Returns the original string repeated times. If times smaller than 1, we get an empty string.
+    func repeated(times:Int)->String {
+        guard times > 0 else {
+            return ""
+        }
+        return String(repeating: self, count: times)
+    }
+    
+    func repeated(times:UInt)->String {
+        return self.repeated(times: Int(times))
+    }
 }
 
 public extension StaticString {
@@ -717,48 +732,54 @@ public extension String {
         return result
     }
     
-    func indices(of occurrence: String) -> [Int] {
-        var indices = [Int]()
-        var position = startIndex
-        while let range = range(of: occurrence, range: position..<endIndex) {
-            let i = distance(from: startIndex,
-                             to: range.lowerBound)
-            indices.append(i)
-            let offset = occurrence.distance(from: occurrence.startIndex,
-                                             to: occurrence.endIndex) - 1
-            guard let after = index(range.lowerBound,
-                                    offsetBy: offset,
-                                    limitedBy: endIndex) else {
-                                        break
-            }
-            position = index(after: after)
-        }
-        return indices
-    }
+//    func indices(of occurrence: String) -> [Int] {
+//        var indices = [Int]()
+//        var position = startIndex
+//        while let range = range(of: occurrence, range: position..<endIndex) {
+//            let i = distance(from: startIndex,
+//                             to: range.lowerBound)
+//            indices.append(i)
+//            let offset = occurrence.distance(from: occurrence.startIndex,
+//                                             to: occurrence.endIndex) - 1
+//            guard let after = index(range.lowerBound,
+//                                    offsetBy: offset,
+//                                    limitedBy: endIndex) else {
+//                                        break
+//            }
+//            position = index(after: after)
+//        }
+//        return indices
+//    }
+//
+//    func ranges(of searchString: String) -> [Range<String.Index>] {
+//        let _indices = indices(of: searchString)
+//        let count = searchString.count
+//        return _indices.map({ index(startIndex, offsetBy: $0)..<index(startIndex, offsetBy: $0+count) })
+//    }
     
-    func ranges(of searchString: String) -> [Range<String.Index>] {
-        let _indices = indices(of: searchString)
-        let count = searchString.count
-        return _indices.map({ index(startIndex, offsetBy: $0)..<index(startIndex, offsetBy: $0+count) })
-    }
-    
-    func substrings(between prefix:String, suffix:String)->[String]? {
-        var result : [String]? = []
-        let ranges = self.ranges(of: prefix)
-        ranges.forEachIndex { (index, range) in
-            // DLog.misc.info("[StringEx] substrings:between:suffix: substr: \(self[range])")
-            var endIndex = String.Index(utf16Offset: self.count - 1, in:self)
-            if index + 1 < ranges.count - 1 {
-                endIndex = ranges[index + 1].lowerBound
-            }
-            
-            let part = self[range.lowerBound..<endIndex]
-            if let suffixRange = part.range(of: suffix) {
-                // DLog.misc.info("[StringEx] substrings:between:suffix: substr: Found range: from:\(range.upperBound) ro:\(suffixRange.lowerBound) whole:\(self[range.upperBound..<suffixRange.lowerBound])")
-                result?.append(String(part[range.upperBound..<suffixRange.lowerBound]))
+    func substrings(between prefix:String, suffix:String, isCaseSensitive : Bool = true, innerDelimiter : String? = nil, maxSubstrLength : Int = 256)->[String]? {
+        var result : [String] = []
+        
+        let regex = NSRegularExpression.escapedPattern(for:prefix) + ".{0,\(maxSubstrLength)}" + NSRegularExpression.escapedPattern(for:suffix)
+        result = self.matches(for: regex, options: isCaseSensitive ? [] : [.caseInsensitive]).map({ str in
+            return str.trimmingPrefix(prefix).trimmingSuffix(suffix)
+        })
+        
+        if let inner = innerDelimiter {
+            result = result.flatMap { str in
+                return str.components(separatedBy: inner)
             }
         }
         
+        /*
+        let splitted = self.components(separatedBy: suffix)
+        splitted.forEachIndex { index, part in
+            if let prefixRange = part.matchRanges(for: prefix).last {
+                if let substr = part.split(atIndex: prefixRange.location + prefixRange.length)?.last {
+                    result.append(substr)
+                }
+            }
+        }*/
         return result
     }
     
@@ -1060,11 +1081,10 @@ public extension String /* OLD substring with int ranges */ {
      */
     
     func substring(untilFirstOccuranceOf substr:String)->String? {
+        // TODO: Validate this && write tests
         
-        let indices = self.indices(of: substr)
-        if (indices.count > 0)
-        {
-            return self.substring(upTo: indices.first!)
+        if let range = self.matchRanges(for: substr).first {
+            return self.substring(upTo: range.location)
         }
         
         return nil

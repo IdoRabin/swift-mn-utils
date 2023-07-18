@@ -30,5 +30,10 @@ public protocol MNBootStateObserver<ObjectType> {
 }
 
 public extension MNBootStateObserver /* default implementation */ {
-    // ?
+    func needsSaving<App:AnyObject>(object:ObjectType, inApp:App?) {}
+    func willSave<App:AnyObject>(object:ObjectType, inApp:App?) {}
+    func didSave<App:AnyObject>(object:ObjectType, inApp:App?) {}
+    
+    func willLoad<App:AnyObject>(object:ObjectType, inApp:App?) {}
+    func didLoad<App:AnyObject>(object:ObjectType, inApp:App?) {}
 }

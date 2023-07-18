@@ -588,10 +588,8 @@ public extension Sequence {
     func toDictionary<T:Hashable,Z>(keyForItem:(_ element:Element)->T?, itemForItem:(_ key:T, _ element:Element)->Z?)-> [T:Z] {
         var result :[T:Z] = [:]
         for item in self {
-            if let key = keyForItem(item) {
-                if let resitem = itemForItem(key, item) {
-                    result[key] = resitem
-                }
+            if let key = keyForItem(item),  let resitem = itemForItem(key, item) {
+                result[key] = resitem
             }
         }
         return result
@@ -729,5 +727,13 @@ public extension Sequence where Element == String {
         return self.first(where:{ str in
             return str.contains(substring, isCaseSensitive: isCaseSensitive)
         }) != nil
+    }
+}
+
+public extension Sequence where Element : RawRepresentable {
+    var rawValues : [Element.RawValue] {
+        return self.map { val in
+            val.rawValue
+        }
     }
 }

@@ -7,14 +7,14 @@
 
 import Foundation
 
-protocol MNErrorCodable : MNErrorable, Codable, JSONSerializable {
+public protocol MNErrorCodable : MNErrorable, Codable, JSONSerializable {
     // Just allows encoding / decoding of an Error
 }
 
-extension MNErrorCodable /* default implementation */ {
+public extension MNErrorCodable /* default implementation */ {
     /// CustomStringConvertible
     /// We have the same description and debugDescription to avoid confusion
-    public var description: String { // CustomStringConvertible
+    var description: String { // CustomStringConvertible
         var res : String = self.serializeToJsonString(prettyPrint: false) ?? ""
         if (res.count == 0) {
             // Convert to string failed:

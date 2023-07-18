@@ -62,15 +62,13 @@ public extension UUID {
             return result;
         }
         
-        public enum Simplified : Equatable {
+        public enum Simplified : Equatable, CaseIterable {
             case dns
             case url
             case oid
             case x500
             case uuidV4
             case custom
-            
-            static var all : [Simplified] = [.dns, .url, .oid, .x500, .uuidV4, .custom]
         }
         
         var simplified : Simplified {
@@ -85,12 +83,12 @@ public extension UUID {
         }
         
         static var allSimplified : [Simplified] = [.dns, .url, .oid, .x500, .uuidV4, .custom]
-        static var all : [UUIDv5Namespace] = [.dns, .url, .oid, .x500, .uuidV4, .custom("?")]
+        static var allCases : [UUIDv5Namespace] = [.dns, .url, .oid, .x500, .uuidV4, .custom("?")]
     }
 
     func isValid(name:String, nameSpace: UUIDv5Namespace = .uuidV4)->Bool {
         // Validate UUID version nr:
-        guard self.version == .v5 else {
+        guard self.version == .v5 && nameSpace.simplified == UUIDv5Namespace.uuidV4.simplified else {
             return false
         }
         
@@ -147,7 +145,7 @@ public extension UUID {
         var result : Bool = false
         
         // We need to find if name was encrypted into the UUID:
-        // V5 can be validated ONLY if one hase
+        // V5 can be validated ONLY if one has
         if nameSpace.simplified == .uuidV4  {
             
             // If UUIDv5Namespace is uuidV4 we cannot validate UNLESS we have the original v4 UUID.
@@ -198,7 +196,9 @@ public extension UUID {
         case .rfc4122:
             result = UUIDVersion.init(rawValue: Int(self.uuid.6 >> 4))
         default:
-            result = nil
+            if self == UUIDv5.empty {
+                result = .v5
+            }
         }
         
         return result;

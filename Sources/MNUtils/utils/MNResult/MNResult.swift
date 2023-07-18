@@ -18,9 +18,15 @@ func MNResultOrErr<Success:Any>(_ result:Success?, error:MNError)->MNResult<Succ
     }
 }
 
+public extension MNResult {
+    var mnErrorValue : MNError? {
+        return self.errorValue as? MNError
+    }
+}
+
 public extension Result {
     
-    static func failure<Success:Any>(fromError error:Error)->MNResult<Success> {
+    static func failure<Success:Any>(fromError error:any Error)->MNResult<Success> {
         if let mnerror = error as? MNError {
             return MNResult.failure(mnerror)
         } else {
@@ -49,7 +55,7 @@ public extension Result {
         return self.failure(code: mnErrorCode, reasons: reasons, underlyingError: nil)
     }
     
-    static func fromError<Success:Any>(_ error:Error?, orSuccess:Success)->MNResult<Success> {
+    static func fromError<Success:Any>(_ error:(any Error)?, orSuccess:Success)->MNResult<Success> {
         if let mnError = error as? MNError {
             return Self.fromMNError(mnError, orSuccess: orSuccess)
         } else if let err = error {

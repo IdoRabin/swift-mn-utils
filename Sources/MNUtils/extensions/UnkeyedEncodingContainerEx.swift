@@ -104,8 +104,8 @@ public extension UnkeyedEncodingContainer {
 fileprivate var codingRegisteredIffyClasses : [String:Any.Type] = [:]
 fileprivate var codingRegisteredIffyPrefixes = Set<String>()
 
-public typealias StringAnyDictionary = Dictionary<String, Any>
-public typealias StringAnyCodableDictionary = Dictionary<String, Codable>
+public typealias StringAnyDictionary = MNStringAnyDictionary
+public typealias StringAnyCodableDictionary = MNStringAnyCodableDictionary
 
 public protocol StringAnyInitable {
     init(stringAnyDict dict:StringAnyDictionary) throws

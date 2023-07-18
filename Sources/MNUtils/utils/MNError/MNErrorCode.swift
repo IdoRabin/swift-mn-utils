@@ -19,7 +19,7 @@ public extension MNError {
 
 public typealias MNErrorInt = Int
 
-public enum MNErrorCode: MNErrorInt, MNErrorCodable {
+public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     //  - If there is any codes / domains BEFORE http statuses -
     // MAXRANGE: 99
     
@@ -253,10 +253,16 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable {
     // case db_failed_save = 3040
     // case db_failed_autosave = 3041
     // case db_failed_delete = 3050
+    case db_empty_result = 3070
+    
     static let allDB: [MNErrorCode] = [
-        .db_unknown,
-        .db_skipped_migration
-    ]
+        .db_unknown, .db_failed_init, .db_failed_migration, .db_skipped_migration,
+        .db_failed_load, .db_failed_query, .db_failed_fetch_request,
+//        .db_failed_fetch_by_ids,
+//        .db_failed_creating_fetch_request, .db_failed_update_request, .db_failed_save,
+//        .db_failed_autosave, .db_failed_delete,
+        .db_empty_result,
+   ]
 
     // UI
     case ui_unknown = 5000

@@ -23,15 +23,14 @@ public struct MNLogOutput: OptionSet {
 }
 
 // Filtered "granularity" : LOD
-public enum MNLogGranularity : String, Comparable {
+public enum MNLogGranularity : String, Comparable, CaseIterable {
     
     case verbose
     case `default`
     case warningsOnly
     case disabled
     
-    
-    /// All elements, sorted by order of 'verbosity'
+        /// All elements, sorted by order of 'verbosity'
     static var all : [MNLogGranularity] = [.disabled, .warningsOnly, .default, .verbose]
     
     // MARK: Comparable
