@@ -498,6 +498,17 @@ public extension Array where Element: Equatable {
         return true
     }
     
+    @discardableResult
+    mutating func appendIf(test:Bool, _ object : Element?)->Bool {
+        guard let object = object, test == true else {
+            return false
+        }
+        
+        self.append(object)
+        return true
+    }
+    
+    
     /// Mutating: adds the element to the array if it is not nil AND does not already exist in the array (using equatable)
     /// - Parameter object: object to append if not nil AND not already in the array
     /// - Returns: true when element was added, false when element is nil or is equal to an element already  in the array (using equatable)

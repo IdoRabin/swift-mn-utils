@@ -11,11 +11,19 @@ import DSLogger
 fileprivate let dlog : DSLogger? = DLog.forClass("MNLanguage")
 
 public struct MNLanguage : CustomStringConvertible, Codable, Equatable, Hashable {
+    
+    /// English name of the language, written in english
     let nameEn : String
+    
+    /// Native name of the language, written in its alphabet, for example "עברית" for Hebrew.
     let nameNative : String
+    
+    /// 2 char code of the language using iso639_1 strandard
     let iso639_1 : String
-    let countriesIso3166 : [String]
-    let displayFlags : [String/* iso639_1 */:String /* Iso3166 */] // Use "*" as the Key for unknown / unspecified coutry. i.e US flag for "English", even when the actual country we are referring to is unspecified
+    
+    /// Countries where this language is spoken / national language (using Iso3166-α2 standard)
+    ///  The first country in the list will describe the default flag for the language if location / country are unknown / unspecified.
+    let countriesIso3166_2 : [String]
     
     public var description : String {
         var parts : [String] = []
@@ -27,8 +35,8 @@ public struct MNLanguage : CustomStringConvertible, Codable, Equatable, Hashable
             dlog?.note("MNLanguage has no nameEn and no nameNative")
         }
         
-        if countriesIso3166.count > 0 {
-            parts.append(countriesIso3166.descriptionsJoined)
+        if countriesIso3166_2.count > 0 {
+            parts.append(countriesIso3166_2.descriptionsJoined)
         }
         return parts.joined(separator: ";")
     }
@@ -41,5 +49,13 @@ public struct MNLanguage : CustomStringConvertible, Codable, Equatable, Hashable
     // MARK: Hashable
     public func hash(into hasher: inout Hasher) {
         hasher.combine(iso639_1)
+    }
+    
+    public static var `default` : MNLanguage {
+        return MNLanguage(
+            nameEn: "English",
+            nameNative: "English",
+            iso639_1: "en",
+            countriesIso3166_2: ["US", "UK", "CA", "AU"])
     }
 }

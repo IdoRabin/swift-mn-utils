@@ -247,21 +247,22 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case db_failed_query = 3014
     
     case db_failed_fetch_request = 3020
-    // case db_failed_fetch_by_ids = 3021
-    // case db_failed_creating_fetch_request = 3022
-    // case db_failed_update_request = 3030
-    // case db_failed_save = 3040
-    // case db_failed_autosave = 3041
-    // case db_failed_delete = 3050
+    case db_failed_fetch_by_ids = 3021
+    case db_failed_creating_fetch_request = 3022
+    case db_failed_update_request = 3030
+    case db_failed_save = 3040
+    case db_failed_autosave = 3041
+    case db_failed_delete = 3050
     case db_empty_result = 3070
+    case db_failed_creating = 3071
     
     static let allDB: [MNErrorCode] = [
         .db_unknown, .db_failed_init, .db_failed_migration, .db_skipped_migration,
         .db_failed_load, .db_failed_query, .db_failed_fetch_request,
-//        .db_failed_fetch_by_ids,
-//        .db_failed_creating_fetch_request, .db_failed_update_request, .db_failed_save,
-//        .db_failed_autosave, .db_failed_delete,
-        .db_empty_result,
+        .db_failed_fetch_by_ids,
+        .db_failed_creating_fetch_request, .db_failed_update_request, .db_failed_save,
+        .db_failed_autosave, .db_failed_delete,
+        .db_empty_result, .db_failed_creating
    ]
 
     // UI

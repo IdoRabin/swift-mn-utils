@@ -61,6 +61,14 @@ public extension String {
         return result
     }
     
+    func substring(maxSize: Int, midIfClipped:String? = nil) -> String {
+        guard self.count > maxSize else { return self }
+        let midStr = midIfClipped ?? ""
+        let headCharactersCount = Int(ceil(Float(maxSize - midStr.count) / 2.0))
+        
+        let tailCharactersCount = Int(floor(Float(maxSize - midStr.count) / 2.0))
+        return "\(self.prefix(headCharactersCount))\(midStr)\(self.suffix(tailCharactersCount))"
+    }
 
     /// Returns a new string where the charahters at indexes of the given rage were replaced.
     ///
@@ -224,11 +232,11 @@ public extension String {
         return 8
     }
     
-    /// Return if a candidate string is a valid password
+    /// Return if a candidate string is a valid password (in its plaintext form, i,e does the password conform to the minimum requirements from a plaintext pwd - complaxity wise)
     /// Currently the password MUST be comprised of at least 8 chars, 1 uppercase, one digit
     ///
     /// - Returns: true when teh string is a valid password
-    func isCleartextValidPassword()->Bool {
+    func isPlaintextValidPassword()->Bool {
         
         // Examples: (pick and use)
         /*

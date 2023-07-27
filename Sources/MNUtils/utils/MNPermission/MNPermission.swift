@@ -104,3 +104,13 @@ extension MNPermission : Codable where Forbidden : Codable, Allowed : Codable {
         try container.encodeIfPresent(forbiddenValue, forKey: .forbidden)
     }
 }
+
+extension MNPermission where Forbidden : Error {
+    /// If the permission is a failure, throws the failure value (Error), or does nothing if permission isAllowed
+    /// - Returns: void or throws if there is not permission
+    public func throwIfForbidden() throws {
+        if let err = self.forbiddenValue {
+            throw err
+        }
+    }
+}
