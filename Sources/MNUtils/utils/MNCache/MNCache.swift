@@ -81,6 +81,7 @@ public extension MNCacheObserver /* optionals */ {
     
 }
 
+// TODO: Check if can be Actor
 // MARK: Cache decleration
 public typealias AnyCache = MNCache<AnyHashable, AnyHashable>
 public class MNCache<Key : Hashable, Value : Hashable> {

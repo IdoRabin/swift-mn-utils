@@ -10,7 +10,7 @@ import Foundation
 public extension Error {
     
     var description : String {
-        var result = "<unknown error \(type(of: self)) \(self.localizedDescription)>"
+            var result = "<unknown error \(type(of: self)) \(self.localizedDescription)>"
         
         // DO NOT USE SWITCH CASE
         // NOTE: Order of conditions matters here!

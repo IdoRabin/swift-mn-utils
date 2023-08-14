@@ -147,6 +147,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case misc_already_exists = 9034
     case misc_security = 9050
     case misc_concurrency = 9060
+    case misc_bad_input = 9070
     // MAXRANGE: 9999
     
     static let allMisc: [MNErrorCode] = [
@@ -154,7 +155,8 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
         .misc_failed_removing, .misc_failed_inserting, .misc_failed_updating, .misc_failed_reading,
         .misc_no_permission_needed, .misc_no_permission_for_operation, .misc_readonly_permission_for_operation, .misc_failed_crypto,
         .misc_failed_parsing, .misc_failed_encoding, .misc_failed_decoding,
-        .misc_failed_validation, .misc_already_exists, .misc_security, .misc_concurrency
+        .misc_failed_validation, .misc_already_exists, .misc_security, .misc_concurrency,
+        .misc_bad_input
     ]
 
     // Web
@@ -255,6 +257,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case db_failed_delete = 3050
     case db_empty_result = 3070
     case db_failed_creating = 3071
+    case db_already_exists = 3072
     
     static let allDB: [MNErrorCode] = [
         .db_unknown, .db_failed_init, .db_failed_migration, .db_skipped_migration,
@@ -262,7 +265,8 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
         .db_failed_fetch_by_ids,
         .db_failed_creating_fetch_request, .db_failed_update_request, .db_failed_save,
         .db_failed_autosave, .db_failed_delete,
-        .db_empty_result, .db_failed_creating
+        .db_empty_result, .db_failed_creating,
+        .db_already_exists
    ]
 
     // UI

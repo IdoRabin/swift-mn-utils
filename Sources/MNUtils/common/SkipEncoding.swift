@@ -29,6 +29,27 @@ extension SkipEncode: Encodable {
    }
 }
 
+@propertyWrapper
+public struct SkipEncodeSendable<T:Sendable> : Sendable {
+    public var wrappedValue: T
+    public init(wrappedValue value: T) {
+        wrappedValue = value
+    }
+}
+
+extension SkipEncodeSendable: Decodable where T: Decodable {
+   public init(from decoder: Decoder) throws {
+      let container = try decoder.singleValueContainer()
+      self.wrappedValue = try container.decode(T.self)
+   }
+}
+
+extension SkipEncodeSendable: Encodable {
+   public func encode(to encoder: Encoder) throws {
+      // nothing to do here
+   }
+}
+
 public extension KeyedEncodingContainer {
     mutating func encode<T>(_ value: SkipEncode<T>, forKey key: K) throws {
       // overload, but do nothing

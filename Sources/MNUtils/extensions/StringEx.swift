@@ -7,6 +7,9 @@
 //
 
 import Cocoa
+import DSLogger
+
+fileprivate let dlog : DSLogger? = DLog.forClass("StringEx")
 
 public extension Sequence where Iterator.Element == String {
     func lowercased(with locale:Locale? = nil)->[String] {
@@ -917,12 +920,17 @@ public extension String {
         return isUniquify ? result.uniqueElements() : result
     }
     
-    func camelCaseToSnakeCase() -> String {
+    func camelCaseToSnakeCase(delimiter : String = "_") -> String {
+        guard delimiter.count == 1 else {
+            dlog?.warning("camelCaseToSnakeCase(delimiter:) Delimiter must be 1 char long!")
+            return self
+        }
+        
         let acronymPattern = "([A-Z]+)([A-Z][a-z]|[0-9])"
         let normalPattern = "([a-z0-9])([A-Z])"
         let result = self.processCamalCaseRegex(pattern: acronymPattern)?
             .processCamalCaseRegex(pattern: normalPattern)?.lowercased() ?? self.lowercased()
-        return result.replacingOccurrences(of: .whitespacesAndNewlines, with: "_")
+        return result.replacingOccurrences(of: .whitespacesAndNewlines, with: delimiter)
     }
     
     fileprivate func processCamalCaseRegex(pattern: String) -> String? {

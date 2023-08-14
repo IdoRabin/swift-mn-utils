@@ -169,11 +169,11 @@ public protocol JSONSerializable : Codable {
 public extension JSONSerializable {
     
     func didDeserializefromJson() {
-        
+        // Re-implement in implementor to get the event
     }
     
     func didSerializeToJson() {
-        
+        // Re-implement in implementor to get this event
     }
     
     /// Serialized any codable object into a JSON string and returned as the Data for that string
@@ -316,11 +316,18 @@ public extension JSONFileSerializable {
         }
     }
     
+    static func loadFromJSON<T>(_ fileurl: URL?) -> Result<T, Error> where T : JSONFileSerializable {
+        guard let fileurl = fileurl else {
+            return .failure(MNError(code:.misc_failed_loading, reason: "file url is nil!"))
+        }
+        
+        return self.loadFromJSON(fileurl)
+    }
+    
     static func loadFromJSON<T>(_ fileurl: URL) -> Result<T, Error> where T : JSONFileSerializable {
         guard T.self == Self.self else {
             return .failure(MNError(code: .misc_failed_loading, reason: "loadFromJSON<T> where T must equal Self (type of class being operated on)"))
         }
-    // static func loadFromJSON(_ fileurl:URL)->Result<Self, Error> {
         if FileManager.default.fileExists(atPath: fileurl.path) {
             do {
                 let data = try Data(contentsOf: fileurl)

@@ -22,6 +22,10 @@ public extension MNResult {
     var mnErrorValue : MNError? {
         return self.errorValue as? MNError
     }
+    
+    var nsErrorValue : NSError? {
+        return self.errorValue as? NSError
+    }
 }
 
 public extension Result {
