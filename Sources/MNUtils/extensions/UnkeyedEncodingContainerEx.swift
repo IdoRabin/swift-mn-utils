@@ -17,6 +17,9 @@ public typealias LosslessStrEnum = LosslessStringConvertible & Codable
 public typealias CodableHashable = Codable & Hashable
 public typealias AnyCodable = Any & Codable
 public typealias AnyEquatable = Any & Equatable
+public typealias AnyCodableHashable = Any & Hashable & Codable
+public typealias AnyObjectHashable = Any & Hashable & AnyObject
+public typealias AnyObjectEquatable = Any & Equatable & AnyObject
 
 public struct TypeDescriptor {
     let name : String
@@ -120,11 +123,6 @@ public extension StringAnyInitable {
         }
         return nil
     }
-}
-
-
-public class StringAny {
-    
 }
 
 public extension StringAnyDictionary {

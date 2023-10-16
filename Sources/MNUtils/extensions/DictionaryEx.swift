@@ -140,11 +140,11 @@ public extension Dictionary where Value : Equatable {
 }
 
 public extension Dictionary where Key : Comparable {
-    var sortedKeys : [Key] {
+    @inlinable var sortedKeys : [Key] {
         return Array(self.keys.sorted()) // Do not: .reversed()
     }
     
-    var valuesSortedByKeys : [Value] {
+    @inlinable var valuesSortedByKeys : [Value] {
         var result : [Value] = []
         for sortedKey in self.sortedKeys {
             if let sortedValue = self[sortedKey] {
@@ -153,6 +153,18 @@ public extension Dictionary where Key : Comparable {
         }
         return result
     }
+    
+    @inlinable var tuplesSortedByKeys : [(key: Key, value: Value)] {
+        var result : [(key: Key, value: Value)] = []
+        for key in self.sortedKeys {
+            if let val = self[key] {
+                result.append((key: key, value: val))
+            }
+        }
+        return result
+    }
+    
+    // @inlinable public func sorted(by areInIncreasingOrder: ((key: Key, value: Value), (key: Key, value: Value)) throws -> Bool) rethrows -> [(key: Key, value: Value)]
 }
 
 //public extension Dictionary where Key : RawRepresentable, Key.RawValue : Comparable {
@@ -270,7 +282,7 @@ public extension Dictionary where Value : FloatingPoint {
 }
 
 
-public extension Dictionary {
+public extension Dictionary where Value : Sequence {
 
     mutating func add<T>(_ element: T, toArrayOn key: Key) where Value == [T] {
         self[key] == nil ? self[key] = [element] : self[key]?.append(element)

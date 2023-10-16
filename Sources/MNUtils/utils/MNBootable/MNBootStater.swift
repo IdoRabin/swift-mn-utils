@@ -118,7 +118,7 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
     
     // MARK: Private funcs
     private func performStateChange(old:MNBootState, new:MNBootState) throws {
-        var err : Error? = nil
+        let err : Error? = nil
         guard let object = originObject else {
             dlog?.note("performStateChange: originObject not defined for MNBootStater")
             return

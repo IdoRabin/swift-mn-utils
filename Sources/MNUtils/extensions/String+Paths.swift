@@ -87,7 +87,7 @@ public extension String /* helper functions relevant to vapor URL requests, para
             // The caller gave a gb2312 string that has been processed by the urlencode function:
             // https://developer.apple.com/forums/thread/68879
             // https://stackoverflow.com/questions/41477013/swift-removingpercentencoding-not-work-with-a-gb2312-string
-            let consts = MNUtils.constants
+            // let consts = MNUtils.constants
             var result = self.replacingOccurrences(ofFromTo: MNUtils.constants.PERCENT_DOUBLY_ESCAPED_HINTS, caseSensitive: false)
             result = self.replacingOccurrences(ofFromTo: MNUtils.constants.PERCENT_ESCAPED_HINTS, caseSensitive: false)
             
@@ -198,7 +198,6 @@ public extension String /* helper functions relevant to vapor URL requests, para
             let comps = part.components(separatedBy: kvDelim)
             
             // dlog?.info("_asQueryParamsDictionary: tuple has \(comps.count) components: \(comps.descriptionJoined)")
-            let consts = MNUtils.constants
             if comps.count != 2 || parts.first == MNUtils.constants.BASE_64_PARAM_KEY {
                 
                 // Try to un-base64 if possible

@@ -17,4 +17,8 @@ public extension Set {
     func allElements()->[Element] {
         return Array<Element>(self)
     }
+    
+    
 }
+
+

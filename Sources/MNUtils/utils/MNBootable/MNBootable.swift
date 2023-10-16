@@ -145,7 +145,7 @@ private class MNBootableMgr {
     }
     
     private func key(for bootable : any MNBootable)->String {
-        var key = String(memoryAddressOf: bootable)
+        var key = MemoryAddress(of: bootable as AnyObject).description
         if let ided = bootable as? any Identifiable {
             key = idName(for: ided)
         }
@@ -160,7 +160,7 @@ private class MNBootableMgr {
         // Validate
         let type = type(of: item)
         let typeKey = TypeDescriptor(type: type)
-        var typedItems = registry[typeKey] ?? [:]
+        let typedItems = registry[typeKey] ?? [:]
         let key = self.key(for: item)
         let registeredState = typedItems[key]
         

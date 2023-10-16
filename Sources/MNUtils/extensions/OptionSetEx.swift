@@ -8,11 +8,12 @@
 import Foundation
 
 public extension OptionSet where RawValue: FixedWidthInteger {
-
+    
+    /// Returns all elements possible in the set as a Sequence, like allElements of an Enum.
     static var allElements :  [Self] {
         var val : RawValue = 0
         var result : [Self] = []
-        while val < 128 {
+        while val < 256 {
             let bits : RawValue = 1 << val
             if let resultElement = Self(rawValue: bits) {
                 result.append(resultElement)
@@ -21,9 +22,13 @@ public extension OptionSet where RawValue: FixedWidthInteger {
             }
             val += 1
         }
+        if val >= 256 {
+            print("OptionSetEx.allElements goes up to 256 and no more")
+        }
         return result
     }
     
+    /// Returns all the elements in the current set as a Sequence
     var elements : AnySequence<Self> {
         var remainingBits = rawValue
         var bitMask: RawValue = 1
@@ -39,5 +44,22 @@ public extension OptionSet where RawValue: FixedWidthInteger {
                 return nil
             }
         }
+    }
+    
+    
+    /// Checks for intersection between the current set and another set, syntactic sugar
+    /// - Parameter members: sequence of member elements
+    /// - Returns: true if at least one element in common between self and anyOf other members
+    func contains(anyOf members: [Element]) -> Bool {
+        return !self.intersection(Self(members)).isEmpty
+    }
+    
+    // Syntactic sugar
+    
+    /// Checks for intersection between the current set and another set, syntactic sugar
+    /// - Parameter other: another optionSet of the same type
+    /// - Returns: true if at least one element in common between self and anyOf the other set.
+    func contains(anyOf other: Self) -> Bool {
+        return !self.intersection(other).isEmpty
     }
 }

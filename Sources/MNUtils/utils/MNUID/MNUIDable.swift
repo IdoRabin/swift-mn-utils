@@ -10,7 +10,7 @@ import Foundation
 // DO NOT: Identifiable because it clashes with Fluent's Model protocol @ID, which required id to be non-optional (some)
 public protocol MNUIDable /* DO NOT: Identifiable */  {
     
-    static var mnuidStr : String { get }
+    static var mnuidTypeStr : String { get }
     var id : UUID? { get }
     var mnUID : MNUID? { get }
     
@@ -19,7 +19,7 @@ public protocol MNUIDable /* DO NOT: Identifiable */  {
 
 public extension MNUIDable {
     func validateMNUID(_ mnUID:MNUID?) -> Bool {
-        return (mnUID?.type == Self.mnuidStr)
+        return (mnUID?.type == Self.mnuidTypeStr)
     }
 }
 
@@ -29,6 +29,6 @@ public extension MNUIDable where Self : Identifiable {
             return nil
         }
         
-        return MNUID(uid: id, typeStr: Self.mnuidStr)
+        return MNUID(uid: id, typeStr: Self.mnuidTypeStr)
     }
 }

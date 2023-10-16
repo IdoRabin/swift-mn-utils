@@ -19,6 +19,10 @@ public extension Sequence {
         }
     }
     
+    var descriptionJoined : String {
+        return self.descriptions().descriptionJoined
+    }
+    
     func descriptions()-> [String] {
         return self.compactMap({ (element) -> String in
             if let element = element as? CustomStringConvertible {
@@ -324,6 +328,52 @@ public extension Array {
     }
 }
 
+// TODO: See how to do this!
+
+public protocol OptionalType {
+  associatedtype Wrapped
+  var optionalType: Wrapped? { get }
+}
+
+extension Optional: OptionalType {
+    public var optionalType: Self { self }
+}
+
+public extension Array where Element: OptionalType {
+    
+    /// Mutating: adds the element to the array if it is not nil
+    /// - Parameter object: object to append if not nil
+    /// - Returns: true when element was added, false when element is nil
+    @discardableResult
+    mutating func appendIfNotNil(_ object : Element?)->Bool {
+        guard let object = object else {
+            return false
+        }
+        
+        self.append(object)
+        return true
+    }
+    
+}
+
+public extension Array where Element: Equatable & OptionalType {
+    /// Mutating: adds the element to the array if it is not nil AND does not already exist in the array (using equatable)
+    /// - Parameter object: object to append if not nil AND not already in the array
+    /// - Returns: true when element was added, false when element is nil or is equal to an element already  in the array (using equatable)
+    @discardableResult
+    mutating func appendIfNotAlreadyOrNil(_ object : Element?)->Bool {
+        guard let object = object else {
+            return false
+        }
+        
+        if !self.contains(object) {
+            self.append(object)
+            return true
+        }
+        return false
+    }
+}
+
 /// Extends the Array class to handle equatable objects, thus allowing remove by object, intersection and testing if elements are common (shared) between two arrays
 public extension Array where Element: Equatable {
     
@@ -371,14 +421,16 @@ public extension Array where Element: Equatable {
     /// Note: the function will accumulate a temp array of objects before removing them all from the array in one call, so there is a memory penalty sized the amount of objects to be deleted for this function
     ///
     /// - Parameter block: return bool for elements that are to be removed
-    mutating func remove(where block: (_ object:Element)->Bool) {
+    /// - Returns: count of elements removed
+    @discardableResult
+    mutating func remove(where block: (_ object:Element)->Bool)->Int {
         var toRemove : [Element] = []
         for object in self {
             if block(object) {
                 toRemove.append(object)
             }
         }
-        self.remove(objects: toRemove)
+        return self.remove(objects: toRemove)
     }
     
     func removing(elementsEqualTo: Element)->[Element] {
@@ -419,6 +471,12 @@ public extension Array where Element: Equatable {
         return result
     }
     
+    /// Check if the array contains at least one of the elements
+    /// - Parameter items: items to find intersection with this array
+    /// - Returns: true if at least one item is common / shared between self and the items array
+    func contains(anyOf items:[Element])->Bool {
+        return self.intersects(with: items)
+    }
     
     /// Returns true if the provided element appears in the array (uses Equatable for comparison)
     /// - Parameter element: element to search
@@ -472,7 +530,6 @@ public extension Array where Element: Equatable {
         return result
     }
     
-    
     /// Mutating: adds the element to the array if it does not already exist in the array (using equatable)
     /// - Parameter object: object to append if not already in the array
     /// - Returns: ttrue when element was added, false when element is equal to an element already  in the array (using equatable)
@@ -485,20 +542,13 @@ public extension Array where Element: Equatable {
         return false
     }
     
-    /// Mutating: adds the element to the array if it is not nil
-    /// - Parameter object: object to append if not nil
-    /// - Returns: true when element was added, false when element is nil
-    @discardableResult
-    mutating func appendIfNotNil(_ object : Element?)->Bool {
-        guard let object = object else {
-            return false
-        }
-        
-        self.append(object)
-        return true
-    }
     
     @discardableResult
+    /// Append to the array if a condition is met
+    /// - Parameters:
+    ///   - test: a test block that recieves the element as the parameter and returns true when the element needs to be appended to the array
+    ///   - object: element that is being tested if it should be added
+    /// - Returns: true if element was added, false if failed the test
     mutating func appendIf(test:Bool, _ object : Element?)->Bool {
         guard let object = object, test == true else {
             return false
@@ -506,23 +556,6 @@ public extension Array where Element: Equatable {
         
         self.append(object)
         return true
-    }
-    
-    
-    /// Mutating: adds the element to the array if it is not nil AND does not already exist in the array (using equatable)
-    /// - Parameter object: object to append if not nil AND not already in the array
-    /// - Returns: true when element was added, false when element is nil or is equal to an element already  in the array (using equatable)
-    @discardableResult
-    mutating func appendIfNotAlreadyOrNil(_ object : Element?)->Bool {
-        guard let object = object else {
-            return false
-        }
-        
-        if !self.contains(object) {
-            self.append(object)
-            return true
-        }
-        return false
     }
     
     /// Will replace any occurance of Equatable elements equal to element with the given array of elements inserted in its place
@@ -618,6 +651,18 @@ public extension Sequence {
             if let key = keyForItem(item) {
                 var arr : [Element] = result[key] ?? []
                 arr.append(item)
+                result[key] = arr
+            }
+        }
+        return result
+    }
+    
+    func toDictionaryOfArrays<T:Hashable, Elem:Any>(keyForItem:(_ element:Element)->T?, arrayItemForItem:(_ element:Element)->Elem?)-> [T:[Elem]] {
+        var result :[T:[Elem]] = [:]
+        for item in self {
+            if let key = keyForItem(item), let arrItem = arrayItemForItem(item) {
+                var arr : [Elem] = result[key] ?? []
+                arr.append(arrItem)
                 result[key] = arr
             }
         }

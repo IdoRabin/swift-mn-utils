@@ -73,7 +73,7 @@ public enum PathComponent: ExpressibleByStringInterpolation, CustomStringConvert
 
 public extension String {
     /// Converts a string into `[PathComponent]`.
-    public var pathComponents: [PathComponent] {
+    var pathComponents: [PathComponent] {
         return self.split(separator: "/").map { .init(stringLiteral: .init($0)) }
     }
 }
@@ -83,7 +83,7 @@ public extension Sequence where Element == PathComponent {
     ///
     ///     galaxies/:galaxyID/planets
     ///
-    public var string: String {
+    var string: String {
         return self.map(\.description).joined(separator: "/")
     }
 }

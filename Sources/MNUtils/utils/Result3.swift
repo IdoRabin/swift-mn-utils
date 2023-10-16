@@ -324,7 +324,8 @@ public extension Result3 where Failure : Error {
         do {
             let newValue = try body()
             print("[Result3] \(Self.self).init(prevValue:catching:) ⚠️️ determining if non-equatable any object vals have changed. prev: \(prevValue!) == new \(newValue) ?  It is highly reccommended to make \(Success.self) conform to Equatable.")
-            if prevValue == nil || String(memoryAddressOf: prevValue!) == String(memoryAddressOf: newValue) {
+            if prevValue == nil || MemoryAddress(of: prevValue!) == MemoryAddress(of: newValue) {
+                // changed
                 self = Result3.successChanged(newValue)
             } else {
                 self = Result3.successNoChange(newValue)
@@ -358,7 +359,7 @@ public extension Result3 where Failure : Error {
     }
     
     @_transparent
-    public init(prevValue:Success? = nil, catching body: () throws -> Success)  where Success : Equatable {
+    init(prevValue:Success? = nil, catching body: () throws -> Success)  where Success : Equatable {
         do {
             let newValue = try body()
             if prevValue == newValue {
@@ -376,7 +377,7 @@ public extension Result3 where Failure : Error {
     }
     
     @_transparent
-    public init(prevValue:Success?, newValue: Success, orFailure failure:Failure?) where Success : Equatable {
+    init(prevValue:Success?, newValue: Success, orFailure failure:Failure?) where Success : Equatable {
         if let failure = failure {
             self = .failure(failure)
         } else if prevValue != nil && prevValue == newValue {
@@ -438,7 +439,7 @@ extension Result3 : Equatable where Success : Equatable, Failure : Equatable {
     }
 }
 
-// MARK: Hahsable
+// MARK: HasHable
 extension Result3 : Hashable where Success : Hashable, Failure : Hashable {
 
     /// Hashes the essential components of this value by feeding them into the

@@ -86,9 +86,7 @@ public extension MNCacheObserver /* optionals */ {
 public typealias AnyCache = MNCache<AnyHashable, AnyHashable>
 public class MNCache<Key : Hashable, Value : Hashable> {
     
-    var defaultSearchPathDirectory : FileManager.SearchPathDirectory {
-        return .cachesDirectory
-    }
+    public typealias CacheDecodeJSONFragmentBlock =  (_ key:String,_ val:Any)->(items:[Key:Value], date:Date)
     
     /// Strategy / policy of attempting to load the last saved files for the cache:
     public enum CacheLoadType {
@@ -120,6 +118,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         let date:Date?
     }
     
+    // MARK: Private Properties
     private var _lock = NSRecursiveLock()
     private var _maxSize : UInt = 10
     private var _flushToSize : UInt? = nil
@@ -143,7 +142,26 @@ public class MNCache<Key : Hashable, Value : Hashable> {
             }
         }
     }
+    private let _maxOldestDates : UInt = 200
+    private let _cacheLoadType : CacheLoadType = .immediate
+    fileprivate var _lastIOStartTime : Date? = nil // for both save and load
+    
+    // MARK: Public Properties
     var loadPolicy : MNCacheLoadPolicy = .replaceAll
+    public var isLog : Bool = false
+    public var observers = ObserversArray<MNCacheObserver>()
+    
+    // Overrides the default loading mechanism to allow custom load element
+    public var decodeElementFromJSONFragment : CacheDecodeJSONFragmentBlock? = nil
+    
+    // When loading objects by their type when using the loadWithSubTypes function, will fail or throw errors during load
+    public var isDecodingSubTypeItemFailsOnNilReasult : Bool = true
+    
+    // MARK: Computed or misc Properties
+    
+    // NOTE: JSON filename is dependent on the name! do not change after init if not well-researched
+    public var name : String = ""
+    
     public var whenLoaded : [(MNCacheError?)->Void] = [] {
         didSet {
             if self.isLoaded {
@@ -152,6 +170,26 @@ public class MNCache<Key : Hashable, Value : Hashable> {
                 }
             }
         }
+    }
+    
+    public func whenLoadedAsync() async -> MNCacheError? {
+        if self.isLoaded {
+            return nil
+        }
+        let twl = MNThreadWaitLock()
+        self.whenLoaded.append {[self] err in
+            self.log("whenLoadedAsync whenLoaded MNThreadWaitLock will unlock")
+            twl.signal()
+        }
+        
+        log("whenLoadedAsync whenLoaded MNThreadWaitLock will wait")
+        twl.waitForSignal()
+        log("whenLoadedAsync whenLoaded MNThreadWaitLock did unlock \(self._loadError.descOrNil)")
+        return self._loadError
+    }
+    
+    var defaultSearchPathDirectory : FileManager.SearchPathDirectory {
+        return .cachesDirectory
     }
     
     var determinePolicyAfterLoad : ((_ existing:[Key])->MNCacheLoadPolicy)? = nil {
@@ -165,17 +203,6 @@ public class MNCache<Key : Hashable, Value : Hashable> {
             }
         }
     }
-    
-    // const
-    private let _maxOldestDates : UInt = 200
-    
-    public var name : String = ""
-    public var isLog : Bool = false
-    public var observers = ObserversArray<MNCacheObserver>()
-    
-    // Overrides the default loading mechanism to allow custom load element
-    public typealias CacheDecodeJSONFragmentBlock =  (_ key:String,_ val:Any)->(items:[Key:Value], date:Date)
-    public var decodeElementFromJSONFragment : CacheDecodeJSONFragmentBlock? = nil
     
     /// For cases of non-homogenous caches / of Value and Value subclasses.
     /// Requires also an override for creating all the instances from json using the lambda
@@ -191,9 +218,6 @@ public class MNCache<Key : Hashable, Value : Hashable> {
             }
         }
     }
-    
-    // When loading objects by their type when using the loadWithSubTypes function, will fail or throw errors during load
-    public var isDecodingSubTypeItemFailsOnNilReasult : Bool = true
     
     public var isSavesDates : Bool {
         get {
@@ -219,55 +243,6 @@ public class MNCache<Key : Hashable, Value : Hashable> {
                 self.flushToDatesIfNeeded()
                 self.isNeedsSave = true
             }
-        }
-    }
-    
-    // MARK: Functions
-    func notifyWhenLoaded(clearAllBlocks:Bool, error:MNCacheError?) {
-        for block in whenLoaded {
-            block(error)
-        }
-        // Clear after calling all
-        if clearAllBlocks {
-            whenLoaded.removeAll()
-        }
-    }
-    
-    func notifyWasLoaded(error:MNCacheError?) {
-        // Call wasLoaded on observers and whenLoaded blocks
-        self.observers.enumerateOnCurrentThread { observer in
-            observer.cacheWasLoaded(uniqueCacheName: self.name, keysCount: self.keys.count, error: error)
-        }
-        
-        // Call completion blocks...
-        self.notifyWhenLoaded(clearAllBlocks: true, error: error)
-    }
-    
-    func log(_ args:CVarArg...) {
-        if isLog && MNUtils.debug.IS_DEBUG {
-            if args.count == 1 {
-                dlog?.info("\(self.logPrefix)\(args.first!)")
-            } else {
-                dlog?.info("\(self.logPrefix)\(args)")
-            }
-        }
-    }
-    
-    func logWarning(_ args:CVarArg...) {
-        let alog = dlog ?? DLog.misc[self.logPrefix]
-                
-        if args.count == 1 {
-            alog?.warning("\(self.logPrefix)\(args.first!)")
-        } else {
-            alog?.warning("\(self.logPrefix)\(args)")
-        }
-    }
-    
-    func logNote(_ args:CVarArg...) {
-        if args.count == 1 {
-            dlog?.note("\(self.logPrefix)\(args.first!)")
-        } else {
-            dlog?.note("\(self.logPrefix)\(args)")
         }
     }
     
@@ -347,6 +322,93 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         }
     }
     
+    /// All cached values as array! NOTE: may be memory / CPU intensive!
+    public var values : [Value] {
+        get {
+            var result : [Value] = []
+            self._lock.lock {
+                result = Array(self._items.values).map({ (info) -> Value in
+                    return info.value
+                })
+            }
+            return result
+        }
+    }
+    
+    public var keys : [Key] {
+        get {
+            var result : [Key] = []
+            self._lock.lock {
+                result = Array(self._items.keys)
+            }
+            return result
+        }
+    }
+    
+    public subscript (key:Key) -> Value? {
+        get {
+            return self.value(forKey: key)
+        }
+        set {
+            if let value = newValue {
+                self.add(key: key, value: value)
+            } else {
+                // newValue is nil
+                self.remove(key:key)
+            }
+        }
+    }
+    
+    // MARK: Log and notify observer Functions
+    private func notifyWhenLoaded(clearAllBlocks:Bool, error:MNCacheError?) {
+        for block in whenLoaded {
+            block(error)
+        }
+        // Clear after calling all
+        if clearAllBlocks {
+            whenLoaded.removeAll()
+        }
+    }
+    
+    func notifyWasLoaded(error:MNCacheError?) {
+        // Call wasLoaded on observers and whenLoaded blocks
+        self.observers.enumerateOnCurrentThread { observer in
+            observer.cacheWasLoaded(uniqueCacheName: self.name, keysCount: self.keys.count, error: error)
+        }
+        
+        // Call completion blocks...
+        self.notifyWhenLoaded(clearAllBlocks: true, error: error)
+    }
+    
+    func log(_ args:CVarArg...) {
+        if isLog && MNUtils.debug.IS_DEBUG {
+            if args.count == 1 {
+                dlog?.info("\(self.logPrefix)\(args.first!)")
+            } else {
+                dlog?.info("\(self.logPrefix)\(args)")
+            }
+        }
+    }
+    
+    func logWarning(_ args:CVarArg...) {
+        let alog = dlog ?? DLog.misc[self.logPrefix]
+                
+        if args.count == 1 {
+            alog?.warning("\(self.logPrefix)\(args.first!)")
+        } else {
+            alog?.warning("\(self.logPrefix)\(args)")
+        }
+    }
+    
+    func logNote(_ args:CVarArg...) {
+        if args.count == 1 {
+            dlog?.note("\(self.logPrefix)\(args.first!)")
+        } else {
+            dlog?.note("\(self.logPrefix)\(args)")
+        }
+    }
+    
+    // MARK: Lifecycle
     /// Initialize a Cache of elements with given kes and values with a unique name, max size and flusToSize
     /// - Parameters:
     ///   - name: unique name - this will be used for loggin and saving / loading to files. Use one unique name for each cached file. Having two instances at the same time with the same unique name may create issues. Having two instanced with the same unique name but other types for keys anfd values will for sure create undefined crashes and clashes.
@@ -366,8 +428,12 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         MNCachesHelper.shared.observers.remove(observer: self)
     }
     
-    fileprivate func needsSaveWasSetEvent() {
-        // Override point
+    // MARK: Flush to size / save funcs
+    private func addToOldestItemsDates(_ date:Date) {
+        self._oldestItemsDates.append(date)
+        if self._oldestItemsDates.count > self._maxOldestDates {
+            self._oldestItemsDates.remove(at: 0)
+        }
     }
     
     private func validate() {
@@ -388,6 +454,10 @@ public class MNCache<Key : Hashable, Value : Hashable> {
                 self.logWarning("\(self.logPrefix) flushed (cur count: \(self._items.count)) and some items / keys are missing")
             }
         }
+    }
+    
+    fileprivate func needsSaveWasSetEvent() {
+        // Override point
     }
     
     fileprivate func flushToSizesIfNeeded() {
@@ -449,50 +519,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         self.flushToDatesIfNeeded()
     }
     
-    public subscript (key:Key) -> Value? {
-        get {
-            return self.value(forKey: key)
-        }
-        set {
-            if let value = newValue {
-                self.add(key: key, value: value)
-            } else {
-                // newValue is nil
-                self.remove(key:key)
-            }
-        }
-    }
-    
-    public var keys : [Key] {
-        get {
-            var result : [Key] = []
-            self._lock.lock {
-                result = Array(self._items.keys)
-            }
-            return result
-        }
-    }
-    
-    private func addToOldestItemsDates(_ date:Date) {
-        self._oldestItemsDates.append(date)
-        if self._oldestItemsDates.count > self._maxOldestDates {
-            self._oldestItemsDates.remove(at: 0)
-        }
-    }
-    
-    /// All cached values as array! NOTE: may be memory intensive!
-    public var values : [Value] {
-        get {
-            var result : [Value] = []
-            self._lock.lock {
-                result = Array(self._items.values).map({ (info) -> Value in
-                    return info.value
-                })
-            }
-            return result
-        }
-    }
-    
+    // MARK: CRUD functions
     /// Gets all values with the given keys
     /// - Parameter keys: all keys to search with. Optional, defaults to nil. When nil, will return ALL ITEMS!!
     /// NOTE: May be memory intensive!
@@ -575,6 +602,24 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         }
     }
     
+    
+    /// Clear all old cached values and set new values from a dictionary
+    /// - Parameter dictionary: dictionary of key:value to replace the existing cache
+    public func replaceWith(dictionary:[Key:Value]) {
+        self._lock.lock {
+            self._items.removeAll(keepingCapacity: true)
+            let date = self.isSavesDates ? Date() : nil
+            for (key, value) in dictionary {
+                self._items[key] = ValueInfo(value:value, date:date)
+            }
+        }
+        
+        // Notify observers
+        observers.enumerateOnMainThread { (observer) in
+            observer.cacheItemsUpdated(uniqueCacheName: self.name, updatedItems: dictionary)
+        }
+    }
+    
     public func add(dictionary:[Key:Value]) {
         self._lock.lock {
             self.flushIfNeeded()
@@ -631,7 +676,6 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         dlog?.info("\(self.logPrefix) clearForMemoryWarning 1") // will always log when in debug mode
         self.clearMemory()
     }
-    
     
     /// Will clear all elements in the array
     /// - Parameter exceptKeys: but / except keys - a list of specific keys to NOT clear from the cache - that is, keep in the cache after the "clear".
@@ -694,6 +738,34 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         let date = Date(timeIntervalSinceNow: -olderThan)
         return self.clear(beforeDate: date)
     }
+    
+    func ioStarted() {
+        self._lock.lock {
+            self._lastIOStartTime = Date.now
+        }
+    }
+    
+    func ioEnded() {
+        self._lock.lock {
+            self._lastIOStartTime = nil
+        }
+    }
+    
+    public func isIOAllowed()->Bool {
+        var result = true
+        
+        self._lock.lock {
+            if let lastIOStart = _lastIOStartTime {
+                let delta = abs(lastIOStart.timeIntervalSinceNow)
+                if delta < 0.05 {
+                    dlog?.warning("\(Self.self)[\(name)] last IO time too soon: \(delta.rounded(decimal: 2)) seconds ago.")
+                    result = false
+                }
+            }
+        }
+        
+        return result
+    }
 }
 
 extension MNCache : MNCachesEventObserver {
@@ -708,6 +780,20 @@ extension MNCache : MNCachesEventObserver {
 }
 
 public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
+    
+    /// File name of the JSON (without preceeding path) - is checkd to be a valid os filename, derived from self.name
+    func filename()->String {
+        var result = self.name.replacingOccurrences(of: CharacterSet.whitespaces, with: "_").replacingOccurrences(of: CharacterSet.punctuationCharacters, with: "_")
+        if !result.isValidStrictFilename {
+            result = result.asValidStrictFilename
+        }
+        if MNUtils.debug.IS_DEBUG && result != self.name {
+            MNExec.debounceExecutingLastBlockOnly(withKey: "MNCache \(name) DEBUG filename warning", afterDelay: 0.1) {
+                self.logNote(" save and load filename is \(result)")
+            }
+        }
+        return result
+    }
     
     func filePath(forKeys:Bool)->URL? {
         var url : URL? = nil
@@ -725,7 +811,7 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
             url = FileManager.default.urls(for: self._searchPathDir ?? self.defaultSearchPathDirectory, in: .userDomainMask).first
         }
         
-        let fname = self.name.replacingOccurrences(of: CharacterSet.whitespaces, with: "_").replacingOccurrences(of: CharacterSet.punctuationCharacters, with: "_")
+        let fname = self.filename()
         url?.appendPathComponent("mncaches")
         
         let path = url!.path
@@ -769,7 +855,14 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
             return true
         }
         
+        guard self.isIOAllowed() else {
+            logWarning(".saveKeys() IO operation not allowed at this time")
+            return false
+        }
+        
+        var result : Bool = false
         if let url = self.filePath(forKeys: true) {
+            self.ioStarted()
             let encoder = JSONEncoder()
             do {
                 let data = try encoder.encode(self.keys)
@@ -781,36 +874,46 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
                 self.isNeedsSave = false
                 self.log("saveKeys size:  \(data.count) filename: \(url.path)")
                 
-                return true
+                result = true
             } catch {
-                // May re-throw
+                // Might re-throw
+                result = false
                 dlog?.raisePreconditionFailure("\(self.logPrefix) saveKeys Cache [\(self.name)] failed with error:\(error.localizedDescription)")
             }
+            self.ioEnded()
         }
         
-        return false
+        return result
     }
     
     func loadKeys()->[Key]? {
+        guard self.isIOAllowed() else {
+            logWarning(".saveKeys() IO operation not allowed at this time")
+            return nil
+        }
+        var result : [Key]? = nil
+        
         if let url = self.filePath(forKeys: true), FileManager.default.fileExists(atPath: url.path) {
+            self.ioStarted()
             if let data = FileManager.default.contents(atPath: url.path) {
                 let decoder = JSONDecoder()
                 do {
                     // dlog?.info("loadKeys [\(self.name)] load data size:\(data.count)")
                     let loadedKeys : [Key] = try decoder.decode([Key].self, from: data)
                     self.log("loadKeys [\(self.name)] \(loadedKeys.count ) keys")
-                    return loadedKeys
+                    result = loadedKeys
                 } catch {
                     self.logWarning("loadKeys [\(self.name)] failed with error:\(error.localizedDescription)")
                 }
             } else {
                 self.logWarning("loadKeys [\(self.name)] no data at \(url.path)")
             }
+            self.ioEnded()
         } else {
-            self.logWarning("loadKeys [\(self.name)] no file at \(self.filePath(forKeys: true)?.path ?? "<nil>" )")
+            self.logWarning("loadKeysloadKeys [\(self.name)] no file at \(self.filePath(forKeys: true)?.path ?? "<nil>" )")
         }
         
-        return nil
+        return result
     }
     
     func clearForMemoryWarning() throws {
@@ -818,6 +921,7 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
         _ = try saveKeys()
         self.clearMemory()
     }
+    
 }
 
 /* saving of cache as a whole */
@@ -834,9 +938,6 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
             }
         case .none:
             self.isLoaded = true
-            fallthrough
-        default:
-            break
         }
     }
     
@@ -845,7 +946,8 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
     ///   - name: unique name - this will be used for loggin and saving / loading to files. Use one unique name for each cached file. Having two instances at the same time with the same unique name may create issues. Having two instanced with the same unique name but other types for keys anfd values will for sure create undefined crashes and clashes.
     ///   - maxSize: maximum size for the cache (amount of items). Beyond this size, oldest entered items will be popped, and newwest pushed into the cache.
     ///   - flushToSize: nil or some value. When nil, the cache will pop as many items as required to remain at the maxSize level. When defined, once the caceh hits or surpasses maxSize capaity, te cache will flust and keep only the latest flushToSize elements, popping the remaining elements. flushToSize must be smaller than maxSize by at least one.
-    ///   - attemptLoad: will attempt loading this cache immediately after init from the cache file, saved previously using saveIfNeeded(), save(), or by AutoSavedCache class.
+    ///   - attemptLoad: will attempt loading this cache immediately after init from the cache file, saved previously using saveIfNeeded(), save(), or by AutoSavedCache class, or after the first change of either the name or the filepath change
+    ///   - searchDirectory: search directory to use for the file on load and save
     convenience init(name:String, maxSize:UInt, flushToSize:UInt? = 0, attemptLoad:CacheLoadType, searchDirectory:FileManager.SearchPathDirectory? = nil) {
         self.init(name: name, maxSize: maxSize, flushToSize: flushToSize)
         self._searchPathDir = searchDirectory
@@ -865,6 +967,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
         let type:String?
     }
     
+    // Kind of a DTO
     fileprivate struct SavableStruct : Codable {
         var saveTimeout : TimeInterval = 0.3
         var maxSize : UInt = 10
@@ -929,6 +1032,13 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
             return true
         }
         
+        guard isIOAllowed() else {
+            dlog?.warning("\(Self.self)[\(name)] failed save for IO reasons!")
+            return false
+        }
+        
+        var result = false
+        self.ioStarted()
         if let url = self.filePath(forKeys: false) {
             
             do {
@@ -948,13 +1058,13 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                 self.log(".save() size: \(data.count) filename: \(url.lastPathComponents(count: 3))")
                 self._lastSaveTime = Date()
                 self.isNeedsSave = false
-                return true
+                result = true
             } catch {
                 dlog?.raisePreconditionFailure("Cache[\(self.name)].save() failed with error:\(error.localizedDescription)")
             }
         }
-        
-        return false
+        self.ioEnded()
+        return result
     }
     
     private func determineVTypeAndVTypeStr(valBeingDecoded val:Any)->(valueType:Value.Type, typeStr:String)? {
@@ -1097,8 +1207,22 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
         var loadErr : MNCacheError? = nil
         
         // Try to load from file:
+        if self.isLoaded {
+            // Reset load vars - indicates loading state?
+            self.isLoaded = false
+            self._loadError = nil // reset
+        }
+        
+        guard isIOAllowed() else {
+            dlog?.warning("\(Self.self)[\(name)] failed load for IO reasons!")
+            return false
+        }
+        
+        var result = false
+        self.ioStarted()
         let url = self.filePath(forKeys: false)
         if let url = url, FileManager.default.fileExists(atPath: url.path) {
+            
             if let data = FileManager.default.contents(atPath: url.path) {
                 do {
                     let decoder = JSONDecoder()
@@ -1173,7 +1297,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                         }
                         
                         self.isLoaded = true
-                        return true
+                        result = true
                     } else {
                         loadErr = MNCacheError(code: .failed_loading, reason: "failed loading: failed casting dictionary ", cacheName: self.name)
                         self.logWarning(".load() failed casting dictionary filename:\(url.lastPathComponents(count: 3))")
@@ -1190,11 +1314,11 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
             loadErr = MNCacheError(code: .failed_loading, reason: "failed loading: no file at: \(url?.absoluteString ?? "<url is nil>")", cacheName: self.name)
             self.logWarning(".load() no file at \(self.filePath(forKeys: false)?.path ?? "<nil>" )")
         }
-        
+        self.ioEnded()
         
         self._loadError = loadErr
-        self.isLoaded = true
-        return false
+        self.isLoaded = result
+        return result
     }
     
     func clearForMemoryWarning() throws {
@@ -1227,12 +1351,13 @@ public class MNAutoSavedCache <Key : CodableHashable, Value : CodableHashable> :
     override fileprivate func needsSaveWasSetEvent() {
         super.needsSaveWasSetEvent()
         
-        TimedEventFilter.shared.filterEvent(key: "\(self.name)_AutoSavedCacheEvent", threshold: max(self.autoSaveTimeout, 0.03)) {
+        MNExec.debounceExecutingLastBlockOnly(withKey: "\(self.name)_AutoSavedCacheEvent", afterDelay: max(self.autoSaveTimeout, 0.03)) {
             self.flushToDatesIfNeeded()
             
             self.log("AutoSavedCache saveIfNeeded called")
             _ = self.saveIfNeeded()
         }
+        /// OLD: TimedEventFilter.shared.filterEvent(key: "\(self.name)_AutoSavedCacheEvent", threshold: max(self.autoSaveTimeout, 0.03))
     }
 }
 

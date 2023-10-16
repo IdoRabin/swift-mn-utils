@@ -333,7 +333,7 @@ extension MNResult3 where Failure : Error {
         do {
             let newValue = try body()
             print("[Result3] \(Self.self).init(prevValue:catching:) ⚠️️ determining if non-equatable any object vals have changed. prev: \(prevValue!) == new \(newValue) ?  It is highly reccommended to make \(Success.self) conform to Equatable.")
-            if prevValue == nil || String(memoryAddressOf: prevValue!) == String(memoryAddressOf: newValue) {
+            if prevValue == nil || MemoryAddress(of: prevValue!) == MemoryAddress(of: newValue) {
                 self = MNResult3.successChanged(newValue)
             } else {
                 self = MNResult3.successNoChange(newValue)
@@ -447,7 +447,7 @@ extension MNResult3 : Equatable where Success : Equatable, Failure : Equatable {
     }
 }
 
-// MARK: Hahsable
+// MARK: HasHable
 extension MNResult3 : Hashable where Success : Hashable, Failure : Hashable {
 
     /// Hashes the essential components of this value by feeding them into the

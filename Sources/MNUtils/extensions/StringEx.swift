@@ -528,6 +528,33 @@ public extension String {
     }
 }
 
+public extension String /* filename, excluding path*/ {
+    
+    
+    /// Returns true when the string is a valid filename (using a rather strict test)
+    /// NOTE: assumes the filename is not a full path or full url.
+    /// NOTE: uses a stricter testing criteria than the OS (osx / iOs)
+    var isValidStrictFilename : Bool {
+        guard self.count > 1 else {
+            dlog?.warning("isValidStrictFilename input string is empty!")
+            return false
+        }
+        guard self.count < 1024 else {
+            dlog?.warning("isValidStrictFilename input string is > 1024 chars!")
+            return false
+        }
+        return !self.contains(anyIn: CharacterSet.strictFilenameDisallowedSet)
+    }
+    
+    var asValidStrictFilename : String {
+        var new = self
+        if self.count <= 2 {
+            new += Date.now.timeIntervalSince1970.description.toMD5NotSecure(length: 12)
+        }
+        return new.replacingOccurrences(of: CharacterSet.strictFilenameDisallowedSet, with: "_")
+    }
+}
+
 public extension StaticString {
     
     /// Will return the last path compoment of the string IF it can be split into a url, otherwise, will return the whole string
@@ -853,29 +880,6 @@ public extension String {
             return lang.lowercased().contains(anyOf: rtlLangs) ? .right : .left
         }
         return nil
-    }
-}
-
-public extension String {
-    
-    init (memoryAddressOf object:AnyObject) {
-        self.init(String(describing: Unmanaged<AnyObject>.passUnretained(object as AnyObject).toOpaque()))
-    }
-    
-    init (memoryAddressOfOrNil object:AnyObject?) {
-        guard let object = object else {
-            self.init("<nil>")
-            return
-        }
-        self.init(String(describing: Unmanaged<AnyObject>.passUnretained(object as AnyObject).toOpaque()))
-    }
-    
-    
-    /// Returns a string describing the memory address of the struct. The struct must be in an mutable state, because this is an inout call
-    init<T>(memoryAddressOfStruct structPointer: UnsafePointer<T>) {
-        let intValue = Int(bitPattern: structPointer)
-        let length = 2 + 2 * MemoryLayout<UnsafeRawPointer>.size
-        self.init(format: "%0\(length)p", intValue)
     }
 }
 

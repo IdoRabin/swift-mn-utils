@@ -40,4 +40,10 @@ public extension CharacterSet /* App-Specific */ {
     static let usernameAllowedSet = CharacterSet.latinAlphabet.union(.latinDigits).union(CharacterSet(charactersIn: "-_"))
     
     static let userDomainAllowedSet = CharacterSet.usernameAllowedSet.union(CharacterSet(charactersIn: "."))
+    
+    static let strictFilenameDisallowedChars = "*\\/:"
+    static let strictFilenameAllowedSet = CharacterSet.latinAlphabet.union(.latinDigits)
+        .union(.punctuationCharacters)
+        .subtracting(CharacterSet(charactersIn: strictFilenameDisallowedChars))
+    static let strictFilenameDisallowedSet = strictFilenameAllowedSet.inverted
 }

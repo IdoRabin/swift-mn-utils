@@ -9,7 +9,17 @@ open class MNUtils {
 
 public class MNDebug {
     // TODO: Check if IS_DEBUG should be an @inlinable var ?
+    #if DEBUG || IS_DEBUG
     public var IS_DEBUG = true
+    #else
+    public var IS_DEBUG = false
+    #endif
+    
+    #if TESTING
+    public var IS_TESTING = false
+    #else
+    public var IS_TESTING = true
+    #endif
     
     fileprivate init(){
         

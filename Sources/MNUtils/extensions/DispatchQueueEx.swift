@@ -25,15 +25,15 @@ public enum WaitResult
     case timeout
     case canceled
     
-    var isTimeout : Bool {
+    public var isTimeout : Bool {
         return self == .timeout
     }
     
-    var isSuccess : Bool {
+    public var isSuccess : Bool {
         return self == .success
     }
     
-    var isCanceled : Bool {
+    public var isCanceled : Bool {
         return self == .canceled
     }
 }
@@ -96,11 +96,11 @@ extension DispatchQueue {
         {
             if (str == "com.apple.main-thread")
             {
-                return "mainThread"
+                return "mainThread" // ? DispatchQueue.main.label
             }
             else if (str == "com.apple.root.default-qos")
             {
-                return "defaultQueue"
+                return "defaultQueue" // ? DispatchQueue.main.label
             }
             return str
         }
@@ -109,7 +109,7 @@ extension DispatchQueue {
     }
     
     static var isMainQueue : Bool {
-        return currentLabel == DispatchQueue.main.label
+        return currentLabel == DispatchQueue.main.label || currentLabel == "mainThread"
     }
     
     var isMainQueue : Bool {
@@ -218,7 +218,7 @@ extension DispatchQueue {
     /// - Returns: true if the block was performed
     @discardableResult
     public func performOncePerInstance(_ instance:AnyObject, block:()->Void)->Bool {
-        var token : String = String(memoryAddressOf: instance)
+        var token : String = MemoryAddress(of: instance).description
         let symbs = Thread.callStackSymbols
         if symbs.count > 1 {
             // stack trace of the calling function+line - is the "unique token" we need - we assentially don't need to traverse twice in the same line of code that says "performOnce {...}"
@@ -359,7 +359,7 @@ extension DispatchQueue {
         waitForQueue.async {
             if test() == false {
                 let elapsedTime : TimeInterval = TimeInterval(counter) * interval
-                let elapsedTimeRounded = elapsedTime.rounded(dec: 3)
+                let elapsedTimeRounded = elapsedTime.rounded(decimal: 3)
                 if elapsedTime > timeout {
                     if logType.allowsTimeout(for: counter) {
                         waitForLog?.fail("\(logStr) stopping wait: .timeout")

@@ -13,21 +13,21 @@ fileprivate let dlog : DSLogger? = DLog.forClass("ObserversArray")
 
 public class ObserversArrayLock : NSRecursiveLock {
     fileprivate static let DEBUG_LONG_LOCKS = false
-    fileprivate static var locksDebugged : [String] = []
+    fileprivate static var locksDebugged : [Int] = []
     
     public func lockBlock(_ block:()->Void) {
         
         #if DEBUG
-            let memStr = String(memoryAddressOf: self)
+        let memoryAddress = MemoryAddress(of: self).rawValue
             var wasLong = false
         
             // Debug LONG LOCKS
             if ObserversArrayLock.DEBUG_LONG_LOCKS == true {
                 DispatchQueue.global().async {
-                    ObserversArrayLock.locksDebugged.append(memStr)
+                    ObserversArrayLock.locksDebugged.append(memoryAddress)
                 }
                 DispatchQueue.global().asyncAfter(delayFromNow: 6.0, block: {
-                    if ObserversArrayLock.locksDebugged.contains(memStr) {
+                    if ObserversArrayLock.locksDebugged.contains(memoryAddress) {
                         wasLong = true
                         // dlog?.warning("DEADLOCK? lockBlock is locked for more than 6.0 seconds. Is this planned? Pause to see blocked threads. memStr:\(memStr)")
                     }
@@ -45,7 +45,7 @@ public class ObserversArrayLock : NSRecursiveLock {
         #if DEBUG
             if ObserversArrayLock.DEBUG_LONG_LOCKS == true {
                 DispatchQueue.global().async {
-                    ObserversArrayLock.locksDebugged.remove(elementsEqualTo:memStr)
+                    ObserversArrayLock.locksDebugged.remove(elementsEqualTo:memoryAddress)
                     
                 }
                 
@@ -69,7 +69,7 @@ public protocol Observer : AnyObject {
 /// All observers are assumed to be of AnyObject type at least.
 public class ObserversArray <T> {
     // MARK: Properties
-    private var weakObservers = WeakArray<AnyObject>()
+    private var weakObservers : [Weak<AnyObject>] = []
     private var lock : ObserversArrayLock = ObserversArrayLock()
     var isInvalidatesEagerly = true // After every action, not just after count
     
@@ -266,6 +266,13 @@ public class ObserversArray <T> {
     ///   - block: a block for the caller to handle each observer at a time (will be called on mainThread) - (syncs / blocks the calling queue)
     ///   - completed: when all observers have been called on the main thread, this block is called on the original thread
     public func enumerateOnMainThread(block:@escaping (_ observer:T)->Void, completed : (()->Void)? = nil) {
+        // Optimization:
+        /*
+        guard self.count > 0 else {
+            completed?()
+            return
+        }
+        */
         
         if (Thread.isMainThread) {
             self.enumerateOnCurrentThread(block: block)
@@ -310,6 +317,14 @@ public class ObserversArray <T> {
     ///   - block: a block for the caller to handle each observer at a time (will be called on current thread / queue)
     ///   - completed: when all observers have been called, this block is called on the original thread
     public func enumerateOnCurrentThread(block:(_ observer:T)->Void, completed : (()->Void)? = nil) {
+        // Optimization:
+        /*
+        guard self.count > 0 else {
+            completed?()
+            return
+        }
+        */
+        
         self.lock.lockBlock {
             
             // Enumerating in reverse order prevents a race condition from happening when removing elements.
@@ -336,6 +351,14 @@ public class ObserversArray <T> {
     ///   - block: a block for the caller to handle each observer at a time (will be called on the givven queue)
     ///   - completed: when all observers have been called, this block is called on the original thread
     public func enumerateOnQueue(queue:DispatchQueue, block:@escaping(_ observer:T)->Void, completed : (()->Void)? = nil) {
+        // Optimization:
+        /*
+        guard self.count > 0 else {
+            completed?()
+            return
+        }
+        */
+        
         queue.safeSync {
             self.lock.lockBlock {
                 
@@ -361,7 +384,7 @@ public class ObserversArray <T> {
 
 extension ObserversArray : CustomStringConvertible {
     public var description : String {
-        return "ObserversArray<\(T.self) : \( String(memoryAddressOf: self)) count: \(self.count) >"
+        return "ObserversArray<\(T.self) : \( MemoryAddress(of: self).description) count: \(self.count) >"
     }
     
     public var descriptionListObservers : String {

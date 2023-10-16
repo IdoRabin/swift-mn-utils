@@ -9,58 +9,86 @@ import Foundation
 
 public extension Float {
     
-    /// Round to the nth decimal digit
-    /// The Float 100.45234 for the parameter dec == 2 should return a Float 100.45
-    /// - Parameter num_places: number of decimal placees to keep
-    /// - Returns: a Dloat numbre rounded to the dec's place
-    func rounded(dec num_places:Int)->Float {
+    /// Round to the nth decimal digit.
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal placees to keep
+    /// - Returns: a floating number rounded to the dec's place
+    @inlinable func rounded(decimal num_places:Int)->Float {
         let prec = Float(pow(10.0, Float(max(num_places, 0))))
         return (self * prec).rounded() / prec
     }
     
-    func stringValue(dec num_places:Int = 2)->String {
+    /// Return a string value of a floating number, with a given decimal digit percision.
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal places (precision) to return in the string.
+    /// - Returns: String resentation of the float, formatted to the provided decimal place
+    @inlinable func stringValue(decimal num_places:Int = 2)->String {
         return String(format: "%0.\(num_places)f", self)
     }
     
-    func toString(dec num_places:Int = 2)->String {
-        return self.stringValue(dec: num_places)
+    /// Return a string value of a floating number, with a given decimal digit percision.
+    /// NOTE: Convenience function - exact same implementation as stringValue(decimal:).
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal places (precision) to return in the string.
+    /// - Returns: String resentation of the float, formatted to the provided decimal place
+    @inlinable func toString(decimal num_places:Int = 2)->String {
+        return self.stringValue(decimal: num_places)
     }
 }
 
 public extension Double {
     
-    /// Round to the nth decimal digit
-    /// The Double 100.45234 for the parameter dec == 2 should return a Double 100.45
-    /// - Parameter num_places: number of decimal placees to keep
-    /// - Returns: a Double numbre rounded to the dec's place
-    func rounded(dec num_places:Int)->Double {
+    /// Round to the nth decimal digit.
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal placees to keep
+    /// - Returns: a floating number rounded to the dec's place
+    @inlinable func rounded(decimal num_places:Int)->Double {
         let prec = Double(pow(10.0, Double(max(num_places, 0))))
         return (self * prec).rounded() / prec
     }
     
-    func stringValue(dec num_places:Int = 2)->String {
+    /// Return a string value of a floating number, with a given decimal digit percision.
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal places (precision) to return in the string.
+    /// - Returns: String resentation of the float, formatted to the provided decimal place
+    @inlinable func stringValue(decimal num_places:Int = 2)->String {
         return String(format: "%0.\(num_places)f", self)
     }
     
-    func toString(dec num_places:Int = 2)->String {
-        return self.stringValue(dec: num_places)
+    
+    /// Return a string value of a floating number, with a given decimal digit percision.
+    /// NOTE: Convenience function - exact same implementation as stringValue(decimal:).
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal places (precision) to return in the string.
+    /// - Returns: String resentation of the float, formatted to the provided decimal place
+    @inlinable func toString(decimal num_places:Int = 2)->String {
+        return self.stringValue(decimal: num_places)
     }
 }
 
 public extension CGFloat {
-    /// Round to the nth decimal digit
-    /// The Double 100.45234 for the parameter dec == 2 should return a Double 100.45
-    /// - Parameter num_places: number of decimal placees to keep
-    /// - Returns: a Double numbre rounded to the dec's place
-    func rounded(dec num_places:Int)->Double {
-        return Double(self).rounded(dec: num_places)
+    
+    /// Round to the nth decimal digit.
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal placees to keep
+    /// - Returns: a floating number rounded to the dec's place
+    @inlinable func rounded(decimal num_places:Int)->Double {
+        return Double(self).rounded(decimal: num_places)
     }
     
-    func stringValue(dec num_places:Int = 2)->String {
-        return Double(self).stringValue(dec: num_places)
+    /// Return a string value of a floating number, with a given decimal digit percision.
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal places (precision) to return in the string.
+    /// - Returns: String resentation of the float, formatted to the provided decimal place
+    @inlinable func stringValue(decimal num_places:Int = 2)->String {
+        return Double(self).stringValue(decimal: num_places)
     }
-    
-    func toString(dec num_places:Int = 2)->String {
-        return self.stringValue(dec: num_places)
+    /// Return a string value of a floating number, with a given decimal digit percision.
+    /// NOTE: Convenience function - exact same implementation as stringValue(decimal:).
+    /// For example: the value 100.45234 for the parameter decimal == 2 should return a value of 100.45
+    /// - Parameter decimal: number of decimal places (precision) to return in the string.
+    /// - Returns: String resentation of the float, formatted to the provided decimal place
+    @inlinable func toString(decimal num_places:Int = 2)->String {
+        return self.stringValue(decimal: num_places)
     }
 }

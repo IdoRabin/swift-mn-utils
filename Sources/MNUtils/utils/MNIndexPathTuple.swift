@@ -42,25 +42,25 @@ public struct MNMoveIndexPathTuple : Hashable {
 }
 
 public extension Sequence where Element == MNMoveIndexPathTuple {
-    public var fromIndexPaths : [IndexPath] {
+    var fromIndexPaths : [IndexPath] {
         return self.compactMap { item in
             item.fromIndexpath
         }
     }
 
-    public var toIndexPaths : [IndexPath] {
+    var toIndexPaths : [IndexPath] {
         return self.compactMap { item in
             item.toIndexpath
         }
     }
     
-    public var fromIndexes : [Int] {
+    var fromIndexes : [Int] {
         return self.compactMap { item in
             item.fromIndexpath.first
         }
     }
     
-    public var toIndexes : [Int] {
+    var toIndexes : [Int] {
         return self.compactMap { item in
             item.toIndexpath.first
         }

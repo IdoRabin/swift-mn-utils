@@ -10,7 +10,7 @@ import Foundation
 fileprivate func formattedValue(_ any: Any) -> String {
     
     switch any {
-    case let any as CustomStringConvertible:
+    case let any as CustomStringConvertible: // also LosslessStringConvertible
         return any.description
     case let any as CustomDebugStringConvertible:
         return any.debugDescription
@@ -60,11 +60,13 @@ public extension Optional /*: CustomDebugStringConvertible */ {
     }
     
     var descOrNil: String {
-        
+        return self.descOrNil()
+    }
+    
+    func descOrNil(nilString:String = "<nil>") -> String {
         if let value = self {
-            
             return formattedValue(value)
         }
-        return "<nil>"
+        return nilString
     }
 }
