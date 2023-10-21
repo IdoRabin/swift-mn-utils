@@ -1,6 +1,11 @@
 //  Version.swift
 
-import AppKit
+// import AppKit
+
+#if canImport(NIO)
+import NIO
+import CNIOAtomics
+#endif
 
 enum PreRelease: String {
     case none = ""
@@ -16,7 +21,7 @@ enum PreRelease: String {
 let MNUTILS_NAME_STR : String = "MNUtils"
 
 // String fields allow only alphanumerics and a hyphen (-)
-let MNUTILS_BUILD_NR : Int = 99
+let MNUTILS_BUILD_NR : Int = 102
 let MNUTILS_BUILD_VERSION = MNSemver (
     major: 0,
     minor: 1,
