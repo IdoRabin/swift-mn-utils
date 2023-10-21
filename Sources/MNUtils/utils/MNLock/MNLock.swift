@@ -23,6 +23,9 @@ public protocol LockProtocol : BasicLockProtocol {
     func withLock<ReturnValue>(_ body: @escaping  () throws -> ReturnValue) rethrows -> ReturnValue
     
     @inlinable
+    func withAsyncLock<ReturnValue>(_ body: @escaping  () async throws -> ReturnValue) async rethrows -> ReturnValue
+    
+    @inlinable
     func withLockVoid(_ body: @escaping  () throws -> Void) rethrows -> Void
 }
 
@@ -69,6 +72,11 @@ public final class MNLock : CustomDebugStringConvertible {
     }
     
     @inlinable
+    public func withAsyncLock<ReturnValue>(_ body: @escaping () async throws -> ReturnValue) async rethrows -> ReturnValue {
+        try await mLock.withAsyncLock(body)
+    }
+    
+    @inlinable
     public func withLockVoid(_ body: @escaping () throws -> Void) rethrows -> Void {
         try mLock.withLockVoid(body)
     }
@@ -91,6 +99,13 @@ extension NSLock: LockProtocol {
         lock()
         defer { unlock() }
         return try body()
+    }
+    
+    @inlinable
+    public func withAsyncLock<ReturnValue>(_ body: @escaping () async throws -> ReturnValue) async rethrows -> ReturnValue {
+        lock()
+        defer { unlock() }
+        return try await body()
     }
     
     @inlinable

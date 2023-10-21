@@ -27,5 +27,5 @@ let MNUTILS_BUILD_VERSION = MNSemver (
     minor: 1,
     patch: 0,
     prerelease: "\(PreRelease.alpha.rawValue)",
-    metadata: [String(format: "%04X", MNUTILS_BUILD_NR)]
+    metadata: [String(format: "0x%04X", MNUTILS_BUILD_NR)]
 )

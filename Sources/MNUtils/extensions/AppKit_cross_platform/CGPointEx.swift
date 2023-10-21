@@ -7,6 +7,11 @@
 
 import Cocoa
 
+#if canImport(NIO)
+import NIO
+import CNIOAtomics
+#endif
+
 extension CGPoint {
     
     
