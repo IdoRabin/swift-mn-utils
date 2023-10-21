@@ -53,7 +53,9 @@ protocol MNCachesEventObserver {
 //}
 
 extension MNCachesHelper : MNCacheObserver {
-    
+    func cacheWasSaved(uniqueCacheName: String, keysCount: Int, error: MNCacheError?) {
+        // ?
+    }
     
     func cacheWasLoaded(uniqueCacheName: String, keysCount: Int, error: MNCacheError?) {
         // ?

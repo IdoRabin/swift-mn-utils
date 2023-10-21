@@ -369,29 +369,26 @@ public extension AverageAccumulator /* saving */ {
         if let url = self.filePath(forKeys: false), FileManager.default.fileExists(atPath: url.path) {
             let displayPath = url.lastPathComponents(count: 3)
             
-            if let data = FileManager.default.contents(atPath: url.path) {
-                do {
-                    let decoder = JSONDecoder()
-                    let saved : Payload = try decoder.decode(Payload.self, from: data)
-                    if self.payload.name == saved.name {
-                        self._lock.lock {
-                            // NO NEED self.name = saved.name
-                            self.payload.tuples = saved.tuples
-                            
-                            if self.payload.isLog != saved.isLog {
-                                self.payload.isLog = saved.isLog
-                                dlog?.info("load() changed isLog:\(self.payload.isLog)")
-                            }
+            do {
+                let data = try Data(contentsOf: url, options: .mappedIfSafe)
+                let decoder = JSONDecoder()
+                let saved : Payload = try decoder.decode(Payload.self, from: data)
+                if self.payload.name == saved.name {
+                    self._lock.lock {
+                        // NO NEED self.name = saved.name
+                        self.payload.tuples = saved.tuples
+                        
+                        if self.payload.isLog != saved.isLog {
+                            self.payload.isLog = saved.isLog
+                            dlog?.info("load() changed isLog:\(self.payload.isLog)")
                         }
-                        return true
-                    } else {
-                        dlog?.note("load() failed casting dictionary filename:\(displayPath)")
                     }
-                } catch {
-                    dlog?.warning("load() failed with error:\(error.localizedDescription)")
+                    return true
+                } else {
+                    dlog?.note("load() failed casting dictionary filename:\(displayPath)")
                 }
-            } else {
-                dlog?.warning("load() no data at \(displayPath)")
+            } catch {
+                dlog?.warning("load() failed with error:\(error.localizedDescription)")
             }
         } else {
             dlog?.warning("load() no file at \(self.filePath(forKeys: false)?.path ?? "<nil>" )")

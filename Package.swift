@@ -32,7 +32,7 @@ let package = Package(
             ],
             swiftSettings: [
                 // Enables better optimizations when building in Release
-                // .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release)),
+                .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release)),
                 .define("PRODUCTION", .when(configuration: .release)),
                 .define("DEBUG", .when(configuration: .debug)),
             ]

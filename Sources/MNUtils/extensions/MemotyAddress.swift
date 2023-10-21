@@ -39,6 +39,14 @@ public extension MemoryAddress where T: AnyObject {
         // or
         // Int(bitPattern: Unmanaged<T>.passUnretained(classInstance).toOpaque())
     }
+    
+    // Convenience
+    init?(ofOptional classInstance: T?) {
+        guard let classInstance = classInstance else {
+            return nil
+        }
+        self.init(of: classInstance)
+    }
 }
 
 

@@ -216,27 +216,28 @@ public extension StringAnyDictionary {
 
 public class UnkeyedDecodingUtil {
     
-    public static func decode(decoder:Decoder, key:String, typeName:String, value:String) throws ->Any? {
+    public static func decode<Value>(decoder:Decoder, key:String, value:String) throws ->Value? {
+        let typeName = "\(Value.self)"
         var typeNameClean = typeName.replacingOccurrences(ofFromTo: ["Swift.":""])
         
         switch typeNameClean {
-        case "UInt": return UInt(value)
-        case "UInt8": return UInt8(value)
-        case "UInt16": return UInt16(value)
-        case "UInt32": return UInt32(value)
-        case "UInt64": return UInt64(value)
-        case "Int": return Int(value)
-        case "Int8": return Int8(value)
-        case "Int16": return Int16(value)
-        case "Int32": return Int32(value)
-        case "Int64": return Int64(value)
-        case "Float": return Float(value)
-        case "Double": return Double(value)
-        case "Date": return Date(timeIntervalSince1970: TimeInterval(value)!)
-        case "NSColor": if value != "null" { return value.colorFromHex()! }
-        case "UUID": return UUID(uuidString: value)
-        // ?? case "UUIDv5": return UUIDv5(uuidString: value)
-        case "Bool": return Bool(value.trimmingPrefix("."))
+        case "UInt": return UInt(value) as! Value?
+        case "UInt8": return UInt8(value) as! Value?
+        case "UInt16": return UInt16(value) as! Value?
+        case "UInt32": return UInt32(value) as! Value?
+        case "UInt64": return UInt64(value) as! Value?
+        case "Int": return Int(value) as! Value?
+        case "Int8": return Int8(value) as! Value?
+        case "Int16": return Int16(value) as! Value?
+        case "Int32": return Int32(value) as! Value?
+        case "Int64": return Int64(value) as! Value?
+        case "Float": return Float(value) as! Value?
+        case "Double": return Double(value) as! Value?
+        case "Date": return Date(timeIntervalSince1970: TimeInterval(value)!) as! Value?
+        case "NSColor": if value != "null" { return value.colorFromHex()! as! Value?}
+        case "UUID": return UUID(uuidString: value) as! Value?
+        // ?? case "UUIDv5": return UUIDv5(uuidString: value) as! Value?
+        case "Bool": return Bool(value.trimmingPrefix(".")) as! Value?
         default:
             
             // Get the right type for this typeName:
@@ -259,28 +260,33 @@ public class UnkeyedDecodingUtil {
                         }
                     }
                     
-                    return val
+                    return val as! Value?
                 } else if let aatype = aatype as? Codable.Type {
                     let val = try aatype.init(from:decoder)
                     dlog?.info("did decode: \(aatype) val:\(val)")
-                    return val
+                    return val as! Value?
                 } else {
-                    dlogWarnings?.note("UnkeyedDecodingContainer.decode(..) static - \(key) failed parsing \(typeName) = \(value) [found type:\(aatype.self)]")
+                    dlogWarnings?.note("UnkeyedDecodingContainer.decode(..) static - \(key) failed parsing \(typeName) = \(value) [found type/class:\(aatype.self)]")
                 }
             } else {
-                dlogWarnings?.note("UnkeyedDecodingContainer.decode(..) static - \(key) failed finding class \(typeName) for ")
+                dlogWarnings?.note("UnkeyedDecodingContainer.decode(..) static - \(key) failed finding type/class \(typeName) for ")
             }
             break
         }
         return nil
     }
     
+//    public static func decode(decoder:Decoder, key:String, typeName:String, value:String) throws ->Any? {
+//        
+//    }
+    
 }
 
 public extension UnkeyedDecodingContainer {
     
     mutating func decode(decoder:Decoder, key:String, typeName:String, value:String) throws ->Any? {
-        return try UnkeyedDecodingUtil.decode(decoder: decoder, key: key, typeName: typeName, value: value)
+        // typeName: typeName
+        return try UnkeyedDecodingUtil.decode(decoder: decoder, key: key, value: value)
     }
     
     /// Wil return a [String:Any] dictionary (heterogenous values) attempting to decode using multiple techniques, inlcudign Registered classes ()

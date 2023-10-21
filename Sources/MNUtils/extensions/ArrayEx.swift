@@ -339,7 +339,7 @@ extension Optional: OptionalType {
     public var optionalType: Self { self }
 }
 
-public extension Array where Element: OptionalType {
+public extension Array { // where Element: OptionalType {
     
     /// Mutating: adds the element to the array if it is not nil
     /// - Parameter object: object to append if not nil
@@ -791,5 +791,46 @@ public extension Sequence where Element : RawRepresentable {
         return self.map { val in
             val.rawValue
         }
+    }
+}
+
+
+public enum SequenceMajorityVoteFallback : Int, Equatable, CaseIterable {
+    case first = 1
+    case second = 2
+}
+
+public extension Array where Element : Equatable {
+    
+    func majorityValue(whenTwoVals:SequenceMajorityVoteFallback = .first)->Element? {
+        guard self.count > 0 else {
+            return nil
+        }
+        
+        var result : Element? = self.first
+        let arr = self.groupBy { element in
+            "key.\(element)"
+        }.valuesArray.sorted { arr1, arr2 in
+            return arr1.count > arr2.count
+        }
+        
+        switch arr.count {
+        case 0:
+            result = nil
+        case 1:
+            result = arr.first?.first
+        default:
+            result = arr[0].first
+            if arr[0].count == arr[1].count {
+                switch whenTwoVals {
+                case .second: result = arr[1].first
+                case .first:
+                    break
+                }
+            }
+        }
+        
+        dlog?.verbose("[\(Element.self)].majorityValue(...) array of values: \(arr) result: \(result.descOrNil)")
+        return result
     }
 }

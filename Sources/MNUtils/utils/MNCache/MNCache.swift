@@ -19,21 +19,32 @@ fileprivate let dlog : DSLogger? = DLog.forClass("Cache")
 public enum MNCacheErrorCode : Int, Codable, Equatable, JSONSerializable {
     case unknown = 9000
     case failed_loading = 9001 // equals AppErrorCodes and MNErrorCodes
+    case misc_failed_saving = 9002 // equals AppErrorCodes and MNErrorCodes
     case misc_failed_encoding = 9031
     case misc_failed_decoding = 9032
 }
 
-public struct MNCacheError : Error, Codable, Equatable, JSONSerializable { // AppErrorable
+public struct MNCacheError : Error, Codable, Equatable, JSONSerializable, CustomStringConvertible { // AppErrorable
     var desc: String
     var domain: String
     var code: Int
     var reason: String
+    var underlyingError : MNError? = nil
     
-    init(code:MNCacheErrorCode, reason:String, cacheName:String) {
+    init(code:MNCacheErrorCode, reason:String, cacheName:String, underlyingError:Error? = nil) {
         self.code = code.rawValue
         self.domain = "com.bricks.CacheError[\(cacheName)]"
         self.reason = reason
         self.desc = "\(code)"
+        self.underlyingError = MNError(error: underlyingError)
+    }
+    // MARK: CustomStringConvertible
+    public var description: String {
+        var underL = ""
+        if let err = self.underlyingError {
+            underL = " underlyingError: \(err.description)"
+        }
+        return "<\(Self.self) code:\(code) domain:\(domain)> reason:\(reason)" + underL
     }
 }
 
@@ -65,6 +76,7 @@ public protocol MNCacheObserver : AnyObject {
     
     // MARK: CacheObserver Required
     func cacheWasLoaded(uniqueCacheName:String, keysCount:Int, error:MNCacheError?)
+    func cacheWasSaved(uniqueCacheName:String, keysCount:Int, error:MNCacheError?)
 }
 
 public extension MNCacheObserver /* optionals */ {
@@ -189,7 +201,8 @@ public class MNCache<Key : Hashable, Value : Hashable> {
     }
     
     var defaultSearchPathDirectory : FileManager.SearchPathDirectory {
-        return .cachesDirectory
+        return .cachesDirectory // ?
+        // return .allApplicationsDirectory
     }
     
     var determinePolicyAfterLoad : ((_ existing:[Key])->MNCacheLoadPolicy)? = nil {
@@ -367,6 +380,13 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         // Clear after calling all
         if clearAllBlocks {
             whenLoaded.removeAll()
+        }
+    }
+    
+    func notifyWasSaved(error:MNCacheError?) {
+        // Call cacheWasSaved on observers
+        self.observers.enumerateOnCurrentThread { observer in
+            observer.cacheWasSaved(uniqueCacheName: self.name, keysCount: self.keys.count, error: error)
         }
     }
     
@@ -602,7 +622,6 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         }
     }
     
-    
     /// Clear all old cached values and set new values from a dictionary
     /// - Parameter dictionary: dictionary of key:value to replace the existing cache
     public func replaceWith(dictionary:[Key:Value]) {
@@ -675,6 +694,41 @@ public class MNCache<Key : Hashable, Value : Hashable> {
     public func clearForMemoryWarning() throws {
         dlog?.info("\(self.logPrefix) clearForMemoryWarning 1") // will always log when in debug mode
         self.clearMemory()
+    }
+    
+    /// Replace a given key in the cache to a new key, while setting the keys' original value as the new keys value
+    /// If the key does not exist in the dictionay, no change will occur
+    ///
+    /// - Parameters:
+    ///   - fromKey: key to be replaced
+    ///   - toKey: new key fro the same value
+    /// - Returns: true if the key was changes, false if the key was not found
+    @discardableResult
+    public func replaceKey(from fromKey:Key, to toKey:Key) -> Bool {
+        guard fromKey != toKey else {
+            dlog?.verbose(log:.note, "replaceKey from:\(fromKey) to:\(toKey) got the same value!")
+            return false
+        }
+        var result = false
+        self._lock.lock {
+            if _items.hasKey(fromKey) {
+                if _items.hasKey(toKey) {
+                    dlog?.warning("[\(self.name)] replaceKey from:\(fromKey) to:\(toKey) already has the target (to) key!")
+                } else {
+                    _items.replaceKey(fromKey: fromKey, toKey: toKey)
+                    // mutating - remove all prev references to key (lifo)
+                    self._latestKeys.remove(elementsEqualTo: fromKey)
+                    
+                    // mutating - insert on top the new key
+                    self._latestKeys.append(toKey)
+                    self.isNeedsSave = true
+                    result = true
+                }
+            } else {
+                dlog?.verbose(log:.note, "replaceKey from:\(fromKey) to:\(toKey) did not find a value for this key!")
+            }
+        }
+        return result
     }
     
     /// Will clear all elements in the array
@@ -751,7 +805,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
         }
     }
     
-    public func isIOAllowed()->Bool {
+    public func isIOAllowed(fileURL:URL? = nil)->Bool {
         var result = true
         
         self._lock.lock {
@@ -763,6 +817,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
                 }
             }
         }
+
         
         return result
     }
@@ -895,19 +950,18 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
         
         if let url = self.filePath(forKeys: true), FileManager.default.fileExists(atPath: url.path) {
             self.ioStarted()
-            if let data = FileManager.default.contents(atPath: url.path) {
+            
+            do {
+                let data = try Data(contentsOf: url, options: .mappedIfSafe)
                 let decoder = JSONDecoder()
-                do {
-                    // dlog?.info("loadKeys [\(self.name)] load data size:\(data.count)")
-                    let loadedKeys : [Key] = try decoder.decode([Key].self, from: data)
-                    self.log("loadKeys [\(self.name)] \(loadedKeys.count ) keys")
-                    result = loadedKeys
-                } catch {
-                    self.logWarning("loadKeys [\(self.name)] failed with error:\(error.localizedDescription)")
-                }
-            } else {
-                self.logWarning("loadKeys [\(self.name)] no data at \(url.path)")
+                // dlog?.info("loadKeys [\(self.name)] load data size:\(data.count)")
+                let loadedKeys : [Key] = try decoder.decode([Key].self, from: data)
+                self.log("loadKeys [\(self.name)] \(loadedKeys.count ) keys")
+                result = loadedKeys
+            } catch {
+                self.logWarning("loadKeys [\(self.name)] failed with error:\(error.localizedDescription)")
             }
+            
             self.ioEnded()
         } else {
             self.logWarning("loadKeysloadKeys [\(self.name)] no file at \(self.filePath(forKeys: true)?.path ?? "<nil>" )")
@@ -1038,6 +1092,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
         }
         
         var result = false
+        var saveError : MNCacheError? = nil
         self.ioStarted()
         if let url = self.filePath(forKeys: false) {
             
@@ -1060,10 +1115,19 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                 self.isNeedsSave = false
                 result = true
             } catch {
+                if let error = error as? MNCacheError {
+                    saveError = error
+                } else {
+                    saveError = MNCacheError(code: .misc_failed_saving, reason: "Underlying cache save error.", cacheName: self.name, underlyingError: error)
+                }
+                
                 dlog?.raisePreconditionFailure("Cache[\(self.name)].save() failed with error:\(error.localizedDescription)")
             }
         }
         self.ioEnded()
+        
+        self.notifyWasSaved(error: saveError)
+        
         return result
     }
     
@@ -1222,9 +1286,11 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
         self.ioStarted()
         let url = self.filePath(forKeys: false)
         if let url = url, FileManager.default.fileExists(atPath: url.path) {
-            
-            if let data = FileManager.default.contents(atPath: url.path) {
                 do {
+                    let data = try Data(contentsOf: url, options: .mappedIfSafe) // let data = FileManager.default.contents(atPath: url.path)
+//                    loadErr = MNCacheError(code: .failed_loading, reason: "failed loading: no data in file: \(url.absoluteString)", cacheName: self.name)
+//                    self.logWarning(".load() no data at \(url.lastPathComponents(count: 3))")
+                    
                     let decoder = JSONDecoder()
                     decoder.setUserInfo("Cache.Load<\(Key.self),\(Value.self)>", forKey: "load_context_str")
                     let saved : SavableStruct = try decoder.decode(SavableStruct.self, from: data)
@@ -1306,10 +1372,6 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                     loadErr = MNCacheError(code: .failed_loading, reason: "failed loading: underlying error:\(String(describing: error))", cacheName: self.name)
                     self.logWarning(".load() failed with error:\(String(describing: error))")
                 }
-            } else {
-                loadErr = MNCacheError(code: .failed_loading, reason: "failed loading: no data in file: \(url.absoluteString)", cacheName: self.name)
-                self.logWarning(".load() no data at \(url.lastPathComponents(count: 3))")
-            }
         } else {
             loadErr = MNCacheError(code: .failed_loading, reason: "failed loading: no file at: \(url?.absoluteString ?? "<url is nil>")", cacheName: self.name)
             self.logWarning(".load() no file at \(self.filePath(forKeys: false)?.path ?? "<nil>" )")
