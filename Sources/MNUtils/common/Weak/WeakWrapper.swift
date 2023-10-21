@@ -9,6 +9,10 @@
 import Foundation
 
 import DSLogger
+// Missing required module 'CNIOAtomics'
+#if canImport(NIO)
+import NIO
+#endif
 
 fileprivate let dlog : DSLogger? = DLog.forClass("WeakWrapper")
 
