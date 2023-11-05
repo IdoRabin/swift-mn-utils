@@ -16,6 +16,7 @@ import Vapor
 import NIO
 #endif
 
+
 fileprivate let dlog : DSLogger? = DLog.forClass("MNExec")?.setting(verbose: true)
 
 #if canImport(NIO)
@@ -33,6 +34,9 @@ public class MNExec {
         let date : Date
         let cKey : CancelKey
     }
+    
+    private static let debounceCache = MNCache<String, DateCKeyTuple>(name:"debounceCache", maxSize: 500)
+    
     #if canImport(Vapor)
     weak static var eventLoopGroup : EventLoopGroup!
     #endif
@@ -60,6 +64,7 @@ public class MNExec {
             self.eventLoopGroup.next().scheduleTask(deadline: NIODeadline.delayFromNow(delay), block)
         #else
             DispatchQueue.main.asyncAfter(delayFromNow: delay) {[block] in // , dlog
+                // dlog?.info("main.asyncAfter(\(delay.toString(decimal: 4)) block:\(String(describing: block))")
                 block()
             }
         #endif
@@ -78,7 +83,6 @@ public class MNExec {
         return self.internal_exec(afterDelay: delay, block: block)
     }
     
-    private static let debounceCache = MNCache<String, DateCKeyTuple>(name:"debounceCache", maxSize: 500)
     /// Will wait until the first time the delay has been waited and the function was not called for the key. At that time, will perform only the LAST block submitted.
     /// - Parameters:
     ///   - key: a unique key to identify the "location" in code where debounce is needed
@@ -160,6 +164,7 @@ public class MNExec {
             // Call teh execution block immediately - we either timed out or result is a success
             dlog?.verbose(log: .info , "waitFor: \(key) #\(depth) DONE (.timeout)")
             block(.timeout)
+            
         } else {
             // Timeout has not arrived yet:
             dlog?.verbose(log: .success , "waitFor: \(key) #\(depth)")
@@ -192,4 +197,5 @@ public class MNExec {
         #endif
         return result
     }
+    
 }

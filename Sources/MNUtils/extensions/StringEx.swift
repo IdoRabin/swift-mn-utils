@@ -64,6 +64,40 @@ public extension String {
         return result
     }
     
+    func substring(upTo: Int, suffixIfClipped:String? = nil) -> String {
+        return self.substring(to: upTo, suffixIfClipped: suffixIfClipped)
+    }
+    
+    
+    /// Return a substring until index (as int)
+    /// - Parameters:
+    ///   - to: index int location of last charahter to return a substring until (not included)
+    ///   - whitespaceTolerance: the tolerance +- for finding an end of a word (whitespace) and clipping there..
+    ///   - suffixIfClipped: if the resulting string is shorter than the original string, will append this string as suffix (Default is nil, in which case nothing is appended to the string...).
+    /// - Returns: a substring of the given sring from the cahr at index 0 until the given index (not included)
+    func substring(upTo: Int, whitespaceTolerance:Int, suffixIfClipped:String? = nil) -> String {
+        guard self.count > upTo else {
+            return self
+        }
+        
+        let tolerance = abs(whitespaceTolerance)
+        var result : String = ""
+        let words = self.components(separatedBy: .whitespaces)
+        let sufx = suffixIfClipped ?? ""
+        
+        for word in words {
+            let len = word.count
+            if result.count + len >= upTo && result.count + len < upTo + tolerance  + sufx.count {
+                result += word
+                break
+            }
+        }
+        if result.count > upTo {
+            result += sufx
+        }
+        return result
+    }
+    
     func substring(maxSize: Int, midIfClipped:String? = nil) -> String {
         guard self.count > maxSize else { return self }
         let midStr = midIfClipped ?? ""

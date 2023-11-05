@@ -163,8 +163,8 @@ extension DispatchQueue {
     ///   - delayFromNow: delay time interval from now, in seconds (Double/TimeInterval)
     ///   - block: block to perform after the delay on this quque
     public func asyncAfter(delayFromNow: TimeInterval, block: @escaping @convention(block) () -> Swift.Void) {
-        if delayFromNow == 0.0 {
-            self.async {
+        if delayFromNow <= 0.0 {
+            self.async {[block] in
                 block()
             }
             return

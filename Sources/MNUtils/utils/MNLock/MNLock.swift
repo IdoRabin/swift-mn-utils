@@ -46,11 +46,11 @@ public final class MNLock : CustomDebugStringConvertible {
                 mLock = NIOLock()
                 // print("Using NIOLock")
             } else {
-                mLock = NSLock()
+                mLock = NSRecursiveLock()
                 //print("Using NSLock")
             }
         #else
-        mLock = NSLock()
+        mLock = NSRecursiveLock()
             // print("Using NSLock")
         #endif
     }
@@ -92,8 +92,8 @@ public final class MNLock : CustomDebugStringConvertible {
     }
 }
 
-// Extend NSLock to conform to LockProtocol
-extension NSLock: LockProtocol {
+// Extend NSRecursiveLock to conform to LockProtocol
+extension NSRecursiveLock: LockProtocol {
     @inlinable
     public func withLock<ReturnValue>(_ body: @escaping () throws -> ReturnValue) rethrows -> ReturnValue {
         lock()

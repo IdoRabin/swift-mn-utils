@@ -108,19 +108,14 @@ public extension Weak /* : Codable */ where Value : Codable {
     }
 }
 
-//extension Sequence where Element : Weak<AnyObject> {
-//    public var values : [Element.Value] {
-//        return self.compactMap { $0.value }
-//    }
-//}
-
 extension Sequence where Element : Weakable {
+    
     public var values : [Element.Value] {
         return self.compactMap { $0.value }
     }
 }
 
-public extension Array where Element : Weak<AnyObject> {
+public extension Array where Element : Weakable {
     
     /// Mutate the array so that all nilified Weak elements are removed from it
     /// - Returns: count of elements that were of nil value and released
@@ -142,3 +137,31 @@ public extension Array where Element : Weak<AnyObject> {
         return self.compactNillifiedWeaks()
     }
 }
+
+public extension Sequence where Element : Weakable, Element.Value : Equatable {
+    
+    func contains(weakValueOf value: Element.Value)->Bool {
+        return self.contains { aweak in
+            aweak.value == value
+        }
+    }
+    
+}
+
+/*
+public extension Sequence where Element : Weakable, Element.Value : Hashable {
+    func contains(weakValueOf value: Element.Value)->Bool {
+        return self.contains { aweak in
+            aweak.value?.hashValue == value.hashValue
+        }
+    }
+}
+
+public extension Sequence where Element : Weakable, Element.Value : Identifiable {
+    func contains(weakValueOf value: Element.Value)->Bool {
+        return self.contains { aweak in
+            aweak.value?.id == value.id
+        }
+    }
+}
+*/

@@ -305,7 +305,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         if isTree {
             treeTypeStr = isFlatTree ? "FLAT" : "FULL"
         }
-        let logPrefix = "\(Self.self) decode \(treeTypeStr) @\(depth)"
+        let logPrefix = (dlog != nil) ? "\(Self.self) decode \(treeTypeStr) @\(depth)" : "?"
         
         if nodeTypeKey != nil {
             guard nodeTypeKey == Self.TREE_NODE_TYPE_KEY else {

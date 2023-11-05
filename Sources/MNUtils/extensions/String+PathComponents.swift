@@ -9,8 +9,8 @@ import Foundation
 
 
 
-#if VAPOR
-// This is implemented in Vapor frameowrk / sdk: see framework RoutingKit/Sources/RoutingKit/PathComponent.swift
+#if VAPOR || canImport(Vapor)
+// This is implemented in the package RoutingKit which Vapor frameowrk is dependent on / sdk: see framework RoutingKit/Sources/RoutingKit/PathComponent.swift
 #else
 // We implement a complimentary extension for when Vapor is absent
 /// A single path component of a `Route`. An array of these components describes
@@ -44,6 +44,7 @@ public enum PathComponent: ExpressibleByStringInterpolation, CustomStringConvert
     case catchall
 
     /// `ExpressibleByStringLiteral` conformance.
+    // Is included in the RoutingKit package
     public init(stringLiteral value: String) {
         if value.hasPrefix(":") {
             self = .parameter(.init(value.dropFirst()))

@@ -850,7 +850,11 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
         return result
     }
     
-    func filePath(forKeys:Bool)->URL? {
+    
+    /// Returns the planned file path for saving the cace. Note: forKeysOnlyCache will change the cache file name
+    /// - Parameter forKeysOnlyCache: flag describing the requested file path - if true, the filename will have a "kays_for_" prefix.
+    /// - Returns: url full path for saved file in the operating system.
+    func filePath(forKeysOnlyCache:Bool)->URL? {
         var url : URL? = nil
         if let path = self._saveFolder {
             url = URL(fileURLWithPath: path)
@@ -878,7 +882,7 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
             }
         }
         
-        if forKeys {
+        if forKeysOnlyCache {
             url?.appendPathComponent("kays_for_\(fname).json")
         } else {
             url?.appendPathComponent("\(fname).json")
@@ -916,7 +920,7 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
         }
         
         var result : Bool = false
-        if let url = self.filePath(forKeys: true) {
+        if let url = self.filePath(forKeysOnlyCache: true) {
             self.ioStarted()
             let encoder = JSONEncoder()
             do {
@@ -948,7 +952,7 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
         }
         var result : [Key]? = nil
         
-        if let url = self.filePath(forKeys: true), FileManager.default.fileExists(atPath: url.path) {
+        if let url = self.filePath(forKeysOnlyCache: true), FileManager.default.fileExists(atPath: url.path) {
             self.ioStarted()
             
             do {
@@ -964,7 +968,7 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
             
             self.ioEnded()
         } else {
-            self.logWarning("loadKeysloadKeys [\(self.name)] no file at \(self.filePath(forKeys: true)?.path ?? "<nil>" )")
+            self.logWarning("loadKeysloadKeys [\(self.name)] no file at \(self.filePath(forKeysOnlyCache: true)?.path ?? "<nil>" )")
         }
         
         return result
@@ -1094,7 +1098,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
         var result = false
         var saveError : MNCacheError? = nil
         self.ioStarted()
-        if let url = self.filePath(forKeys: false) {
+        if let url = self.filePath(forKeysOnlyCache: false) {
             
             do {
                 if FileManager.default.fileExists(atPath: url.path) {
@@ -1284,7 +1288,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
         
         var result = false
         self.ioStarted()
-        let url = self.filePath(forKeys: false)
+        let url = self.filePath(forKeysOnlyCache: false)
         if let url = url, FileManager.default.fileExists(atPath: url.path) {
                 do {
                     let data = try Data(contentsOf: url, options: .mappedIfSafe) // let data = FileManager.default.contents(atPath: url.path)
@@ -1374,7 +1378,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                 }
         } else {
             loadErr = MNCacheError(code: .failed_loading, reason: "failed loading: no file at: \(url?.absoluteString ?? "<url is nil>")", cacheName: self.name)
-            self.logWarning(".load() no file at \(self.filePath(forKeys: false)?.path ?? "<nil>" )")
+            self.logWarning(".load() no file at \(self.filePath(forKeysOnlyCache: false)?.path ?? "<nil>" )")
         }
         self.ioEnded()
         

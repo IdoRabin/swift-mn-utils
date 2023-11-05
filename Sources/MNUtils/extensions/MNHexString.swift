@@ -14,12 +14,12 @@ public extension Int {
         return toHex(uppercase: false)
     }
     
-    func toHex(uppercase:Bool = false)->String {
+    func toHex(uppercase:Bool = false, prefix0x:Bool = false)->String {
         return Self.intToHex(value: self, uppercase:uppercase)
     }
     
-    static func intToHex(value:Int, uppercase:Bool = false)->String {
-        return String(value, radix: 16, uppercase: uppercase)
+    static func intToHex(value:Int, uppercase:Bool = false, prefix0x:Bool = false)->String {
+        return (prefix0x ? "0x" : "") + String(value, radix: 16, uppercase: uppercase)
     }
 }
 
