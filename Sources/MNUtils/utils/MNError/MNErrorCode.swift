@@ -87,9 +87,9 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
 
     // Other names for HTTP status codes Vapor introduced:
     /// Input was syntactically correct, but not semantically (usually failed validations).
-    static let http_stt_invalid_input = Self.http_stt_notAcceptable // 406 not acceptable
+    public static let http_stt_invalid_input = Self.http_stt_notAcceptable // 406 not acceptable
     /// requested data not found, while the request URI exists and is valid, and input data is valid and yielded an empty collection of object/s
-    static let http_stt_data_not_found_204 = Self.http_stt_noContent_204 // 204 No content
+    public static let http_stt_data_not_found_204 = Self.http_stt_noContent_204 // 204 No content
 
     // iana HTTPResponseStatus (in swift-nio)
     // 5xx
@@ -104,7 +104,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case http_stt_loopDetected
     case http_stt_notExtended
     case http_stt_networkAuthenticationRequired
-    static var allHTTPStatus: [MNErrorCode] {
+    public static var allHTTPStatus: [MNErrorCode] {
         var result: [MNErrorCode] = []
         for i in 100 ... 599 {
             if let code = MNErrorCode(rawValue: i) {
@@ -114,7 +114,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
         return result
     } // MAXRANGE: 599
 
-    static var anyHTTPStatus: [MNErrorCode] {
+    public static var anyHTTPStatus: [MNErrorCode] {
         return allHTTPStatus
     }
 
@@ -122,8 +122,8 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case canceled_by_user = 8001
     case canceled_by_server = 8002
     case canceled_by_client = 8003
-    static let allCancel: [MNErrorCode] = [.canceled_by_user, .canceled_by_server, .canceled_by_client]
-    static var anyCancel: [MNErrorCode] = allCancel
+    public static let allCancel: [MNErrorCode] = [.canceled_by_user, .canceled_by_server, .canceled_by_client]
+    public static var anyCancel: [MNErrorCode] = allCancel
     // MAXRANGE: 8999
 
     // Misc
@@ -150,7 +150,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case misc_bad_input = 9070
     // MAXRANGE: 9999
     
-    static let allMisc: [MNErrorCode] = [
+    public static let allMisc: [MNErrorCode] = [
         .misc_unknown, .misc_failed_loading, .misc_failed_saving, .misc_operation_canceled, .misc_failed_creating,
         .misc_failed_removing, .misc_failed_inserting, .misc_failed_updating, .misc_failed_reading,
         .misc_no_permission_needed, .misc_no_permission_for_operation, .misc_readonly_permission_for_operation, .misc_failed_crypto,
@@ -163,7 +163,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case web_unknown = 1000
     case web_internet_connection_error = 1003
     case web_unexpected_response = 1100
-    static let allWeb: [MNErrorCode] = [
+    public static let allWeb: [MNErrorCode] = [
         .web_unknown, .web_internet_connection_error, .web_unexpected_response,
     ]
     // MAXRANGE: 1200
@@ -172,7 +172,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case cmd_not_allowed_now = 1500 // no permission?
     case cmd_failed_execute = 1501
     case cmd_failed_undo = 1502
-    static let allCommand: [MNErrorCode] = [
+    public static let allCommand: [MNErrorCode] = [
         .cmd_not_allowed_now, .cmd_failed_execute, .cmd_failed_undo,
     ]
     // MAXRANGE: 1600
@@ -186,7 +186,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case doc_load_failed = 2014
     case doc_close_failed = 2015
     case doc_change_failed = 2016
-    static let allDocChange: [MNErrorCode] = [
+    public static let allDocChange: [MNErrorCode] = [
         .doc_unknown, .doc_create_new_failed, .doc_create_from_template_failed,
         .doc_open_existing_failed, .doc_save_failed, .doc_load_failed, .doc_close_failed, .doc_change_failed,
     ]
@@ -204,7 +204,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case doc_layer_select_deselect_failed = 2052
     case doc_layer_search_failed = 2060
     case doc_layer_change_failed = 2070
-    static let allDocLayer: [MNErrorCode] = [
+    public static let allDocLayer: [MNErrorCode] = [
         .doc_layer_insert_failed, .doc_layer_insert_undo_failed, .doc_layer_move_failed,
         .doc_layer_move_undo_failed, .doc_layer_delete_failed,
         .doc_layer_delete_undo_failed, .doc_layer_already_exists, .doc_layer_lock_unlock_failed,
@@ -221,7 +221,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case user_login_failed_password = 2506
     case user_login_failed_name_and_password = 2507
     case user_login_failed_user_not_found = 2508
-    static let allUserLogin: [MNErrorCode] = [
+    public static let allUserLogin: [MNErrorCode] = [
         .user_login_failed, .user_login_failed_no_permission, .user_login_failed_bad_credentials,
         .user_login_failed_permissions_revoked,
         .user_login_failed_user_name,
@@ -230,13 +230,13 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     ]
 
     case user_logout_failed = 2530
-    static let allUserLogout: [MNErrorCode] = [
+    public static let allUserLogout: [MNErrorCode] = [
         .user_logout_failed,
     ]
 
     case user_invalid_username = 2540 // sanitization
     case user_invalid_user_input = 2541 // sanitization
-    static let allUsername: [MNErrorCode] = [
+    public static let allUsername: [MNErrorCode] = [
         .user_invalid_username, user_invalid_user_input,
     ]
 
@@ -259,7 +259,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case db_failed_creating = 3071
     case db_already_exists = 3072
     
-    static let allDB: [MNErrorCode] = [
+    public static let allDB: [MNErrorCode] = [
         .db_unknown, .db_failed_init, .db_failed_migration, .db_skipped_migration,
         .db_failed_load, .db_failed_query, .db_failed_fetch_request,
         .db_failed_fetch_by_ids,

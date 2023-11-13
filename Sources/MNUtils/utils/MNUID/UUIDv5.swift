@@ -103,7 +103,9 @@ public extension UUID {
     
     init(version: UUIDVersion, name: String, nameSpace: UUIDv5Namespace) throws {
         // Get UUID bytes from name space:
-        var spaceUID = UUIDv5(uuidString: nameSpace.value.uppercased())!.uuid
+        guard var spaceUID = UUIDv5(uuidString: nameSpace.value.uppercased())?.uuid else {
+            throw MNError(.misc_failed_parsing, reason: "UUIDv5 init failed ver: \(version) name:\(name) nameSpace:\(nameSpace)")
+        }
         var data = withUnsafePointer(to: &spaceUID) { [count =  MemoryLayout.size(ofValue: spaceUID)] in
             Data(bytes: $0, count: count)
         }

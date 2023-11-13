@@ -77,11 +77,12 @@ open class MNUID : MNUIDProtocol, LosslessStringConvertible, Comparable, Codable
     }
     
     // MARK: LosslessStringConvertible
-    required convenience public init?(_ description: String) {
+    required convenience public init?(_ description: String, logFailure:Bool = false) {
+        let ddlog = (logFailure && dlog != nil) ? dlog : nil
         let components = description.components(separatedBy: Self.SEPARATOR)
         guard description.count > 12 && components.count < 2 else {
             // Bad string size or comps
-            dlog?.warning("\(Self.self).init (LosslessStringConvertible) failed with too few components!")
+            ddlog?.warning("\(Self.self).init (LosslessStringConvertible) failed with too few components!")
             return nil
         }
 
@@ -99,17 +100,21 @@ open class MNUID : MNUIDProtocol, LosslessStringConvertible, Comparable, Codable
                 // Call init
                 self.init(uid:uid, typeStr: type)
             } catch let error {
-                dlog?.warning("\(Self.self).init (LosslessStringConvertible) [\(description)] did not contain a MNUIDType or type string. \(error.description)")
+                ddlog?.warning("\(Self.self).init (LosslessStringConvertible) [\(description)] did not contain a MNUIDType or type string. \(error.description)")
                 return nil
             }
             
             if IS_DEBUG && type == Self.NO_TYPE {
-                dlog?.warning("\(Self.self).init (LosslessStringConvertible) [\(description)] did not contain a MNUIDType or type string.")
+                ddlog?.warning("\(Self.self).init (LosslessStringConvertible) [\(description)] did not contain a MNUIDType or type string.")
             }
         } else {
-            dlog?.warning("\(Self.self).init (LosslessStringConvertible) failed: [\(description)] could not be used to init.")
+            ddlog?.warning("\(Self.self).init (LosslessStringConvertible) failed: [\(description)] could not be used to init.")
             return nil
         }
+    }
+    
+    required convenience public init?(_ description: String) {
+        self.init(description, logFailure: true)
     }
     
     // MARK: StringConvertible
