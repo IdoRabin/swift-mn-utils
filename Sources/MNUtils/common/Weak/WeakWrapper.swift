@@ -110,6 +110,8 @@ public extension Weak /* : Codable */ where Value : Codable {
 
 extension Sequence where Element : Weakable {
     
+    /// Returns array of all the values that were not released (non-nil) in the array of weak items
+    /// NOTE: Already compacted and checked for nil values.
     public var values : [Element.Value] {
         return self.compactMap { $0.value }
     }
@@ -146,6 +148,30 @@ public extension Sequence where Element : Weakable, Element.Value : Equatable {
         }
     }
     
+}
+
+public extension Dictionary where Value : Weakable {
+    /// Mutate the dictionary so that all nilified Weak elements are removed from it, including their corresponding keys
+    /// - Returns: count of elements that were of nil valued and released
+    @discardableResult
+    mutating func compactNillifiedWeaks() ->Int {
+        var result = 0
+        self = self.compactMapValues({ val in
+            if val.value != nil {
+                return val
+            }
+            
+            result += 1 // was removed
+            return nil
+        })
+        return result
+    }
+    
+    /// Mutate the array so that all nilified Weak elements are removed from it
+    /// - Returns: count of elements that were of nil value and released
+    mutating func invalidateNillifieds() ->Int {
+        return self.compactNillifiedWeaks()
+    }
 }
 
 /*

@@ -6,6 +6,10 @@
 //
 
 import Foundation
+#if canImport(NIO)
+import NIO
+import CNIOAtomics
+#endif
 
 public extension MNError {
     convenience init(_ code: MNErrorCode, reason: String) {

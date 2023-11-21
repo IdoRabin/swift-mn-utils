@@ -181,6 +181,14 @@ public extension String {
         return str
     }
     
+    func replacingOccurrences(ofAnyOf replacArr:[String], with value:String , caseSensitive:Bool = true) -> String {
+        var str = self
+        for val in replacArr {
+            str = str.replacingOccurrences(of: val, with: value, options: caseSensitive ? [] : [.caseInsensitive])
+        }
+        return str
+    }
+    
     /// Validate if the string is a valid email address (uses a simple regex)
     ///
     /// - Returns: true when email is valid
@@ -442,7 +450,6 @@ public extension String {
         }
         return str
     }
-    
     
     /// Returns true when the string contains ANY charahter in the given charahter set
     /// NOTE: not efficient, do not use with big strings
