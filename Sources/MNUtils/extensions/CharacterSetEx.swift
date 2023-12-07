@@ -21,6 +21,9 @@ public extension CharacterSet {
     /// All charahters in the english / latin decimal digits : 0-9 only
     static let latinDigits = CharacterSet(charactersIn: "01234567890")
     
+    /// All charahters in the english / latin decimal digits : 0-9, period, plus and minus signs, comma and thousand seperators for many languages
+    static let latinDigitsEx = CharacterSet(charactersIn: "01234567890+-.,٫‎٬⠨‎⎖") // thousand seperators: arabic, arabic, persian, braille, decimal separator key
+    
     /// All charahters allowed in a base64 string (excluding the equals sign that sometimes suffixes it)
     static let base64 = latinAlphabet.union(.decimalDigits)
     

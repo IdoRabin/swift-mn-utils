@@ -12,37 +12,46 @@ fileprivate let dlog : MNLogger? = MNLog.forClass("String+Base64")
 
 public extension String  /* base64 */ {
     
-    func fromBase64() throws -> String{
-        guard let data = Data(base64Encoded: self) else {
-            throw MNError(.misc_failed_decoding, reason: "String.fromBase64 does not seem to be a base64 string. Is is escaped or percent encoded?")
-        }
-        guard let str = String(data: data, encoding: .utf8) else {
-            
-            // Fallback from utf16 for externally sourced string:
-            if let str = String(data: data, encoding: .utf16) {
-                return str
+    /// Will try to convert the string back from base64 into a string, trying first utf8 encoding, and as a fallback utf16 encoding. If both methods fail, will throw an error
+    /// - Returns: Original string before it was converted to base 64
+    func fromBase64Throws() throws -> String{
+        let encodingsToTry : [String.Encoding] = [.utf8, .utf16]
+        if let data = Data.init(base64Encoded: self, options: .ignoreUnknownCharacters) { // self.data(using: encoding), data.count > 0 {
+            for encoding in encodingsToTry {
+                if let str = String(data: data, encoding: encoding) {
+                    return str
+                }
             }
-            
-            throw MNError(.misc_failed_decoding, reason: "String.fromBase64 does not interpret as a utf8 string. Data is not decodable.")
         }
         
-        return str
+//        if let data = Data(base64Encoded: self) { // , options: .ignoreUnknownCharacters
+//            for encoding in encodingsToTry {
+//                if let str = String(data: data, encoding: encoding) {
+//                    return str
+//                }
+//            }
+//        }
+        
+        throw MNError(.misc_failed_decoding, reason: "String.fromBase64 does not seem to be encoded in base64 with any of \(encodingsToTry.descriptionsJoined). Is is escaped or percent encoded?")
     }
     
     
-    /// Will try to convert the string back from base64 into a string, trying first utf8 encoding, and as a fallback utf16 encoding. If both methods fail, will return nil
+    /// Will try to convert the string back from base64 into a string, trying first utf16 encoding, and as a fallback utf8 encoding. If both methods fail, will return nil
     /// - Returns: Original string before it was converted to base 64, or nil if attempts at decoding in utf8 AND utf16 fails.
     func fromBase64() -> String? {
-        guard let data = Data(base64Encoded: self), data.count > 0 else {
+        do {
+            return try self.fromBase64Throws()
+        } catch let error {
+            dlog?.note("String.fromBase64() failed decoding: \(error.description)")
             return nil
         }
-        
-        // Contains fallback for utf16 for externally sourced string:
-        return String(data: data, encoding: .utf8) ?? String(data: data, encoding: .utf16)
     }
     
+    
+    /// Returns a base-64 encoded string of the source string (utf-8)
+    /// - Returns: the base-64 string representing the original string
     func toBase64() -> String {
-        return Data(self.utf8).base64EncodedString()
+        return self.data(using: .utf8)!.base64EncodedString()
     }
 }
 
@@ -53,7 +62,7 @@ public extension String /* protobuf */ {
         return self
     }
     
-    func fromProtobuf() throws -> String {
+    func fromProtobufThrows() throws -> String {
         dlog?.warning(".fromProtobuf() IMPLEMENT PROTOBUF!")
         
         return self
@@ -62,7 +71,7 @@ public extension String /* protobuf */ {
     func fromProtobuf() -> String? {
         dlog?.warning(".fromProtobuf() IMPLEMENT PROTOBUF!")
         do {
-            let str : String = try self.fromProtobuf()
+            let str : String = try self.fromProtobufThrows()
             return str
         } catch let error {
             dlog?.warning(".fromProtobuf() Threw error:\(String(describing: error))")

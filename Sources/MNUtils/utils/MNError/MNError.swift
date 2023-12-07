@@ -94,6 +94,22 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
         #endif
     }
     
+    public func underlyingErrorsCollated()->[MNError]? {
+        var result : [MNError] = []
+        var err = self.underlyingError
+        while err != nil {
+            if let err = err {
+                result.append(err)
+            }
+            err = err?.underlyingError
+        }
+        
+        if result.count == 0 {
+            return nil
+        }
+        return result
+    }
+    
     public func setUnderlyingError(err:MNError) {
         if self != err && self.underlyingError != err {
             self.underlyingError = err

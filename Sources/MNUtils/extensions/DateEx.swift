@@ -51,3 +51,15 @@ public extension Date /* is near another Date */ {
         return Self.isDatesAreNear(date1: self, date2: other, tolerance: tolerance)
     }
 }
+
+public extension Date /* rounding */ {
+    
+    /// Return a similar date but without the miliseconds value, that is "rounded" to the seconds.
+    /// Example:
+    /// Date with timeIntervalSince1970:
+    /// rounded() will return timeIntervalSince1970:
+    /// - Returns: a new datet with 0 miliseconds above / below the nearest second
+    func roundedToTheSecond()->Date {
+        return Date(timeIntervalSince1970: round(self.timeIntervalSince1970))
+    }
+}

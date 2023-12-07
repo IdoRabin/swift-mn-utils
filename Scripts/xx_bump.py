@@ -1277,14 +1277,14 @@ def find_possible_filepaths(root_folder: str, additional_paths: list[str] = [], 
 		for folder in folders:
 			# note! recursive!
 			cdir = clean_folder_name(folder)
-			# print(f'{prfx} |find_possible_filepaths sub folder: >>>> {cdir}')
+			# print(f'{prfx} |find_possible_filepaths sub folder: >>==>> {cdir}')
 			result = result.union(find_possible_filepaths(cdir, [], depth + 1))
 
 	if depth == 0:
 		if len(additional_paths) > 0:
 			log(f'{prfx} ::: {len(additional_paths)} additional paths :::', True)
 			for dir in additional_paths:
-				# print(f'{prfx} | find_possible_filepaths additional path: >>>> {cdir}')
+				# print(f'{prfx} | find_possible_filepaths additional path: >>==>> {cdir}')
 				cdir = clean_folder_name(dir)
 				result = result.union(find_possible_filepaths(cdir, depth + 1))
 		else:

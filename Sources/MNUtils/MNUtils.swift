@@ -22,7 +22,7 @@ public class MNDebug {
     #endif
     
     fileprivate init(){
-        
+        // Implement in the future if needed MNDomains() // will be released immediately - used to init some static things
     }
     
     func StringOrNil(_ str:String)->String? {

@@ -797,6 +797,21 @@ public extension Sequence where Element == String {
             return str.contains(substring, isCaseSensitive: isCaseSensitive)
         }) != nil
     }
+    
+    
+    /// Will reove all strings from the array that are equal to one of the strings in the provided strings array.
+    /// NOTE: will check for equality with or without case sensitivity, but will not remove when strings contain a substring of self
+    /// - Parameters:
+    ///   - strings: strings to remove from the array.
+    ///   - isCaseSensitive: determines if  the check for removal be case sensitive or not
+    /// - Returns: A string array comprised of all the original elements, minus those elements which are contained to one of the provided string.
+    func removing(strings: [Element], isCaseSensitive:Bool = true)->[Element] {
+        var result : [Element] = Array(self)
+        result.removeAll { elem in
+            strings.contains(elem, isCaseSensitive: isCaseSensitive)
+        }
+        return result
+    }
 }
 
 public extension Sequence where Element : RawRepresentable {

@@ -33,7 +33,7 @@ public struct MNCacheError : Error, Codable, Equatable, JSONSerializable, Custom
     
     init(code:MNCacheErrorCode, reason:String, cacheName:String, underlyingError:Error? = nil) {
         self.code = code.rawValue
-        self.domain = "com.bricks.CacheError[\(cacheName)]"
+        self.domain = MNDomains.DEFAULT_DOMAIN + ".CacheError[\(cacheName)]"
         self.reason = reason
         self.desc = "\(code)"
         self.underlyingError = MNError(error: underlyingError)

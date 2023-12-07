@@ -18,7 +18,7 @@ fileprivate let ALL_SUSPECTED_PERCENT_ESCAPED_KEYS = MNUtils.constants.PERCENT_E
 fileprivate let URL_ESCAPE_ENCODED_DETECTION_CHARACTERSET = CharacterSet(charactersIn: "%+&=") // See also in MNUtils.constants?
 
 public extension String /* helper functions relevant to vapor URL requests, params, base64 params and more  */ {
-    
+
     /// Removes url percent encoding from the string and returns the unencoded string. Handles a few end cases that the removingPercentEncoding does not handle.
     /// - Parameter isLogIssues: will log issues is encountered
     /// - Returns:either an unencoded string or nil if the unencoding failed .
@@ -141,6 +141,15 @@ public extension String /* helper functions relevant to vapor URL requests, para
             // Merge while unescaping
             for (key, val) in dict {
                 result[key.removingPercentEncodingEx ?? key] = (val.removingPercentEncodingEx ?? val)
+            }
+        }
+        
+        if result.count == 0, let dict = convStr.asQueryParams() {
+            for (key, val) in dict {
+                result[key.removingPercentEncodingEx ?? key] = (val.removingPercentEncodingEx ?? val)
+            }
+            if MNUtils.debug.IS_DEBUG && result.count > 0 {
+                dlog?.note("explodeBase64IfPossible exploded a string that was already reverted from base64! input should be in base64.")
             }
         }
 

@@ -71,7 +71,7 @@ public extension DateFormatter {
             DateFormatter.timeIntervalFormatterHHMMSS!.allowedUnits = [.hour, .minute, .second]
         }
         
-        return DateFormatter.timeIntervalFormatterHHMMSS!.string(from: duration)?.trimmingPrefix("00")
+        return DateFormatter.timeIntervalFormatterHHMMSS!.string(from: abs(duration))?.trimmingPrefix("00")
     }
     
     private static var timeIntervalFormatterHHMM : DateComponentsFormatter? = nil
@@ -85,7 +85,21 @@ public extension DateFormatter {
             DateFormatter.timeIntervalFormatterHHMM!.allowedUnits = [.hour, .minute, .second]
         }
         
-        return DateFormatter.timeIntervalFormatterHHMM!.string(from: duration)
+        return DateFormatter.timeIntervalFormatterHHMM!.string(from:abs(duration))
+    }
+    
+    private static var timeIntervalFormatterDDHHMM : DateComponentsFormatter? = nil
+    class func timeIntervalDDHHMM(_ duration: TimeInterval?) -> String? {
+        guard let duration = duration else {
+            return nil
+        }
+        if DateFormatter.timeIntervalFormatterDDHHMM == nil {
+            DateFormatter.timeIntervalFormatterDDHHMM = DateComponentsFormatter()
+            DateFormatter.timeIntervalFormatterDDHHMM!.zeroFormattingBehavior = .pad
+            DateFormatter.timeIntervalFormatterDDHHMM!.allowedUnits = [.day, .hour, .minute]
+        }
+        
+        return DateFormatter.timeIntervalFormatterDDHHMM!.string(from: abs(duration))?.trimmingPrefix("00")
     }
     
     class func formatterByDateFormatString(_ dateFormat:String)->DateFormatter {
@@ -149,6 +163,19 @@ public extension DateFormatter {
     }
 }
 
+public extension TimeInterval {
+    var asHHMMSSStr : String? {
+        return DateFormatter.timeIntervalHHMMSS(self)
+    }
+    
+    var asHHMMStr : String? {
+        return DateFormatter.timeIntervalHHMM(self)
+    }
+    
+    var asDDHHMMStr : String? {
+        return DateFormatter.timeIntervalDDHHMM(self)
+    }
+}
 // Extension allowing unboxing of Int64 values as Dates Formatter
 /// Protocol acting as a common API for all types of date formatters,
 /// such as `DateFormatter` and `ISO8601DateFormatter`. (CodeExtended)
@@ -205,6 +232,16 @@ public extension Date {
     /// Returns an Int64 number of seconds / miliseconds since 1970 for this date
     var timeIntervalSince1970Int64 : Int64 {
         return Int64(round(timeIntervalSince1970 * (IS_MODIFIED_INT64_IN_MILLISECONDS ? 1000.0 : 1.0)))
+    }
+    
+    
+    init?(iso8601 string:String) {
+        let formatter = DateFormatter.iso8601DateFormatter ?? ISO8601DateFormatter()
+        if let date = formatter.date(from: string) {
+            self = date
+        } else {
+            return nil
+        }
     }
 }
 

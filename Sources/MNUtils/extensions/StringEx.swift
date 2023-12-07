@@ -8,6 +8,7 @@
 
 import Cocoa
 import DSLogger
+import Network // for IP adress detection
 
 fileprivate let dlog : DSLogger? = DLog.forClass("StringEx")
 
@@ -715,6 +716,26 @@ public extension String {
         return self.keepingDigitsOnly.count == self.count
     }
     
+    /// true when the string contains a valid IPv4Address or IPv6Address
+    // Requires Network framework for IP adress detection:
+    var isValidIPAddress : Bool {
+        if let _ = IPv4Address(self) {
+            // print("address \(address) is a valid IPv4 address")
+            return true
+        } else if let _ = IPv6Address(self) {
+            // print("address \(self) is a valid IPv6 address")
+            return true
+        } else {
+            // print("address \(self) is neither an IPv4 address nor an IPv6 address")
+            return false
+        }
+    }
+    
+    var isValidLocalhostIPAddress : Bool {
+        return self.isValidIPAddress && 
+            (self.hasPrefix("127.0.0") || self.hasPrefix("::1"))
+    }
+    
     var isAllCharsUppercased : Bool {
         return self.uppercased() == self
     }
@@ -1149,6 +1170,23 @@ public extension String /* OLD substring with int ranges */ {
         }
         
         return nil
+    }
+}
+
+public extension String /* MNDebug */ {
+    
+    
+    /// Will return the original string, or if MNUtils.debug.IS_DEBUG is true, will return the string with the appended string added.
+    /// - Parameter add: string to apped only in debug mode
+    /// - Returns: the original string or string with the appended part
+    func mnDebug(add:String)->String {
+        guard MNUtils.debug.IS_DEBUG else {
+            // When NOT in debug mode
+            return self
+        }
+        
+        // When in debug mode
+        return self.trimmingSuffix(" ") + " DBG " + add.trimmingPrefix(" ")
     }
 }
 
