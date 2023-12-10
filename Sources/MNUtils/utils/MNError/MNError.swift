@@ -10,6 +10,90 @@ import DSLogger
 
 fileprivate let dlog : MNLogger? = MNLog.forClass("MNError")
 
+public struct MNErrorStruct : Codable, Hashable {
+    public let error_code : Int?
+    public let error_domain : String?
+    public let error_reason: String
+    
+    private (set) public var underlying_errors : [MNErrorStruct]?
+    private (set) public var error_originating_path : String? = nil
+    private (set) public var error_req_id : String? = nil
+    private (set) public var error_text: String? = nil
+    
+    public init() {
+        // Empty init
+        error_code = 0
+        error_domain = MNDomains.DEFAULT_DOMAIN + ".MNError"
+        error_reason = "Unknown error"
+        underlying_errors = nil
+    }
+    
+    public init(error_code code: Int? = nil,
+        error_domain domain: String? = nil,
+        error_reason reason: String? = nil,
+        underlying_errors underlying: [MNErrorStruct]? = nil) {
+            // Set values
+        error_code = code ?? 0
+        error_domain = domain ?? MNDomains.DEFAULT_DOMAIN + ".MNError"
+        error_reason = reason ?? "Unknown error"
+        underlying_errors = underlying
+    }
+    
+    public init(mnError:MNError, recurseUnderlyingErrors:Bool = true) {
+        error_code = mnError.code
+        error_domain = mnError.domain
+        error_reason = mnError.reason
+        if recurseUnderlyingErrors, let mnErros = mnError.underlyingErrorsCollated() {
+            underlying_errors = mnErros.map({ underlyingError in
+                MNErrorStruct(mnError: underlyingError)
+            })
+        } else {
+            underlying_errors = nil
+        }
+    }
+    
+    public init(error:any Error) {
+        self.init(mnError: MNError(error: error))
+    }
+    
+    public mutating func update(originatingPath:String) {
+        error_originating_path = originatingPath
+    }
+    public mutating func update(reqId:String) {
+        error_req_id = reqId
+    }
+    public mutating func update(errorText:String) {
+        error_text = errorText
+    }
+    public mutating func update(underlyingErrorStructs:[MNErrorStruct]) {
+        underlying_errors = (underlying_errors ?? []).appending(contentsOf: underlyingErrorStructs).uniqueElements()
+    }
+    
+    public mutating func update(underlyingMNErrors mnErrors:[MNError]) {
+        let newErrorStructs = mnErrors.map({ err in
+            MNErrorStruct(mnError: err, recurseUnderlyingErrors: false)
+        })
+        if newErrorStructs.count > 0 {
+            self.update(underlyingErrorStructs: newErrorStructs)
+        }
+    }
+    
+    public mutating func update(underlyingErrors errors:[Error]) {
+        let mnErrors = errors.map { MNError(error: $0) }
+        self.update(underlyingMNErrors: mnErrors)
+    }
+    
+    // MARK: HasHable
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(error_code)
+        hasher.combine(error_domain)
+        hasher.combine(error_reason)
+        hasher.combine(underlying_errors)
+        hasher.combine(error_originating_path)
+        hasher.combine(error_req_id)
+    }
+}
+
 /// App class of error, is derived from Error, but can be initialized by AppError codes and also in concurrance with NSErrors and other Errors and underlying errors / filtered before determining eventual error code
 /// The main aim in this class is to wrap each error raised in the app from any source into a more organized state
 open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConvertible {
