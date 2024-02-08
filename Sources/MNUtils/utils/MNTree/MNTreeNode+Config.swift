@@ -2,11 +2,10 @@
 //  MNTreeNode+Config.swift
 //  
 //
-//  Created by Ido on 13/09/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
 #if TESTING
 fileprivate let IS_TESTING = true
@@ -14,7 +13,7 @@ fileprivate let IS_TESTING = true
 fileprivate let IS_TESTING = false || MNUtils.debug.IS_TESTING
 #endif
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNode+Config")?.setting(verbose: false, testing: IS_TESTING)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNode+Config") // ?.setting(verbose: false, testing: IS_TESTING)
 
 // MARK: Types
 public class MNTreeConfig : CustomStringConvertible {
@@ -87,7 +86,7 @@ public class MNTreeConfig : CustomStringConvertible {
     private func rootNodeName () -> String?  {
         if let root = self.rootNode {
             if root.isRoot == false {
-                dlog?.note("\(self) rootNodeName for root node: \(root) where rootNode is NOT a root!")
+                dlog?.notice("\(self) rootNodeName for root node: \( "\(root)" ) where rootNode is NOT a root!")
             }
             return "\(root.id)"
         }
@@ -224,7 +223,7 @@ extension MNTreeNode {
             do {
                 return try getTreeConfig()
             } catch let error {
-                dlog?.raisePreconditionFailure("cannot .get MNTreeConfig for \(self). error: \(error)")
+                dlog?.critical("cannot .get MNTreeConfig for \(self). error: \(error)")
                 preconditionFailure("\(self) cannot .get MNTreeConfig for \(self). Unknown error")
             }
         }

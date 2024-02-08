@@ -2,12 +2,11 @@
 //  HTTPResponseStatus.swift
 //  
 //
-//  Created by Ido on 20/03/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-#if VAPOR || NIO
-// Nothing - is declared in NIOCore NIOHTTP1.HTTPTypes
+#if VAPOR || NIO || canImport(NIO)
+// Nothing - HTTPResponseStatus is declared in NIOCore NIOHTTP1.HTTPTypes
 #else
 // We declare instead
 

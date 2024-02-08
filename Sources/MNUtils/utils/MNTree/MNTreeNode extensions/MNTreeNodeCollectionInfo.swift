@@ -2,11 +2,10 @@
 //  MNTreeNodeCollectionInfo.swift
 //  
 //
-//  Created by Ido on 09/10/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
 #if TESTING
 fileprivate let IS_TESTING = true
@@ -14,7 +13,7 @@ fileprivate let IS_TESTING = true
 fileprivate let IS_TESTING = false || MNUtils.debug.IS_TESTING
 #endif
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNodeCollectionInfo")?.setting(verbose: false, testing: IS_TESTING)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeCollectionInfo") // ?.setting(verbose: false, testing: IS_TESTING)
 
 struct MNTreeNodeCollectionInfo : Codable, Equatable, CustomStringConvertible, Hashable {
     enum CodingKeys : String, CodingKey, CaseIterable {
@@ -64,7 +63,7 @@ struct MNTreeNodeCollectionInfo : Codable, Equatable, CustomStringConvertible, H
     // MARK: Equatable
     static func ==(lhs:MNTreeNodeCollectionInfo, rhs:MNTreeNodeCollectionInfo)->Bool {
         guard lhs.hashSum == rhs.hashSum else {
-            dlog?.note("lhs.hashSum (\(lhs.hashSum)) != hs.hashSum (\(rhs.hashSum))")
+            dlog?.notice("lhs.hashSum (\(lhs.hashSum)) != hs.hashSum (\(rhs.hashSum))")
             return false
         }
         return lhs.treesCount == rhs.treesCount &&

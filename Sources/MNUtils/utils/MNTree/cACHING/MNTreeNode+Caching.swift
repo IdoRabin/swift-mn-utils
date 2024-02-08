@@ -2,11 +2,10 @@
 //  MNTreeNode+Caching.swift
 //  
 //
-//  Created by Ido on 07/09/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
 #if TESTING
 fileprivate let IS_TESTING = true
@@ -14,7 +13,7 @@ fileprivate let IS_TESTING = true
 fileprivate let IS_TESTING = false || MNUtils.debug.IS_TESTING
 #endif
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNode+Cache")?.setting(verbose: false, testing: IS_TESTING)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNode+Cache") // ?.setting(verbose: false, testing: IS_TESTING)
 
 protocol MNTreeNodeCacheProtocol<NodeType> where NodeType : MNTreeNode<ValueType, IDType> {
     associatedtype IDType : Hashable
@@ -70,7 +69,7 @@ public class MNTreeNodeMgr {
     }
     
     func clear() {
-        dlog?.note("MNTreeNodeMgr.shared.clear() (will clear \(caches.count) existing caches)")
+        dlog?.notice("MNTreeNodeMgr.shared.clear() (will clear \(self.caches.count) existing caches)")
         caches = [:]
     }
 }
@@ -184,7 +183,7 @@ extension MNTreeNode /* CACHING */ {
         typealias CacheType = MNTreeNodeCache<MNTreeNode<ValueType, IDType>>
         let cache : CacheType = MNTreeNodeMgr.shared.cacheFor(nodeType: Self.self)
         let result = cache.quickFetch(byId: id)
-        dlog?.verbose("\(self) quickFetch(byId: \(id)) | \(cache) | result: \((result?.id).descOrNil)")
+        dlog?.trace("\(self) quickFetch(byId: \( "\(id)" )) | \(cache) | result: \( (result?.id).descOrNil )")
         return result
     }
     
@@ -224,7 +223,7 @@ extension MNTreeNode /* CACHING */ {
         }
         
         if MNUtils.debug.IS_DEBUG, let dlog = dlog {
-            dlog.verbose("\(self) rootNodes (\(result.ids.descriptions().descriptionJoined)")
+            dlog.trace("\(self) rootNodes (\(result.ids.descriptions().descriptionJoined)")
         }
         
         return result

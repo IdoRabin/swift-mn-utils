@@ -2,8 +2,8 @@
 //  CustomStringConvertibleEx.swift
 //  Bricks
 //
-//  Created by Ido Rabin on 17/05/2023.
-//  Copyright © 2022 IdoRabin. All rights reserved.
+// Created by Ido Rabin for Bricks on 17/1/2024.
+// Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Foundation
@@ -91,18 +91,14 @@ public extension Dictionary where Value : CustomStringConvertible {
     
     var descriptionLines : String {
         get {
-            var result : String = ""
+            var result : [String] = []
             if self.count > 0 {
                 self.forEachIndex { (index, element) in
-                    result.append("\n  ")
                     result.append("\(element.key) = \(element.value)")
-                    if (index != self.count - 1) {
-                        result.append(",")
-                    }
                 }
             }
-            
-            return "[\(result)\n]"
+            result.sort()
+            return "[\(result.joined(separator: "\n"))\n]"
         }
     }
 }

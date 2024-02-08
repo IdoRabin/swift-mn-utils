@@ -2,13 +2,12 @@
 //  MNTreeNodeCache.swift
 //  
 //
-//  Created by Ido on 08/09/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNodeCache")?.setting(verbose: false, testing:MNUtils.debug.IS_TESTING)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeCache") // ?.setting(verbose: false, testing:MNUtils.debug.IS_TESTING)
 
 class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, CustomStringConvertible where NodeType : AnyObject {
     
@@ -51,7 +50,7 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
     
     private func guardResume(ctx:String)->Bool {
         guard MNExec.isMain else {
-            dlog?.note("\(ctx) should only run on the main thread / actor / dispatch queue!")
+            dlog?.notice("\(ctx) should only run on the main thread / actor / dispatch queue!")
             return false
         }
         return true
@@ -78,14 +77,14 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
         self.updateRootStatus(node: node)
         
         if !self._treeCache.hasValue(forKey: node.id) {
-            dlog?.verbose("\(self.TREE_NODE_TYPE_KEY) register | \(node.id)")
+            dlog?.trace("\(self.TREE_NODE_TYPE_KEY) register | \( "\(node.id)" )")
             self._treeCache[node.id] = node
             if self._treeReconstructionIds.contains(node.id) {
-                dlog?.info("\(self.TREE_NODE_TYPE_KEY) register for: = \(node.id) = is a known reconstruction id")
-                self.attemptReconstruction(context: "register(node id:\(node.id))", andRebuildQuickMap: MNNodeType.IS_CACHED)
+                dlog?.info("\(self.TREE_NODE_TYPE_KEY) register for: = \( "\(node.id)" ) = is a known reconstruction id")
+                self.attemptReconstruction(context: "register(node id:\( "\(node.id)" ))", andRebuildQuickMap: MNNodeType.IS_CACHED)
             }
         } else {
-            dlog?.verbose(log:.note, "\(self.TREE_NODE_TYPE_KEY) register | \(node.id) - was already registered.")
+            dlog?.notice("\(self.TREE_NODE_TYPE_KEY) register | \( "\(node.id)" ) - was already registered.")
         }
         
         
@@ -95,11 +94,11 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
         guard guardResume(ctx:"unregister") else { return }
         
         if self._treeCache.hasValue(forKey: id) {
-            dlog?.info("   ".repeated(times: (node as! MNNodeType).depth) +
-                       "\(self.TREE_NODE_TYPE_KEY) unregister | \(id)")
+            let indent = "   ".repeated(times: (node as! MNNodeType).depth)
+            dlog?.info("\(indent) \(self.TREE_NODE_TYPE_KEY) unregister | \( "\(id)" )")
             self._treeCache[id] = nil
         } else {
-            dlog?.verbose(log:.note,"   ".repeated(times: (node as! MNNodeType).depth) +
+            dlog?.verbose(symbol:.warning,"   ".repeated(times: (node as! MNNodeType).depth) +
                           "\(self.TREE_NODE_TYPE_KEY) unregister | \(id) - was not found!")
         }
         
@@ -136,7 +135,7 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
     func rebuildQuickMap(byId id:IDType) -> Int? {
         guard guardResume(ctx:"rebuildQuickMap") else { return nil }
         guard let node = self.quickFetch(byId: id) else {
-            dlog?.note("rebuildQuickMap(byId:\(id) was not found!")
+            dlog?.notice("rebuildQuickMap(byId:\( "\(id)" ) was not found!")
             return nil
         }
         
@@ -150,9 +149,9 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
         var root : MNNodeType = node as! MNNodeType
         if node.parent != nil {
             root = node.root
-            dlog?.info("rebuildQuickMap for \(node.id) (using root: \(root.id))")
+            dlog?.info("rebuildQuickMap for \( "\(node.id)" ) (using root: \( "\(root.id)" ))")
         } else {
-            dlog?.info("rebuildQuickMap for \(node.id)")
+            dlog?.info("rebuildQuickMap for \( "\(node.id)" )")
         }
         
         var count : Int = 0
@@ -170,7 +169,7 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
                 self._treeCache[node.id] = mnNode
                 self.updateRootStatus(node: mnNode)
             } else {
-                dlog?.note("rebuildQuickMap()")
+                dlog?.notice("rebuildQuickMap()")
             }
             count += 1
         }, method: .depthFirst, includeSelf:true)
@@ -243,7 +242,7 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
                     
                     // Create new node instance - no parent needed
                     newNode = .init(id:recon.id, value:recon.value)
-                    dlog?.verbose(log:.success, "\(self.TREE_NODE_TYPE_KEY).attemptReconstruction (ctx: \(context)) for a root node \(recon.id)")
+                    dlog?.verbose(symbol: .success, "\(self.TREE_NODE_TYPE_KEY).attemptReconstruction (ctx: \(context)) for a root node \(recon.id)")
                     reconstructed.append(recon)
                     
                 } else if let parentId = recon.parentId {
@@ -251,9 +250,9 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
                     // Create new node instance - no parent
                     if let parent = self.quickFetch(byId: parentId) {
                         newNode = .init(id:recon.id, value:recon.value, parent: (parent as! MNNodeType))
-                        dlog?.verbose(log:.success, "\(self.TREE_NODE_TYPE_KEY).attemptReconstruction (ctx: \(context)) for a node \(recon.id) with existing parent: \(parentId)")
+                        dlog?.verbose(symbol: .success, "\(self.TREE_NODE_TYPE_KEY).attemptReconstruction (ctx: \(context)) for a node \(recon.id) with existing parent: \(parentId)")
                     } else {
-                        dlog?.verbose(log:.fail, "\(self.TREE_NODE_TYPE_KEY).attemptReconstruction (ctx: \(context)) for a node \(recon.id) but parent id: \(parentId) still does not exist / or registered in the cache (has \(self._treeCache.count) items)")
+                        dlog?.verbose(symbol: .fail, "\(self.TREE_NODE_TYPE_KEY).attemptReconstruction (ctx: \(context)) for a node \(recon.id) but parent id: \(parentId) still does not exist / or registered in the cache (has \(self._treeCache.count) items)")
                     }
                 }
                 

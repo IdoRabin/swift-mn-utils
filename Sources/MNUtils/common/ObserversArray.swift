@@ -2,14 +2,14 @@
 //  ObserversArray.swift
 //  Bricks
 //
-//  Created by Ido Rabin for Bricks on 30/10/2017.
-//  Copyright © 2017 Bricks. All rights reserved.
+//  Created by Ido Rabin for Bricks on 17/1/2024.
+// Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Foundation
-import DSLogger
 
-fileprivate let dlog : DSLogger? = DLog.forClass("ObserversArray")
+fileprivate let dlog : Logger? = Logger(label: "ObserversArray")
+import Logging
 
 public class ObserversArrayLock : NSRecursiveLock {
     fileprivate static let DEBUG_LONG_LOCKS = false
@@ -81,7 +81,7 @@ public class ObserversArray <T> {
     private class func castAsAnyObject(observer: T)->AnyObject? {
         let result = (observer as? AnyObject)   // Warning is Expected, cannot be suppressed.
         if result == nil && MNUtils.debug.IS_DEBUG {
-            dlog?.note("castAsAnyObject(\(observer) conforms to \(T.self) but is not a class object / AnyObject")
+            dlog?.notice("castAsAnyObject(\( "\(observer)" ) conforms to \(T.self) but is not a class object / AnyObject")
             return nil
         }
         return result
@@ -148,8 +148,8 @@ public class ObserversArray <T> {
                     }
                 } else {
                     // Observer being passed is "by value" (not supported)
-                    dlog?.raisePreconditionFailure("does not support value types")
-                     fatalError("ObserversArray does not support value types")
+                    dlog?.critical("ObserversArray does not support value types")
+                    fatalError("ObserversArray does not support value types")
                 }
             }
         }

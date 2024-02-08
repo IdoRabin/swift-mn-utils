@@ -2,11 +2,10 @@
 //  MNTreeNode+Codable.swift
 //  
 //
-//  Created by Ido on 10/09/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
 #if TESTING
 fileprivate let IS_TESTING = true
@@ -14,9 +13,13 @@ fileprivate let IS_TESTING = true
 fileprivate let IS_TESTING = false || MNUtils.debug.IS_TESTING
 #endif
 
-fileprivate let dlogRegistry : DSLogger? = DLog.forClass("MNTreeNode+Codable |reg|")?.setting(verbose: false, testing: IS_TESTING)
-fileprivate let dlogDecode : DSLogger? = DLog.forClass("MNTreeNode+Codable |dec|")?.setting(verbose: false, testing: IS_TESTING)
-fileprivate let dlogEncode : DSLogger? = DLog.forClass("MNTreeNode+Codable |enc|")?.setting(verbose: true, testing: IS_TESTING)
+fileprivate let dlogRegistry : Logger? = Logger(label: "MNTreeNode+Codable |reg|")
+fileprivate let dlogDecode : Logger? = Logger(label: "MNTreeNode+Codable |dec|")
+fileprivate let dlogEncode : Logger? = Logger(label: "MNTreeNode+Codable |enc|")
+
+//fileprivate let dlogRegistry: Logger? = Logger(label: MNTreeNode+Codable |reg|")?.setting(verbose: false, testing: IS_TESTING)
+//fileprivate let dlogDecode: Logger? = Logger(label: "MNTreeNode+Codable |dec|")?.setting(verbose: false, testing: IS_TESTING)
+//fileprivate let dlogEncode: Logger? = Logger(label: "MNTreeNode+Codable |enc|")?.setting(verbose: true, testing: IS_TESTING)
 
 extension MNTreeNode : Codable where IDType : Codable, ValueType : Codable {
     
@@ -184,7 +187,7 @@ class UnknownMNTreeDecodingObj : Codable {
         if !nodeTypes.hasKey(key) {
             let nodeType = type(of:node as (any MNTreeNodeProtocol))
             nodeTypes[key] = TypeRecord(nodeType, ValueType.self, IDType.self)
-            dlogRegistry?.verbose(log: .success, "registerNodeType: \(key) : \(nodeType) | \(ValueType.self) | \(IDType.self)")
+            dlogRegistry?.verbose(symbol: .success, " registerNodeType: \(key) : \(nodeType) | \(ValueType.self) | \(IDType.self)")
         }
     }
     
@@ -220,12 +223,12 @@ class UnknownMNTreeDecodingObj : Codable {
         
         //dlog?.info(">>  UnknownMNTreeDecodingObj key: \(self.key)")
         if let cache = MNTreeNodeMgr.shared.cacheFor(nodeTypeString: self.key) {
-            dlogDecode?.verbose(log:.success, "UnknownMNTreeDecodingObj found cache: \(cache)")
+            dlogDecode?.verbose(symbol: .success, " UnknownMNTreeDecodingObj found cache: \(cache)")
         } else if let type = StringAnyDictionary.getType(typeName: key) {
-            dlogDecode?.verbose(log:.success, "UnknownMNTreeDecodingObj found cache for key: \(self.key) type: \(type)")
+            dlogDecode?.verbose(symbol: .success, " UnknownMNTreeDecodingObj found cache for key: \(self.key) type: \(type)")
         } else if let record = Self.getNodeTypeRecord(byKey: self.key){
             codableType = record.0 as? Codable.Type
-            dlogDecode?.verbose(log:.success, "UnknownMNTreeDecodingObj found type: \(record) : codableType \(codableType.descOrNil)")
+            dlogDecode?.verbose(symbol: .success, " UnknownMNTreeDecodingObj found type: \(record) : codableType \(codableType.descOrNil)")
         } else {
             dlogDecode?.fail(">> UnknownMNTreeDecodingObj Failed finding type for key: \(self.key)")
         }

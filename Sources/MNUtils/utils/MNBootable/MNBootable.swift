@@ -2,13 +2,12 @@
 //  MNBootable.swift
 //  
 //
-//  Created by Ido on 08/06/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNBoot")?.setting(verbose: true)
+fileprivate let dlog : Logger? = Logger(label: "MNBootable")
 
 //  --    --  #if canImport(UIKit)
 //#if canImport(vapor) || VAPOR || NIO
@@ -75,7 +74,7 @@ public extension MNBootable /* default implementation */{
     }
     var isInitialized : Bool {
         if self.bootState == .running {
-            dlog?.note("isInitialized but busy doing: \(self.bootState)")
+            dlog?.notice("isInitialized but busy doing: \(self.bootState)")
         }
         
         return ![MNBootState.unbooted, .booting].contains(self.bootState)
@@ -136,7 +135,7 @@ private class MNBootableMgr {
             // No description to the id:
             result = "id.hash\(ided.id.hashValue)"
         }
-        dlog?.verbose("idName for \(type(of: ided)) = \(result)")
+        dlog?.trace("idName for \(type(of: ided)) = \(result)")
         return result
     }
     
@@ -201,7 +200,7 @@ private class MNBootableMgr {
                 return typedItems[instanceKey]
             }
         } else {
-            dlog?.note("Item \(typeName) : \(item) was not found in the registry!")
+            dlog?.notice("Item \(typeName) : \( "\(item)" ) was not found in the registry!")
         }
         
         return nil

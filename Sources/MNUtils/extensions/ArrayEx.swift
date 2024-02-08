@@ -3,13 +3,13 @@
 //  testSwift
 //
 //  Created by Ido Rabin for  on 30/10/2023.
-//  Copyright © 2022 Ido Rabin. All rights reserved.
+//  Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : MNLogger? = MNLog.forClass("ArrayEx")
+fileprivate let dlog : Logger? = Logger(label: "ArrayEx") // ?.setting(verbose: false, testing: IS_TESTING)
 
 public extension Sequence {
     /// Iterate all elements while handling for each element its index and the element.
@@ -553,6 +553,16 @@ public extension Array where Element: Equatable {
             return true
         }
         return false
+    }
+    
+    
+    /// Returns a new array with the element added to the array if it did not already exist in original array (using equatable)
+    /// - Parameter element: element to append if not already in the array
+    /// - Returns: new array with element appended (if wan't already in it)
+    func appendingIfNotAlready(_ element:Element)->Array<Element> {
+        var result = self
+        result.appendIfNotAlready(element)
+        return result
     }
     
     

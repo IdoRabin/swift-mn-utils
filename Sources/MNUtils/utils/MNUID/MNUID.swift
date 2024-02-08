@@ -2,13 +2,12 @@
 //  MNUID.swift
 //  
 //
-//  Created by Ido on 24/05/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNUID")?.setting(verbose: false)
+fileprivate let dlog : Logger? = Logger(label: "MNUID") // ?.setting(verbose: false)
 #if DEBUG
 fileprivate let IS_DEBUG = true
 #else
@@ -52,7 +51,7 @@ open class MNUID : MNUIDProtocol, LosslessStringConvertible, Comparable, Codable
         }
 
         if newValue != self._type {
-            dlog?.note("Setting type from: [\(self._type)] to [\(newValue)]")
+            dlog?.notice("Setting type from: [\(self._type)] to [\(newValue)]")
             self._type = newValue
         }
     }

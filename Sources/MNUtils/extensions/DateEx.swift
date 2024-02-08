@@ -2,8 +2,7 @@
 //  DateEx.swift
 //  Date extensions
 //
-//  Created by Ido on 28/08/2022.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 

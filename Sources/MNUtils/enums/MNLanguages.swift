@@ -2,13 +2,12 @@
 //  File.swift
 //  
 //
-//  Created by Ido on 12/07/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNLanguage")
+fileprivate let dlog : Logger? = Logger(label: "MNLanguage")
 
 public struct MNLanguage : CustomStringConvertible, Codable, Equatable, Hashable {
     
@@ -32,7 +31,7 @@ public struct MNLanguage : CustomStringConvertible, Codable, Equatable, Hashable
         } else if nameNative.count > 0 {
             parts.append(nameNative)
         } else {
-            dlog?.note("MNLanguage has no nameEn and no nameNative")
+            dlog?.notice("MNLanguage has no nameEn and no nameNative")
         }
         
         if countriesIso3166_2.count > 0 {

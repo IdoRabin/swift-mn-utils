@@ -2,14 +2,11 @@
 ////  MNLogger.swift
 ////
 ////  Created by Ido Rabin for  on 30/10/2022.
-////  Copyright © 2022 Ido Rabin. All rights reserved.
+//Copyright © 2024 Bricks. All rights reserved.
 ////
 //
 //// ❌ ❗👁 ⚠️️ ▶ ✘ ✔
 //
-import DSLogger
-typealias MNLogger = DSLogger
-typealias MNLog = DLog
 
 //import Foundation
 //

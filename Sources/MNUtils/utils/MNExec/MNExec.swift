@@ -1,12 +1,11 @@
 //
-//  File.swift
-//  
+//  MNExec.swift
 //
-//  Created by Ido on 19/08/2023.
 //
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
 #if canImport(Vapor)
 import Vapor
@@ -17,7 +16,7 @@ import NIO
 #endif
 
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNExec")?.setting(verbose: true)
+fileprivate let dlog : Logger? = Logger(label: "MNExec")
 
 #if canImport(NIO)
 fileprivate extension NIODeadline /* delayFromNow : TimeInterval */ {
@@ -54,7 +53,7 @@ public class MNExec {
     // @preconcurrency
     private static func internal_exec(afterDelay delay:TimeInterval, forcedCKey:CancelKey? = nil, block:@escaping ()->Void)->CancelKey? {
         guard delay >= 0 else {
-            dlog?.note("exec(afterDelay:) delay should be a positive or zero value. (not \(delay))")
+            dlog?.notice("exec(afterDelay:) delay should be a positive or zero value. (not \(delay))")
             return nil
         }
         let cKey : CancelKey = forcedCKey ?? Date.now.timeIntervalSince1970.description.toBase64()
@@ -115,13 +114,13 @@ public class MNExec {
                 if debounceCache[key]?.cKey == cKey {
                     block()
                 } /*else {
-                    dlog?.verbose(log: .fail, ">>> Canceled block")
+                    dlog?.verbose(symbol: .fail, ">>> Canceled block")
                 }*/
             })
             return cKey
         } else {
             // Time has already passed:
-            dlog?.verbose(">>> Time has passed.")
+            dlog?.trace(">>> Time has passed.")
             block()
             debounceCache[key] = nil
             return nil
@@ -131,12 +130,12 @@ public class MNExec {
     private static func internal_waitFor(_ key:String, test:@escaping ()->Bool, interval:TimeInterval, timeout:TimeInterval, block:@escaping (_ waitResult:WaitResult)->Void, startTime:Date, depth:Int)->CancelKey? {
         
         guard timeout > 0 && interval > 0 else {
-            dlog?.note("waitFor(...interval:timeout:...) needs both interval and timeout to be > 0. interval needs to be smaller than timeout.")
+            dlog?.notice("waitFor(...interval:timeout:...) needs both interval and timeout to be > 0. interval needs to be smaller than timeout.")
             return nil
         }
         
         guard interval < timeout else {
-            dlog?.note("waitFor(...interval:timeout:...) needs both interval and timeout to be > 0. interval needs to be smaller than timeout.")
+            dlog?.notice("waitFor(...interval:timeout:...) needs both interval and timeout to be > 0. interval needs to be smaller than timeout.")
             return nil
         }
         
@@ -148,26 +147,26 @@ public class MNExec {
         }
                                  
         if interval > timeout * 0.49 {
-            dlog?.note("waitFor(...interval:timeout:...) has an interval of \(interval) of timeout \(timeout) which means it will only be calld once!")
+            dlog?.notice("waitFor(...interval:timeout:...) has an interval of \(interval) of timeout \(timeout) which means it will only be calld once!")
         }
         
         if test() {
             if MNUtils.debug.IS_DEBUG {
                 if depth == 0 {
-                    dlog?.verbose(log: .info , "waitFor: \(key) #\(depth) DONE Immediate (.success)")
+                    dlog?.trace("waitFor: \(key) #\(depth) DONE Immediate (.success)")
                 } else {
-                    dlog?.verbose(log: .info , "waitFor: \(key) #\(depth) DONE (.success)")
+                    dlog?.trace("waitFor: \(key) #\(depth) DONE (.success)")
                 }
             }
             block(.success)
         } else if abs(startTime.timeIntervalSinceNow) >= timeout {
             // Call teh execution block immediately - we either timed out or result is a success
-            dlog?.verbose(log: .info , "waitFor: \(key) #\(depth) DONE (.timeout)")
+            dlog?.trace("waitFor: \(key) #\(depth) DONE (.timeout)")
             block(.timeout)
             
         } else {
             // Timeout has not arrived yet:
-            dlog?.verbose(log: .success , "waitFor: \(key) #\(depth)")
+            dlog?.success(level: .debug , "waitFor: \(key.description) #\(depth)")
             self.internal_exec(afterDelay: interval, forcedCKey: key) {
                 _ = self.internal_waitFor(key, test:test, interval: interval, timeout: timeout, block: block, startTime: startTime, depth: depth + 1)
             }

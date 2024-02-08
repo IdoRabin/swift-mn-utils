@@ -2,15 +2,14 @@
 //  MNTreeNodeProtocol.swift
 //  
 //
-//  Created by Ido on 30/08/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 /* ===== NOTE: Was deferred in favor of a super class to inherit from ! =========*/
 /*
 import Foundation
-import DSLogger
+ import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNodeProtocol")?.setting(verbose: true)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeProtocol")?.setting(verbose: true)
 
 typealias AnyMNTreeNode = any MNTreeNodeProtocol
 
@@ -155,14 +154,14 @@ extension MNTreeNodeProtocol /* extended initializers, protocol conformance */ {
         dlog?.verbose("\(Self.self).init(id: \(id), value: \(value.descOrNil) parentID: \(parentID))")
         guard id != parentID else {
             // Init where parentId == self.id
-            dlog?.note("\(Self.self).init(id: \(id), value: \(value.descOrNil) parentID: \(parentID)) had parentID == self.id !!")
+            dlog?.notice("\(Self.self).init(id: \(id), value: \(value.descOrNil) parentID: \(parentID)) had parentID == self.id !!")
             self.init(id: id, value: value)
             return // Success!
         }
         
         // Init with existing parent:
         if let newParent = Self.quickFetch(byId: parentID) {
-            dlog?.verbose(log: .success, "\(Self.self).init(id: \(id), value: \(value.descOrNil) parentID: \(parentID)) parent already existed")
+            dlog?.verbose(symbol: .success, "\(Self.self).init(id: \(id), value: \(value.descOrNil) parentID: \(parentID)) parent already existed")
             self.init(id: id, value: value, parent: newParent)
             return // Success!
         }
@@ -205,7 +204,7 @@ extension MNTreeNodeProtocol where IDType : LosslessStringConvertible {
         }
         
         self.init(id: id, value: value, parent: existingParent)
-        dlog?.verbose(log:.success, "\(Self.self).init(id: \(id), value: \(value.descOrNil) parentIDString: \(parentIDString) (parent already exited)")
+        dlog?.verbose(symbol:.success, "\(Self.self).init(id: \(id), value: \(value.descOrNil) parentIDString: \(parentIDString) (parent already exited)")
     }
 }
 
@@ -223,7 +222,7 @@ extension MNTreeNodeProtocol /* Default implementations */ {
                                             recursionDepth:Int, nodeDepth:Int)->MNResumeStopTuple<[ResultType]>  {
         
         guard recursionDepth <= Self.MAX_TREE_DEPTH && recursionDepth < Self.MAX_TREE_DEPTH else {
-            dlog?.note("\(Self.self) _recourseChildren \(recursionType.description) recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
+            dlog?.notice("\(Self.self) _recourseChildren \(recursionType.description) recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
             return MNResumeStopTuple.stopEmpty
         }
         var result : [ResultType] = []
@@ -270,7 +269,7 @@ extension MNTreeNodeProtocol /* Default implementations */ {
     private func _recourseParents<ResultType : Any>(_ block: (_ node:Self,_ depth:Int)->MNResumeStopTuple<ResultType>, includeSelf:Bool = false, recursionDepth:Int, nodeDepth:Int)->MNResumeStopTuple<[ResultType]> {
         guard nodeDepth <= Self.MAX_TREE_DEPTH && recursionDepth <= Self.MAX_TREE_DEPTH &&
               nodeDepth >= 0 && recursionDepth >= 0 else {
-            dlog?.note("\(Self.self) _recourseParents recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
+            dlog?.notice("\(Self.self) _recourseParents recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
             return .stopEmpty
         }
         
@@ -382,7 +381,7 @@ extension MNTreeNodeProtocol /* Default implementations */ {
         
         // Log if stooped
         if dlog?.isVerboseActive == true && rsTuple.instrutionIsStop {
-            dlog?.verbose(log: .note, "recourseChildrenWidthFirst for \(self) was STOPPED!")
+            dlog?.verbose(symbol: .note, "recourseChildrenWidthFirst for \(self) was STOPPED!")
         }
         return rsTuple.value ?? []
     }
@@ -402,7 +401,7 @@ extension MNTreeNodeProtocol /* Default implementations */ {
         
         // Log if stooped
         if dlog?.isVerboseActive == true && rsTuple.instrutionIsStop {
-            dlog?.verbose(log: .note, "recourseChildrenWidthFirst for \(self) was STOPPED!")
+            dlog?.verbose(symbol: .note, "recourseChildrenWidthFirst for \(self) was STOPPED!")
         }
         return rsTuple.value ?? []
     }
@@ -441,7 +440,7 @@ extension MNTreeNodeProtocol /* Default implementations */ {
         
         // Log if stooped
         if dlog?.isVerboseActive == true && rsTuple.instrutionIsStop {
-            dlog?.verbose(log: .note, "recourseParents for \(self) was STOPPED!")
+            dlog?.verbose(symbol: .note, "recourseParents for \(self) was STOPPED!")
         }
         return rsTuple.value ?? []
     }
@@ -607,7 +606,7 @@ extension MNTreeNodeProtocol /* reconstruction & quickMap */ {
         for recon in Self._treeReconstructionWaitingList {
             dlog?.verbose("\(Self.self).attemptReconstruction (ctx: \(context)) for \(Self.self) id: \"\(recon.id)\" ")
             if let existingNode = Self.quickFetch(byId: recon.id) {
-                dlog?.note("\(Self.self).attemptReconstruction (ctx: \(context)) has a reonstruction job for a node that already exists id:\(recon.id) value:\(recon.value.descOrNil). reconstruction value: \(existingNode.value.descOrNil)")
+                dlog?.notice("\(Self.self).attemptReconstruction (ctx: \(context)) has a reonstruction job for a node that already exists id:\(recon.id) value:\(recon.value.descOrNil). reconstruction value: \(existingNode.value.descOrNil)")
                 rootNodes.append(existingNode.root)
                 reconstructed.append(recon)
             } else {
@@ -617,14 +616,14 @@ extension MNTreeNodeProtocol /* reconstruction & quickMap */ {
                 // Create new node instance:
                 if (recon.depthToReconstruct.depth ?? 0 == 0) && recon.parentId == nil {
                     newNode = Self.init(id:recon.id, value:recon.value)
-                    dlog?.verbose(log:.success, "\(Self.self).attemptReconstruction (ctx: \(context)) for a root node \(newNode.descOrNil)")
+                    dlog?.verbose(symbol:.success, "\(Self.self).attemptReconstruction (ctx: \(context)) for a root node \(newNode.descOrNil)")
                     reconstructed.append(recon)
                 } else if let parentId = recon.parentId {
                     if let parent = self.quickFetch(byId: parentId) {
                         newNode = Self.init(id:recon.id, value:recon.value, parent: parent)
-                        dlog?.verbose(log:.success, "\(Self.self).attemptReconstruction (ctx: \(context)) for a node \(newNode.descOrNil) with existing parent by id: \(parent.id)")
+                        dlog?.verbose(symbol:.success, "\(Self.self).attemptReconstruction (ctx: \(context)) for a node \(newNode.descOrNil) with existing parent by id: \(parent.id)")
                     } else {
-                        dlog?.verbose(log:.fail, "\(Self.self).attemptReconstruction (ctx: \(context)) for a node \(newNode.descOrNil) but parent node id: \(parentId) still does not exist / or registered in the cache (has \(Self._treeCache.count) items)")
+                        dlog?.verbose(symbol:.fail, "\(Self.self).attemptReconstruction (ctx: \(context)) for a node \(newNode.descOrNil) but parent node id: \(parentId) still does not exist / or registered in the cache (has \(Self._treeCache.count) items)")
                     }
                 }
                 
@@ -701,7 +700,7 @@ extension MNTreeNodeProtocol /* reconstruction & quickMap */ {
     
     fileprivate static func quickFetch(byIdString idString:String?) -> Self? where IDType : LosslessStringConvertible {
         guard let idStr = idString, let id = IDType(idStr) else {
-            dlog?.note("quickFetch(byIdString:) recieved a nil string")
+            dlog?.notice("quickFetch(byIdString:) recieved a nil string")
             return nil
         }
         
@@ -710,7 +709,7 @@ extension MNTreeNodeProtocol /* reconstruction & quickMap */ {
     
     fileprivate static func quickFetch(byId id:IDType?) -> Self? {
         guard let id = id else {
-            dlog?.note("quickFetch(byId:) recieved a nil id")
+            dlog?.notice("quickFetch(byId:) recieved a nil id")
             return nil
         }
         

@@ -2,8 +2,7 @@
 //  MNResult3.swift
 //  
 //
-//  Created by Ido on 19/03/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 
@@ -30,36 +29,38 @@ public extension MNResult {
 
 public extension Result {
     
-    static func failure<Success:Any>(fromError error:any Error)->MNResult<Success> {
+    // NOTE: Swift 6 will not allow using base Generic parameters in the extension claiming they "Shadow" the declared generic params. ):
+    // TODO: Check how can reuse same Generic params when no 
+    
+    static func failure<ShadowSuccess>(fromError error:any Error)->MNResult<ShadowSuccess> {
         if let mnerror = error as? MNError {
             return MNResult.failure(mnerror)
         } else {
             return MNResult.failure(MNError(error: error))
         }
-        
     }
     
-    static func failure<Success:Any>(fromAppError mnError:MNError)->MNResult<Success> {
+    static func failure<ShadowSuccess>(fromAppError mnError:MNError)->MNResult<ShadowSuccess> {
         return MNResult.failure(mnError)
     }
     
-    static func failure<Success:Any>(code mnErrorCode:MNErrorCode, reason:String? = nil, underlyingError:Error? = nil)->MNResult<Success> {
+    static func failure<ShadowSuccess>(code mnErrorCode:MNErrorCode, reason:String? = nil, underlyingError:Error? = nil)->MNResult<ShadowSuccess> {
         return MNResult.failure(MNError(code:mnErrorCode, reason: reason, underlyingError: underlyingError))
     }
     
-    static func failure<Success:Any>(code mnErrorCode:MNErrorCode, reason:String? = nil)->MNResult<Success> {
+    static func failure<ShadowSuccess>(code mnErrorCode:MNErrorCode, reason:String? = nil)->MNResult<ShadowSuccess> {
         return self.failure(code: mnErrorCode, reason: reason, underlyingError: nil)
     }
     
-    static func failure<Success:Any>(code mnErrorCode:MNErrorCode, reasons:[String]? = nil, underlyingError:Error? = nil)->MNResult<Success> {
+    static func failure<ShadowSuccess>(code mnErrorCode:MNErrorCode, reasons:[String]? = nil, underlyingError:Error? = nil)->MNResult<ShadowSuccess> {
         return MNResult.failure(MNError(code:mnErrorCode, reasons: reasons, underlyingError: underlyingError))
     }
     
-    static func failure<Success:Any>(code mnErrorCode:MNErrorCode, reasons:[String]? = nil)->MNResult<Success> {
+    static func failure<ShadowSuccess>(code mnErrorCode:MNErrorCode, reasons:[String]? = nil)->MNResult<ShadowSuccess> {
         return self.failure(code: mnErrorCode, reasons: reasons, underlyingError: nil)
     }
     
-    static func fromError<Success:Any>(_ error:(any Error)?, orSuccess:Success)->MNResult<Success> {
+    static func fromError<ShadowSuccess>(_ error:(any Error)?, orSuccess:ShadowSuccess)->MNResult<ShadowSuccess> {
         if let mnError = error as? MNError {
             return Self.fromMNError(mnError, orSuccess: orSuccess)
         } else if let err = error {
@@ -69,7 +70,7 @@ public extension Result {
         }
     }
     
-    static func fromMNError<Success:Any>(_ mnError:MNError?, orSuccess:Success)->MNResult<Success> {
+    static func fromMNError<ShadowSuccess>(_ mnError:MNError?, orSuccess:ShadowSuccess)->MNResult<ShadowSuccess> {
         if let mnError = mnError {
             return .failure(mnError)
         } else {

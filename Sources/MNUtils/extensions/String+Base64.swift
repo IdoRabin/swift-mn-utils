@@ -2,13 +2,12 @@
 //  String+Base64.swift
 //  Base64 extensions with String
 //
-//  Created by Ido on 17/08/2022.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : MNLogger? = MNLog.forClass("String+Base64")
+fileprivate let dlog : Logger? = Logger(label:"String+Base64")
 
 public extension String  /* base64 */ {
     
@@ -42,7 +41,7 @@ public extension String  /* base64 */ {
         do {
             return try self.fromBase64Throws()
         } catch let error {
-            dlog?.note("String.fromBase64() failed decoding: \(error.description)")
+            dlog?.notice("String.fromBase64() failed decoding: \(error.description)")
             return nil
         }
     }

@@ -2,8 +2,8 @@
 //  CGRect+Corners.swift
 //  Bricks
 //
-//  Created by Ido on 02/09/2023.
-//  Copyright © 2022 Bricks Ltd. All rights reserved.
+// Created by Ido Rabin for Bricks on 17/1/2024.
+// Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Cocoa

@@ -2,14 +2,14 @@
 //  URLEx.swift
 //  
 //
-//  Created by Ido Rabin on 17/05/2023.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 . All rights reserved.
 //
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : MNLogger? = MNLog.forClass("URLEx")
+fileprivate let dlog : Logger? = Logger(label: "URLEx")
 
 //extension URI {
 //    

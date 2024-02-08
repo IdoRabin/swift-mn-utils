@@ -2,11 +2,10 @@
 //  ImageString.swift
 //  Bricks
 //
-//  Created by Ido on 06/07/2022.
-//
-
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 #if os(OSX)
+    import AppKit
     import Cocoa
     public typealias SysImage = NSImage
     public typealias SysColor = NSColor

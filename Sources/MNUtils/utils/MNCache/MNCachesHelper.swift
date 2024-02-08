@@ -2,14 +2,14 @@
 //  CachesHelper.swift
 //  Bricks
 //
-//  Created by Ido on 01/12/2021.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 Bricks Ltd. All rights reserved.
 //
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("CachesHelper")
+fileprivate let dlog : Logger? = Logger(label: "CachesHelper")
 
 class MNCachesHelper : NSObject {
     public var observers = ObserversArray<MNCachesEventObserver>()

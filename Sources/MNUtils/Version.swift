@@ -21,10 +21,10 @@ enum PreRelease: String {
 let MNUTILS_NAME_STR : String = "MNUtils"
 
 // String fields allow only alphanumerics and a hyphen (-)
-let MNUTILS_BUILD_NR : Int = 102
+let MNUTILS_BUILD_NR : Int = 418
 let MNUTILS_BUILD_VERSION = MNSemver (
     major: 0,
-    minor: 1,
+    minor: 2,
     patch: 0,
     prerelease: "\(PreRelease.alpha.rawValue)",
     metadata: [String(format: "0x%04X", MNUTILS_BUILD_NR)]

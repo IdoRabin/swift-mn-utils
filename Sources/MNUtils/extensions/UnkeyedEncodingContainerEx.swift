@@ -2,16 +2,16 @@
 //  UnkeyedEncodingContainerEx.swift
 //  Bricks
 //
-//  Created by Ido on 11/12/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 import AppKit
-import DSLogger
+import Logging
+
 // see also NSColorEx.swift for NSColor.hexString() etc..
 
-fileprivate let dlog : MNLogger? = nil // MNLog.forClass("decodeStringAnyDict")
-fileprivate let dlogWarnings : MNLogger? = MNLog.forClass("decodeStringAnyDict_")
+fileprivate let dlog : Logger? = nil // Logger(label: "decodeStringAnyDict")
+fileprivate let dlogWarnings : Logger? = Logger(label: "decodeStringAnyDict_")
 
 public typealias LosslessStrEnum = LosslessStringConvertible & Codable
 public typealias CodableHashable = Codable & Hashable
@@ -55,7 +55,7 @@ public extension UnkeyedEncodingContainer {
     
     mutating func encode(dic:[String:Any], encoder:Encoder) throws {
         for (key, value) in dic {
-            dlog?.info("saving \(key) : \(type(of: value)) = \(value)")
+            dlog?.info("saving \(key) : \(type(of: value) )) = \("\(value)")")
             switch value {
             case let val as Bool: try self.encode("\(key) : Bool = \(val)")
                 
@@ -95,7 +95,7 @@ public extension UnkeyedEncodingContainer {
             case let val as Codable:
                 
                 let typeStr = String(reflecting:type(of: value))
-                dlogWarnings?.warning("to support [String:Any] dictionary encodings, type [\(typeStr)] should support LosslessStrEnum or LosslessStringConvertible in order to support encoding value :\(val)")
+                dlogWarnings?.warning("to support [String:Any] dictionary encodings, type [\(typeStr)] should support LosslessStrEnum or LosslessStringConvertible in order to support encoding value :\( "\(val)" )")
                 
             default:
                 break
@@ -145,7 +145,7 @@ public extension StringAnyDictionary {
             let type = String(reflecting:avalue)
             return codingRegisteredIffyClasses[type] != nil
         } else {
-            MNLog.misc["StringAnyDictionary"]?.warning("isClassRegistered: \(avalue) cannot be registered: it must conform to Decodable protocol")
+            dlog?.warning("isClassRegistered: \( "\(avalue)" ) cannot be registered: it must conform to Decodable protocol")
         }
         return false
     }
@@ -160,7 +160,7 @@ public extension StringAnyDictionary {
                 codingRegisteredIffyPrefixes.update(with: prefix)
             }
         } else {
-            MNLog.misc["StringAnyDictionary"]?.warning("registerClass: \(avalue) cannot be registered: it must conform to Decodable protocol")
+            dlog?.warning("registerClass: \( "\(avalue)" ) cannot be registered: it must conform to Decodable protocol")
         }
     }
     
@@ -263,7 +263,7 @@ public class UnkeyedDecodingUtil {
                     return val as! Value?
                 } else if let aatype = aatype as? Codable.Type {
                     let val = try aatype.init(from:decoder)
-                    dlog?.info("did decode: \(aatype) val:\(val)")
+                    dlog?.info("did decode: \(aatype) val:\( "\(val)" )")
                     return val as! Value?
                 } else {
                     dlogWarnings?.note("UnkeyedDecodingContainer.decode(..) static - \(key) failed parsing \(typeName) = \(value) [found type/class:\(aatype.self)]")

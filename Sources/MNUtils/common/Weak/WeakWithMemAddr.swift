@@ -2,14 +2,12 @@
 //  WeakWithMemAddr.swift
 //  
 //
-//  Created by Ido on 15/10/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
+import Logging // we chose this because of nio server logging implications
 
-import DSLogger
-
-fileprivate let dlog : DSLogger? = DLog.forClass("WeakWithMemAddr")
+fileprivate let dlog : Logger? = Logger(label: "WeakWithMemAddr")
 
 /// A wrapper for weakly referenced objects, specialining in the case where equality or hashing values equal, but memory adresses differ
 public class WeakWithMemAddr<Value : AnyObject> : Weak<Value> {

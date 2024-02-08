@@ -2,8 +2,7 @@
 //  MNErrorCode.swift
 //
 //
-//  Created by Ido on 08/11/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 #if canImport(NIO)
@@ -290,7 +289,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     public var desc: String {
         switch rawValue {
         case 100 ..< 600: // HttpStatus
-            return httpStatusCode?.reasonPhrase ?? "TODO.MNErrorCode.httpStatus.desc|\(self.code)"
+            return httpStatus?.reasonPhrase ?? "TODO.MNErrorCode.httpStatus.desc|\(self.code)"
         default:
             return "TODO.MNErrorCode.desc|\(self.code)"
         }
@@ -300,7 +299,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
         return rawValue
     }
 
-    public var httpStatusCode : HTTPResponseStatus? {
+    public var httpStatus : HTTPResponseStatus? {
         // IANA HTTPResponseStatus
         var result : HTTPResponseStatus? = nil
         switch rawValue {
@@ -312,6 +311,13 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
             }
         }
         return result
+    }
+    
+    public var httpStatusCode : Int? {
+        guard let uintCode = self.httpStatus?.code else {
+            return nil
+        }
+        return Int(uintCode)
     }
     
     public var isHTTPStatus: Bool {

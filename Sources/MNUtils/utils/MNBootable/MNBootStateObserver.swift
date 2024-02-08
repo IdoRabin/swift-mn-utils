@@ -2,13 +2,12 @@
 //  MNBootStateObserver.swift
 //  
 //
-//  Created by Ido on 10/06/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNBootStateObserver")?.setting(verbose: true)
+fileprivate let dlog : Logger? = Logger(label: "MNBootStateObserver") // ?.setting(verbose: true)
 
 typealias AppInstanceType = AnyObject
 public protocol MNBootStateObserver<ObjectType> {

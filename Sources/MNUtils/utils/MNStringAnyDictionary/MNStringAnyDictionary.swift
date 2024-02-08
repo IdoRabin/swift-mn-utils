@@ -2,16 +2,15 @@
 //  MNStringAnyDictionary.swift
 //  
 //
-//  Created by Ido on 19/03/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
 fileprivate var codingRegisteredIffyClasses : [String:Any.Type] = [:]
 fileprivate var codingRegisteredIffyPrefixes = Set<String>()
 
-fileprivate let dlog : MNLogger? = nil // MNLog.forClass("MNStringAnyDictionary")
+fileprivate let dlog : Logger? = Logger(label: "MNStringAnyDictionary") // ?.setting(verbose: true)
 
 public typealias MNStringAnyDictionary = Dictionary<String, Any>
 public typealias MNStringAnyCodableDictionary = Dictionary<String, Codable>

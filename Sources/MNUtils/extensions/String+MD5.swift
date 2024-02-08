@@ -2,8 +2,7 @@
 //  String+MD5.swift
 //  
 //
-//  Created by Ido on 27/08/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 import CommonCrypto

@@ -1,12 +1,12 @@
 //
 //  TimedEventFilter.swift
 import Foundation
-import DSLogger
+import Logging
 
 public typealias TimedEventBlock = ()->Void
 public typealias EventValues = (time:Date, contents:TimedEventBlock?)
 
-fileprivate let dlog : DSLogger? = nil // DLog.forClass("TimedEventFilter")
+fileprivate let dlog : Logger? = nil // Logger(label: "TimedEventFilter")
 
 /// Filter incoming event so that even if the event is fired multiple times in short time interval, the event will be passes on according to a minimum time threshold between events.
 /// Example: Even if "saveToDisk" is called 10 times in one second, only the last call will trigger the save to disk, thus limiting the overhead I/O of 10 saves just because of repeated events.

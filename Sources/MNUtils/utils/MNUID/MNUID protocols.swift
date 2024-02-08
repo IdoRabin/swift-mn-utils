@@ -2,8 +2,7 @@
 //  MNUID protocols.swift
 //  
 //
-//  Created by Ido on 24/05/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 

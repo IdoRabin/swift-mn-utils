@@ -2,15 +2,16 @@
 //  StringEx.swift
 //
 //
-//  Created by Ido Rabin on 17/05/2023.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 . All rights reserved.
 //
 
 import Cocoa
-import DSLogger
 import Network // for IP adress detection
+import Logging
+import AppKit
 
-fileprivate let dlog : DSLogger? = DLog.forClass("StringEx")
+fileprivate let dlog : Logger? = Logger(label: "StringEx")
 
 public extension Sequence where Iterator.Element == String {
     func lowercased(with locale:Locale? = nil)->[String] {
@@ -553,7 +554,6 @@ public extension String {
         return substring(to: maxSize, suffixIfClipped:suffixIfClipped)
     }
 
-    
     /// Return a string that is the original string repeated times amount.
     /// for "N".repeated(times:3) we get "NNN"
     /// - Parameter times: times to repeat
@@ -567,6 +567,41 @@ public extension String {
     
     func repeated(times:UInt)->String {
         return self.repeated(times: Int(times))
+    }
+    
+    
+    /// Will return a new string with the given prefix added at the start, making sure to not add the prefix when it is alrady at the beginning of the string. (i.e in any  case the prefix will apprear only once at the beginning of the string)
+    /// - Parameters:
+    ///   - prefix: prefix to insert at the beginning of the string if it is not already there
+    ///   - caseSensitive: should use case sensitivity when checking if prefix already exists
+    ///   - trimmingWhitespace: should trim whitespace and newLines before checking for prefix
+    /// - Returns: a new string with a single appearence of the prefix at its beginning
+    func adddingPrefixIfNotAlready(_ prefix:String, caseSensitive:Bool = false, trimmingWhitespace:Bool = true)->String {
+        var result = self
+        if trimmingWhitespace {
+            result = result.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        if !result.hasPrefixMatching("^\(prefix)", options: [caseSensitive ? [] : .caseInsensitive]) {
+            result = prefix + result
+        }
+        return result
+    }
+    
+    /// Will return a new string with the given suffix added at the end, making sure to not add the suffix when it is alrady at the end of the string. (i.e in any  case the suffix will apprear only once at the end of the string)
+    /// - Parameters:
+    ///   - suffix: suffix to insert at the end of the string if it is not already there
+    ///   - caseSensitive: should use case sensitivity when checking if suffix already exists
+    ///   - trimmingWhitespace: should trim whitespace and newLines before checking for suffix
+    /// - Returns: a new string with a single appearence of the suffix at its end
+    func adddingSuffixIfNotAlready(_ suffix:String, caseSensitive:Bool = false, trimmingWhitespace:Bool = true)->String {
+        var result = self
+        if trimmingWhitespace {
+            result = result.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        if !result.hasSuffixMatching("\(suffix)", options: [caseSensitive ? [] : .caseInsensitive]) {
+            result = suffix + result
+        }
+        return result
     }
 }
 
@@ -679,7 +714,7 @@ public extension String {
                     // DLog.misc.info("rangesOfDigits found:\(digitsStr) in \(self) at:\(regexResult.range)")
                 }
             } catch let error as NSError {
-                MNLog.misc.warning("StringEx.rangesOfDigits excpetion in regex: \(error.description)")
+                dlog?.warning("StringEx.rangesOfDigits excpetion in regex: \(error.description)")
             }
         }
         
@@ -963,7 +998,7 @@ public extension Sequence where Element == String {
         for val in self {
             let variants = val.serializationIssuesVariants(isUniquify: false)
             if result.count + variants.count > maxElements {
-                MNLog.misc["serializationIssuesVariants"]?.warning("too many variants creatd > \(maxElements) maxElements. enough variants made!")
+                dlog?.warning(".serializationIssuesVariants too many variants creatd > \(maxElements) maxElements. enough variants made!")
                 break
             } else {
                 result.append(contentsOf: variants)

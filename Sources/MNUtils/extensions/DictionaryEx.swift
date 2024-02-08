@@ -2,7 +2,7 @@
 //  DictionaryEx.swift
 //  zync
 //
-//  Created by Ido on 10/11/2023.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 idorabin. All rights reserved.
 //
 
@@ -346,6 +346,49 @@ public extension Dictionary where Value : Sequence, Value.Element : Equatable {
 public extension Dictionary where Value == Array<Any> {
     func count(for key:Key)->Int {
         return self[key]?.count ?? 0
+    }
+}
+
+public extension Dictionary where Key == String {
+    func toSnakeCasedKeys()-> [String:Value] {
+        var result : [String:Value] = [:]
+        for (key, value) in self {
+            result[key.camelCaseToSnakeCase()] = value
+        }
+        return result
+    }
+    
+    func toCamelCasedKeys()-> [String:Value] {
+        var result : [String:Value] = [:]
+        for (key, value) in self {
+            result[key.snakeCaseToCamelCase()] = value
+        }
+        return result
+    }
+}
+
+public extension Dictionary {
+    
+    /// Create a new dictionaty, remapping the keys to new keys (can also change type of key)
+    /// - Parameter transform: func to transform the key, val and return a new key
+    /// - Returns: new key value for the given tuple
+    func remapKeys<NewKey:Hashable>(_ transform : (_ element:(Key, Value))->NewKey)->[NewKey : Value] {
+        var newDict : [NewKey : Value] = [:]
+        for (key, val) in self {
+            newDict[transform((key, val))] = val
+        }
+        return newDict
+    }
+    
+    /// Create a new dictionaty, remapping the values to new values (can also change type of value)
+    /// - Parameter transform: func to transform the key, val and return a new value
+    /// - Returns: new value for the given tuple
+    func remapValues<NewVal:Any>(_ transform : (_ element:(Key, Value))->NewVal)->[Key: NewVal] {
+        var newDict : [Key : NewVal] = [:]
+        for (key, val) in self {
+            newDict[key] = transform((key, val))
+        }
+        return newDict
     }
 }
 

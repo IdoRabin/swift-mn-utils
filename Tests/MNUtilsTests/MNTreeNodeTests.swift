@@ -2,14 +2,13 @@
 //  MNTreeNodeTests.swift
 //  
 //
-//  Created by Ido on 30/08/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 @testable import MNUtils
 import XCTest
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNodeTest")?.setting(verbose: false, testing: true)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeTest") // ?.setting(verbose: false, testing: true)
 
 class TestNode : MNTreeNode<String, String> {
     //
@@ -26,10 +25,16 @@ final class MNTreeNodeTest: XCTestCase {
         let child2b : TestNode? = TestNode(id: "2b", value: "child2b", parent: root)
         let child3a : TestNode? = TestNode(id: "3a", value: "child3a", parentID: "2b")
         let child3x : TestNode? = TestNode(id: "3x", value: "child3x", parent: root)
+        dlog?.info("""
+        3b \( "\(child3b.descOrNil)" )
+        2b \( "\(child2b.descOrNil)" )
+        3a \( "\(child3a.descOrNil)" )
+        3x \( "\(child3x.descOrNil)" )
+""")
         
         //dlog?.info("== Setting parent for child2a: \((child2a?.id).descOrNil) parent: \((root?.id).descOrNil)")
         child2a?.setParent(root)
-        dlog?.info("setUpWithError END: \(root!.treeDescription().descriptionLines)")
+        dlog?.info("setUpWithError END: \(self.root!.treeDescription().descriptionLines)")
         //dlog?.info("setUpWithError END: \([child3b?.id, child2b?.id, child3a?.id, child3x?.id])")
     }
 
@@ -84,7 +89,7 @@ final class MNTreeNodeTest: XCTestCase {
         
         let expectation = expectation(description: "wait for attemptReconstruction")
         
-        dlog?.info("testMNTreeNode root: \(root.descOrNil) START")
+        dlog?.info("testMNTreeNode root: \(self.root.descOrNil) START")
         if root?.IS_SHOULD_AUTO_RECONSTRUCT == false {
             // Insteasd of auto - we will test an explicit reconstruction here:
             root?.attemptReconstruction(context: "testMNTreeNode after init", andRebuildQuickMap: true)

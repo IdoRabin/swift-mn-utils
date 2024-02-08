@@ -2,13 +2,12 @@
 //  MNError.swift
 //  grafo
 //
-//  Created by Ido on 10/07/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : MNLogger? = MNLog.forClass("MNError")
+fileprivate let dlog : Logger? = Logger(label:"MNError")
 
 public struct MNErrorStruct : Codable, Hashable {
     public let error_code : Int?
@@ -113,7 +112,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     public let desc : String
     private (set) public var underlyingError:MNError?
     private (set) public var reasons:[String]?
-
+        
     public func mnErrorCode() -> MNErrorCode? {
         guard let result = MNErrorCode(rawValue:code) else {
             return nil
@@ -128,6 +127,17 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
         return result
     }
     
+    public var httpStatus : HTTPResponseStatus? {
+        return mnErrorCode()?.httpStatus
+    }
+    
+    public var httpStatusCode : Int? {
+        guard let uintCode = mnErrorCode()?.httpStatusCode else {
+            return nil
+        }
+        return Int(uintCode)
+    }
+    
     public var localizedDescription: String {
         get {
             return desc
@@ -135,7 +145,15 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     }
     
     public var debugDescription: String {
-        return "<MNError \(self.domain) \(self.code)> [\(self.reason)]"
+        var str = "<MNError \(self.domain) \(self.code)> [\(self.reason)]"
+        if self.hasUnderlyingError, let lines = self.underlyingErrorsCollated()?.descriptionLines {
+            str += lines
+        }
+        if ["PostgresNIO.PSQLError"].contains(str) {
+            str += "\(self)"
+        }
+        return str
+        
     }
     
     public var hasUnderlyingError : Bool {
@@ -173,7 +191,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     private func validatSelf() {
         #if DEBUG
         if self.desc.contains("couldn't") {
-            dlog?.warning("MNError.init(domain:newCode:description:reasons:underlyingError) Exception: Desc: \(desc)\n code: \(self.code) domain: \(self.domain) description: \(self.description) lines: \(self.reasons?.descriptionLines ?? "<no reason/s>")")
+            dlog?.warning("MNError.init(domain:newCode:description:reasons:underlyingError) Exception: Desc: \(self.desc)\n code: \(self.code) domain: \(self.domain) description: \(self.description) lines: \(self.reasons?.descriptionLines ?? "<no reason/s>")")
         }
         #endif
     }
@@ -199,6 +217,24 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
             self.underlyingError = err
         }
     }
+    
+    
+    @discardableResult
+    /// Will add the error as most nested underlying error in the nested .underlyingError list
+    ///  NOTE: We ignore / do not set an error equal to any one of its parents.
+    /// - Parameter error: error to set as the most-nested error
+    public func setMostNestedUnderlyingError(_ error:MNError) {
+        var err : MNError? = self
+        while err?.hasUnderlyingError == true {
+            if err == error {
+                // We ignore / do not set an error equal to any one of its parents.
+                return
+            }
+            err = err?.underlyingError
+        }
+        err?.setUnderlyingError(err: error)
+    }
+    
     /// Init in base level (try not to use this init)
     ///
     /// - Parameters:
@@ -337,7 +373,8 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     public convenience init(error: any Error) {
         #if DEBUG
         if String(describing:type(of: error)) == "SAError" {
-            dlog?.raiseAssertFailure("Error converted to error")
+            dlog?.warning("Error converted to error [1]")
+            preconditionFailure("Error converted to error [1]")
         }
         #endif
         
@@ -351,7 +388,8 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     public convenience init?(error:(any Error)?) {
         #if DEBUG
             if String(describing:type(of: error)) == "SAError" {
-                dlog?.raiseAssertFailure("Error converted to error")
+                dlog?.warning("Error converted to error [2]")
+                preconditionFailure("Error converted to error [2]")
             }
         #endif
         

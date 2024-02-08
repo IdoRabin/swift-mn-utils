@@ -2,19 +2,18 @@
 //  WeakWrapper.swift
 //  Bricks
 //
-//  Created by Ido Rabin for Bricks on 30/10/2017.
-//  Copyright © 2017 Bricks. All rights reserved.
+//  Created by Ido Rabin for Bricks on 17/1/2024.Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Foundation
+import Logging
 
-import DSLogger
 // Missing required module 'CNIOAtomics'
 #if canImport(NIO)
 import NIO
 #endif
 
-fileprivate let dlog : DSLogger? = DLog.forClass("WeakWrapper")
+fileprivate let dlog : Logger? = Logger(label: "WeakWrapper")
 
 // TODO: Determine if syntactically better? typealias WeakArray<T:AnyObject> = [Weak<T>]
 

@@ -2,8 +2,8 @@
 //  UIImage+Utils.swift
 //  
 //
-//  Created by Ido Rabin on 17/05/2023.
-//  Copyright © 2022 . All rights reserved.
+// Created by Ido Rabin for Bricks on 17/1/2024.
+// Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Foundation
@@ -16,6 +16,7 @@ import UIKit
 
 #if os(OSX)
 import Cocoa
+import AppKit
 
 extension NSImage {
     

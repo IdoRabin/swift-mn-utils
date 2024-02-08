@@ -2,12 +2,12 @@
 //  MNPermission.swift
 //  
 //
-//  Created by Ido on 06/12/2022.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
-fileprivate let dlog : MNLogger? = MNLog.forClass("MNPermission")
+import Logging
+
+fileprivate let dlog : Logger? = Logger(label: "MNPermission")
 
 
 public typealias MNAllowed = Hashable

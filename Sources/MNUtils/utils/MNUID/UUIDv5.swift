@@ -2,17 +2,16 @@
 //  UUIDv5.swift
 //  
 //
-//  Created by Ido on 11/10/2022.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 import CommonCrypto
-import DSLogger
+import Logging
 
 public typealias UUIDv5 = UUID
 public let UID_EMPTY_STRING : String = "00000000-0000-0000-0000-000000000000";
 
-fileprivate let dlog : DSLogger? = DLog.forClass("UUIDv5")
+fileprivate let dlog : Logger? = Logger(label: "UUIDv5")
 
 public extension UUID {
     static var UUID_EMPTY_STRING : String {
@@ -161,7 +160,7 @@ public extension UUID {
                 result = (newUUID == self)
                 
             } catch let error {
-                dlog?.note(".validateV5Hashed Faild validating by creating a new UUID error:\(error.description)")
+                dlog?.notice(".validateV5Hashed Faild validating by creating a new UUID error:\(error.description)")
             }
         }
         

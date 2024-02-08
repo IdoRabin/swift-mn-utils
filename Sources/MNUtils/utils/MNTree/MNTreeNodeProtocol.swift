@@ -2,13 +2,12 @@
 //  MNTreeNodeProtocol.swift
 //  
 //
-//  Created by Ido on 26/09/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNodeProtocol")?.setting(verbose: false)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeProtocol") // ?.setting(verbose: false)
 
 public protocol MNTreeNodeBaseProtocol<ValueType, IDType> : AnyObject, Equatable, Hashable {
     associatedtype IDType : Hashable

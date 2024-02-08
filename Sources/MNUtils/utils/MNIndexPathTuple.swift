@@ -2,8 +2,7 @@
 //  IndexPathTuple.swift
 //  bricks
 //
-//  Created by Ido on 02/12/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 

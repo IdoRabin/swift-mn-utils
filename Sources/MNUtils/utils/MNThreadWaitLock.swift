@@ -2,7 +2,7 @@
 //  MNThreadWaitLock.swift
 //  testVerbs
 //
-//  Created by Ido Rabin on 23/05/2017.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 Ido Rabin. All rights reserved.
 //
 

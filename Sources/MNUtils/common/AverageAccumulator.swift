@@ -2,14 +2,14 @@
 //  AverageAccumulator.swift
 //  expenser
 //
-//  Created by Ido on 20/08/2019.
-//  Copyright © 2019 . All rights reserved.
+// Created by Ido Rabin for Bricks on 17/1/2024.
+// Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Foundation
-import DSLogger
 
-fileprivate let dlog : DSLogger? = DLog.forClass("AverageAccumulator")
+fileprivate let dlog : Logger? = Logger(label: "AverageAccumulator")
+import Logging
 
 public class AverageAccumulator : Codable {
     
@@ -70,7 +70,7 @@ public class AverageAccumulator : Codable {
     
     func log(_ string:String) {
         if payload.isLog && MNUtils.debug.IS_DEBUG {
-            dlog?.info("[\(payload.name)] \(string)")
+            dlog?.info("[\(self.payload.name)] \(string)")
         }
     }
     
@@ -357,7 +357,9 @@ public extension AverageAccumulator /* saving */ {
                 self._isNeedsSave = false
                 return true
             } catch {
-                dlog?.raisePreconditionFailure("save [\(self.payload.name)] failed with error:\(error.localizedDescription)")
+                let msg = "save [\(self.payload.name)] failed with error:\(error.localizedDescription)"
+                dlog?.critical("\(msg)")
+                preconditionFailure(msg)
             }
         }
         
@@ -385,7 +387,7 @@ public extension AverageAccumulator /* saving */ {
                     }
                     return true
                 } else {
-                    dlog?.note("load() failed casting dictionary filename:\(displayPath)")
+                    dlog?.notice("load() failed casting dictionary filename:\(displayPath)")
                 }
             } catch {
                 dlog?.warning("load() failed with error:\(error.localizedDescription)")

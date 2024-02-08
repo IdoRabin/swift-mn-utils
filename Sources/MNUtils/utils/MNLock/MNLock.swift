@@ -2,8 +2,7 @@
 //  MNLock.swift
 //  
 //
-//  Created by Ido on 03/08/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 
@@ -50,7 +49,7 @@ public final class MNLock : CustomDebugStringConvertible {
                 //print("Using NSLock")
             }
         #else
-        mLock = NSRecursiveLock()
+            mLock = NSRecursiveLock()
             // print("Using NSLock")
         #endif
     }
@@ -103,7 +102,7 @@ extension NSRecursiveLock: LockProtocol {
     
     @inlinable
     public func withAsyncLock<ReturnValue>(_ body: @escaping () async throws -> ReturnValue) async rethrows -> ReturnValue {
-        lock()
+        lock() // TODO: Instance method 'lock' is unavailable from asynchronous contexts; Use async-safe scoped locking instead; this is an error in Swift 6
         defer { unlock() }
         return try await body()
     }

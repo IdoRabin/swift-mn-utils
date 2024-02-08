@@ -2,14 +2,13 @@
 //  MNTreeNode.swift
 //  
 //
-//  Created by Ido on 07/09/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNode")?.setting(verbose: false)
-fileprivate let dlogDecode : DSLogger? = DLog.forClass("MNTreeNode |dec|")?.setting(verbose: true)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNode") // ?.setting(verbose: false)
+fileprivate let dlogDecode : Logger? = Logger(label: "MNTreeNode |dec|") // ?.setting(verbose: true)
 
 public enum MNTreeNodeType : String, Codable, CaseIterable {
     case leaf
@@ -160,7 +159,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
     
     private func treeDescription(depth:Int = 0) -> [String] {
         guard depth < Self.MAX_TREE_DEPTH else {
-            dlog?.note("treeDescription(depth:\(depth) recursion or tree depth too big!")
+            dlog?.notice("treeDescription(depth:\(depth) recursion or tree depth too big!")
             return []
         }
         
@@ -197,7 +196,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
     
     private static func idForMNUIDable(value:ValueType?)->IDType? {
         if (ValueType.self is MNUIDable) {
-            dlog?.note("Type \(Self.self) has an IDType of MNUID, consider if ValueType should be MNUIDable?")
+            dlog?.notice("Type \(Self.self) has an IDType of MNUID, consider if ValueType should be MNUIDable?")
         }
         return nil
     }
@@ -231,13 +230,13 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         UnknownMNTreeDecodingObj.registerNodeType(key: "\(type(of:self))", node: self)
         
         Self.removeFromReconstruction(byId: self.id)
-        dlog?.verbose("\(Self.self).init(id: \(id), value: \(value.descOrNil) parent: \(parent.descOrNil))")
+        dlog?.trace("\(Self.self).init(id: \( "\(id)" ), value: \(value.descOrNil) parent: \(self.parent.descOrNil))")
     }
         
     // Codable?
     public required init(from decoder: Decoder) throws {
         let msg = "\(Self.self) can only be decoded when value type: \(ValueType.self) and IDType: \(IDType.self) are Codable!"
-        dlogDecode?.warning(msg)
+        dlogDecode?.warning("\(msg)")
         throw MNError(code: .misc_failed_decoding, reason: msg)
     }
     
@@ -310,7 +309,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         if nodeTypeKey != nil {
             guard nodeTypeKey == Self.TREE_NODE_TYPE_KEY else {
                 let msg = "\(Self.self) decoding failed depth:\(depth): tree type key mismatch: \(nodeTypeKey.descOrNil) != \(Self.TREE_NODE_TYPE_KEY)"
-                dlogDecode?.warning(msg)
+                dlogDecode?.warning("\( msg )")
                 throw MNError(code: .misc_failed_decoding, reason: msg)
             }
         }
@@ -362,7 +361,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
                     childParentIds[id] = parentId
                     totalFound += 1
                     if parentId == nil || parentId == .none {
-                        dlog?.note("node: \(id) has no parent!")
+                        dlog?.notice("node: \( "\(id)" ) has no parent!")
                     }
                 }
                 
@@ -379,14 +378,14 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
             var unkeyedContainer = try keyedContainer.nestedUnkeyedContainer(forKey: .children)
             do {
                 // Will decode all children (flat or full tree):
-                DLog.indentStart(logger: dlogDecode)
+                // DLog.indentStart(logger: dlogDecode)
                 try decodeChildrenTree(unkeyedContainer: &unkeyedContainer)
                 unkeyedContainer = try keyedContainer.nestedUnkeyedContainer(forKey: .children)
                 try decodeChildren(unkeyedContainer: &unkeyedContainer)
-                DLog.indentEnd(logger: dlogDecode)
+                // DLog.indentEnd(logger: dlogDecode)
             } catch let error {
                 let msg = "Failed decoding instance in \(treeTypeStr) tree: \(Self.self) depth:\(depth) error: \(error.description)"
-                dlog?.warning(msg)
+                dlog?.warning("\( msg )")
                 throw MNError(code: .misc_failed_decoding, reason: msg)
             }
         }
@@ -398,21 +397,21 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
             }
         }
             
-        dlogDecode?.info("\(logPrefix) Decoded | id: \"\(self.id)\" |\(self.nodeType.rawValue)| value: \"\(self.value.descOrNil)\" ")
+        dlogDecode?.info("\(logPrefix) Decoded | id: \"\( "\(self.id)" )\" |\(self.nodeType.rawValue)| value: \"\(self.value.descOrNil) ")
     }
     
     public convenience init?(id: IDType, value: ValueType?, parentID: IDType) {
-        dlog?.verbose("\(Self.self).init(id: \(id), value: \(value.descOrNil) parentID: \(parentID))")
+        dlog?.verbose("\(Self.self).init(id: \( "\(id)" ), value: \(value.descOrNil) parentID: \(parentID))")
         guard id != parentID else {
             // Init where parentId == self.id
-            dlog?.note("\(Self.self).init(id: \(id), value: \(value.descOrNil) parentID: \(parentID)) had parentID == self.id !!")
+            dlog?.notice("\(Self.self).init(id: \( "\(id)" ), value: \(value.descOrNil) parentID: \( "\(parentID)" )) had parentID == self.id !!")
             self.init(id: id, value: value)
             return // Success!
         }
         
         // Init with existing parent:
         if let newParent = Self.quickFetch(byId: parentID) {
-            dlog?.verbose(log: .success, "\(Self.self).init(id: \(id), value: \(value.descOrNil) parentID: \(parentID)) parent already existed")
+            dlog?.verbose(symbol: .success, "\(Self.self).init(id: \( "\(id)" ), value: \(value.descOrNil) parentID: \( "\(parentID)" )) parent already existed")
             self.init(id: id, value: value, parent: newParent)
             return // Success!
         }
@@ -451,7 +450,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         if duplicateIds.count > 0 {
             let msg = "\(Self.self) tree sturcture has duplicate nodes in different areas of the tree: \(duplicateIds.count)"
             result.append(MNError(code: .misc_bad_input, reason: msg))
-            dlog?.warning(msg + "\n" + self.root.treeDescription().descriptionLines)
+            dlog?.warning("\(msg) \n \(self.root.treeDescription().descriptionLines)")
         }
         
         return result
@@ -510,7 +509,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
             let newIds = nodes.ids
             let intersection = existingIds.intersection(with: newIds)
             if intersection.count > 0 {
-                dlog?.warning("\(self.TREE_NODE_TYPE_KEY) : addChildren attempted to add nodes as children of [\(self.id)] that are already in the tree! existing: \(intersection)")
+                dlog?.warning("\(self.TREE_NODE_TYPE_KEY) : addChildren attempted to add nodes as children of [\( "\(self.id)" )] that are already in the tree! existing: \( "\(intersection)" )")
             }
         }
         
@@ -538,10 +537,10 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         
         let nodesToRemove = nodes.intersection(with: self.children)
         if nodesToRemove.count < nodes.count {
-            dlog?.note("removeChildren recieved some nodes to remove (\(nodes.removing(objects: nodesToRemove).ids.descriptionJoined)) that are NOT children of self: \"\(self.id)\"")
+            dlog?.notice("removeChildren recieved some nodes to remove (\(nodes.removing(objects: nodesToRemove).ids.descriptionJoined)) that are NOT children of self: \"\( "\(self.id)" )\"")
         }
         guard nodesToRemove.count > 0 else {
-            dlog?.note("removeChildren has 0 nodes to remove!")
+            dlog?.notice("removeChildren has 0 nodes to remove!")
             return
         }
         
@@ -582,11 +581,11 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         let depth = self.depth
         let recursionDepth = recursivelyDowntree ? recursionDepth : 0 // ignore if not recursion
         guard recursionDepth <= Self.MAX_TREE_DEPTH && recursionDepth < Self.MAX_TREE_DEPTH else {
-            dlog?.note("\(self).detachAll(recursivelyDowntree:\(recursivelyDowntree)) recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
+            dlog?.notice("\(self).detachAll(recursivelyDowntree:\(recursivelyDowntree)) recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
             return
         }
         
-        dlog?.info("   ".repeated(times: 2) + "\(self).detachAll(recursivelyDowntree:\(recursivelyDowntree))")
+        dlog?.info("\("   ".repeated(times: 2)) \(self).detachAll(recursivelyDowntree:\(recursivelyDowntree))")
         
         if recursivelyDowntree {
             let children = self.allChildrenByDepth // recoursive call, does not include self.
@@ -621,10 +620,10 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         }
         for child in children {
             if child.parent != parent {
-                dlog?.warning("debugValidateChild \(child.id) parent is not \(parent.id)!")
+                dlog?.warning("debugValidateChild \( "\(child.id)" ) parent is not \( "\(parent.id)" )!")
             }
             if !parent.children.contains(elementEqualTo: child) {
-                dlog?.warning("debugValidateChild \(child.id) parent is not \(self.id)!")
+                dlog?.warning("debugValidateChild \( "\(child.id)" ) parent is not \( "\(self.id)" )!")
             }
         }
     }
@@ -637,7 +636,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
                                             recursionDepth:Int, nodeDepth:Int)->MNResumeStopTuple<[ResultType]>  {
         
         guard recursionDepth <= Self.MAX_TREE_DEPTH && recursionDepth < Self.MAX_TREE_DEPTH else {
-            dlog?.note("\(Self.self) _recourseChildren \(recursionType.description) recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
+            dlog?.notice("\(Self.self) _recourseChildren \(recursionType.description) recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
             return MNResumeStopTuple.stopEmpty
         }
         var result : [ResultType] = []
@@ -694,7 +693,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
     private func _recourseParents<ResultType : Any>(_ block: (_ node:SelfType,_ depth:Int)->MNResumeStopTuple<ResultType>, includeSelf:Bool = false, recursionDepth:Int, nodeDepth:Int)->MNResumeStopTuple<[ResultType]> {
         guard nodeDepth <= Self.MAX_TREE_DEPTH && recursionDepth <= Self.MAX_TREE_DEPTH &&
               nodeDepth >= 0 && recursionDepth >= 0 else {
-            dlog?.note("\(Self.self) _recourseParents recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
+            dlog?.notice("\(Self.self) _recourseParents recursion depth exceeded MAX_TREE_DEPTH \(Self.MAX_TREE_DEPTH)")
             return .stopEmpty
         }
         
@@ -746,7 +745,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         
         // Log if stooped
         if dlog?.isVerboseActive == true && rsTuple.instrutionIsStop {
-            dlog?.verbose(log: .note, "recourseChildrenWidthFirst for \(self) was STOPPED!")
+            dlog?.verbose("⚠️️ recourseChildrenWidthFirst for \(self) was STOPPED!")
         }
         return rsTuple.value ?? []
     }
@@ -766,7 +765,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         
         // Log if stooped
         if dlog?.isVerboseActive == true && rsTuple.instrutionIsStop {
-            dlog?.verbose(log: .note, "recourseChildrenWidthFirst for \(self) was STOPPED!")
+            dlog?.verbose("⚠️️ recourseChildrenWidthFirst for \(self) was STOPPED!")
         }
         return rsTuple.value ?? []
     }
@@ -806,7 +805,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         
         // Log if stooped
         if dlog?.isVerboseActive == true && rsTuple.instrutionIsStop {
-            dlog?.verbose(log: .note, "recourseParents for \(self) was STOPPED!")
+            dlog?.verbose("⚠️️ recourseParents for \(self) was STOPPED!")
         }
         return rsTuple.value ?? []
     }
@@ -869,7 +868,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
             if includeSelf || node != self {
                 return (depth, node)
             } else if node == self && !includeSelf {
-                dlog?.note("recourseChildrenDepthFirst has a problem! (visited self while includeSelf is false!)")
+                dlog?.notice("recourseChildrenDepthFirst has a problem! (visited self while includeSelf is false!)")
             }
             return nil
         }, includeSelf: includeSelf)
@@ -959,7 +958,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         
         if MNUtils.debug.IS_DEBUG && result == false {
             if anode.isParentOf(node: self) {
-                dlog?.note("isParentOf(node: \(anode)) is a child of \(self)! Maybe you wanted to ask isParentOf(node:) with reversed param / caller?")
+                dlog?.notice("isParentOf(node: \(anode)) is a child of \(self)! Maybe you wanted to ask isParentOf(node:) with reversed param / caller?")
             }
         }
         
@@ -983,7 +982,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
             if anode.root.firstParent(where: { aparent, depth in
                 aparent == self
             }, includeSelf: false) != nil {
-                dlog?.note("isChildOf(node: \(anode)) is a child of \(self)! Maybe you wanted to ask isChildOf(node:) with reversed param / caller?")
+                dlog?.notice("isChildOf(node: \(anode)) is a child of \(self)! Maybe you wanted to ask isChildOf(node:) with reversed param / caller?")
             }
         }
         
@@ -1040,7 +1039,7 @@ extension MNTreeNode where IDType : LosslessStringConvertible {
         }
         
         self.init(id: id, value: value, parent: existingParent)
-        dlog?.verbose(log:.success, "\(Self.self).init(id: \(id), value: \(value.descOrNil) parentIDString: \(parentIDString) (parent already exited)")
+        dlog?.verbose(symbol: .success, "\(Self.self).init(id: \(id), value: \(value.descOrNil) parentIDString: \(parentIDString) (parent already exited)")
     }
 }
 

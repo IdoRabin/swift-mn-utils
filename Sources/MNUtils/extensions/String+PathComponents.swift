@@ -2,15 +2,15 @@
 //  String+PathComponents.swift
 //  rabac-test-project
 //
-//  Created by Ido on 20/03/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 
 
 
-#if VAPOR || canImport(Vapor)
+#if VAPOR || canImport(Vapor) || canImport(RoutingKit)
 // This is implemented in the package RoutingKit which Vapor frameowrk is dependent on / sdk: see framework RoutingKit/Sources/RoutingKit/PathComponent.swift
+    import RoutingKit
 #else
 // We implement a complimentary extension for when Vapor is absent
 /// A single path component of a `Route`. An array of these components describes
@@ -72,24 +72,6 @@ public enum PathComponent: ExpressibleByStringInterpolation, CustomStringConvert
     }
 }
 
-public extension String {
-    /// Converts a string into `[PathComponent]`.
-    var pathComponents: [PathComponent] {
-        return self.split(separator: "/").map { .init(stringLiteral: .init($0)) }
-    }
-}
-
-public extension Sequence where Element == PathComponent {
-    /// Converts an array of `PathComponent` into a readable path string.
-    ///
-    ///     galaxies/:galaxyID/planets
-    ///
-    var string: String {
-        return self.map(\.description).joined(separator: "/")
-    }
-}
-#endif
-
 // Regardless of Vapor being imported or not:
 // extending Vapor RoutingKit PathComponent
 extension PathComponent : Codable, Hashable {
@@ -111,10 +93,23 @@ extension PathComponent : Codable, Hashable {
     }
     
     // MARK: Equatable
-    public static func == (lhs: PathComponent, rhs: PathComponent) -> Bool {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs.description == rhs.description
     }
 }
+
+
+public extension String /* path components */ {
+    var asPathComponents : [PathComponent] {
+        return self.components(separatedBy: "/").map { str in
+            return PathComponent(stringLiteral: str)
+        }
+    }
+}
+
+#endif
+
+/// ========================= regardless of implementation =====================================
 
 public extension Sequence where Element == PathComponent {
     var fullPath:String {

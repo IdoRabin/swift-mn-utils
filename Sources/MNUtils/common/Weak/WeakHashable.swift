@@ -2,13 +2,12 @@
 //  WeakHashable.swift
 //  
 //
-//  Created by Ido on 15/10/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("WeakHashable")
+fileprivate let dlog : Logger? = Logger(label: "WeakHashable")
 
 // TODO: Check why could Weak<any Hashable> do not seem to conform to Hahsable in the context of WeakSet - this will thus eliminate the need for class WeakHashable?
 /// A wrapper for weakly referenced hashable objects, for use in observers arrays and other lists that require pointers to objects without retaining them

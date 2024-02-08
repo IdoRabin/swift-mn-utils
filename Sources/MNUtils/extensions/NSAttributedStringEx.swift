@@ -1,11 +1,15 @@
 //
 //  NSAttributedStringEx.swift
-//  Created by Ido Rabin on 17/05/2023.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 . All rights reserved.
 //
 
 import Foundation
 import AppKit
+import Logging
+
+fileprivate let dlog : Logger? = Logger(label: "AttributedStringEx")
+
 
 public class AttributedString : Codable, Equatable, Hashable {
     
@@ -77,11 +81,11 @@ public extension String {
                 }
                 return result
             } catch let error {
-                MNLog.misc["NSAttributedStringEx"]?.warning("invalid regex: \(error.localizedDescription)")
+                dlog?.warning("invalid regex: \(error.localizedDescription)")
                 return []
             }
         } else {
-            MNLog.misc["NSAttributedStringEx"]?.warning("findAllStringRangeMatches:substring regex length was 0: \(substring)")
+            dlog?.warning("findAllStringRangeMatches:substring regex length was 0: \(substring)")
         }
         
         return []
@@ -107,11 +111,11 @@ public extension String {
                 }
                 return result
             } catch let error {
-                MNLog.misc["NSAttributedStringEx"]?.warning("invalid regex: \(error.localizedDescription)")
+                dlog?.warning("invalid regex: \(error.localizedDescription)")
                 return []
             }
         } else {
-            MNLog.misc["NSAttributedStringEx"]?.warning("findAllStringRangeMatches:startingWith: regex length was 0: startingWith:\(startingWith) endingWith:\(endingWith)")
+            dlog?.warning("findAllStringRangeMatches:startingWith: regex length was 0: startingWith:\(startingWith) endingWith:\(endingWith)")
         }
         return []
     }

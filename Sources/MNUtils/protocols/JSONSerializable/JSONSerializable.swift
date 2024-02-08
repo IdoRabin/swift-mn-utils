@@ -2,14 +2,14 @@
 //  JSONSerializable.swift
 //  
 //
-//  Created by Ido Rabin on 25/11/2022.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 . All rights reserved.
 //
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : MNLogger? = MNLog.forClass("JSONSerializable")
+fileprivate let dlog : Logger? = Logger(label: "JSONSerializable")
 
 public extension JSONEncoder {
     func encodeJSONObject<T: Encodable>(_ value: T, options opt: JSONSerialization.ReadingOptions = []) throws -> Any {
@@ -239,7 +239,7 @@ public extension JSONSerializable {
             return result
         } catch let error as NSError {
             let appErr = MNError(error: error)
-            dlog?.note("Decoding of \(type(of: self)) faild with error:\(appErr)")
+            dlog?.notice("Decoding of \(type(of: self)) faild with error:\(appErr)")
             return nil
         }
     }
@@ -252,7 +252,7 @@ public extension JSONSerializable {
                 (result as? JSONSerializable)?.didDeserializefromJson()
                 return result
             } catch let error as NSError {
-                dlog?.note("Failed deserializing from JSON: error: \(error.code) > \(error.localizedDescription) > \(String(describing: error))")
+                dlog?.notice("Failed deserializing from JSON: error: \(error.code) > \(error.localizedDescription) > \(String(describing: error))")
                 return nil
             }
         }
@@ -300,7 +300,7 @@ public extension JSONFileSerializable {
                 FileManager.default.createFile(atPath: fileurl.path, contents: data, attributes: nil)
                 if MNUtils.debug.IS_DEBUG {
                     if data.count > 1000000 { // 1MB
-                        dlog?.note("Maybe saving a > 1MB JSON as string is not efficient, consider using another encoder!")
+                        dlog?.notice("Maybe saving a > 1MB JSON as string is not efficient, consider using another encoder!")
                     }
                     // dlog?.info("saveToJSON size: \(data.count) file: \(fileurl) prettyPrint: \(prettyPrint)")
                 }
@@ -337,18 +337,18 @@ public extension JSONFileSerializable {
                 let result : Self = try decoder.decode(Self.self, from: data)
                 if MNUtils.debug.IS_DEBUG {
                     if data.count > 1000000 { // 1MB
-                        dlog?.note("Maybe loading a > 1MB JSON as string is not efficient, consider using another encoder!")
+                        dlog?.notice("Maybe loading a > 1MB JSON as string is not efficient, consider using another encoder!")
                     }
                 }
                 return .success(result as! T)
                 
             } catch let error {
                 let desc = "loadFromJSON File \"...\(fileurl.lastPathComponents(count: 3))\" parse / load error:\(MNError(error: error))"
-                dlog?.note(desc)
+                dlog?.notice("\(desc)")
                 return .failure(MNError(code:.misc_failed_loading, reason: desc, underlyingError: error))
             }
         } else {
-            dlog?.note("loadFromJSON File \"...\(fileurl.lastPathComponents(count: 3))\" does not exit")
+            dlog?.notice("loadFromJSON File \"...\(fileurl.lastPathComponents(count: 3))\" does not exit")
             return .failure(MNError(MNErrorCode.misc_failed_loading, reason: "loadFromJSON failed - file does not exist: \(fileurl.path) "))
         }
     }

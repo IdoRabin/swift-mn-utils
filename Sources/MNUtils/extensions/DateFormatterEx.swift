@@ -2,8 +2,8 @@
 //  DateFormatterEx.swift
 //  
 //
-//  Created by Ido Rabin on 17/05/2023.
-//  Copyright © 2022 . All rights reserved.
+// Created by Ido Rabin for Bricks on 17/1/2024.
+// Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Foundation
@@ -236,7 +236,7 @@ public extension Date {
     
     
     init?(iso8601 string:String) {
-        let formatter = DateFormatter.iso8601DateFormatter ?? ISO8601DateFormatter()
+        let formatter = DateFormatter.iso8601DateFormatter // ?? ISO8601DateFormatter()
         if let date = formatter.date(from: string) {
             self = date
         } else {

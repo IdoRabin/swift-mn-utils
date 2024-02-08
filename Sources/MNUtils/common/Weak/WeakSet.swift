@@ -2,13 +2,12 @@
 //  WeakSet.swift
 //  
 //
-//  Created by Ido on 15/10/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("WeakSet")
+fileprivate let dlog : Logger? = Logger(label: "WeakSet")
 
 class WeakSet<T: AnyObject, WeakType: Weakable> where T : Equatable & Hashable {
     typealias WeakedT = WeakHashable<T>
@@ -59,7 +58,7 @@ class WeakSet<T: AnyObject, WeakType: Weakable> where T : Equatable & Hashable {
         if MNUtils.debug.IS_DEBUG {
 //            let intersection = self.values.intersection(with: vals)
 //            if intersection.count > 0 {
-//                dlog?.note("WeakSet add(values:filteredBy) contains items already in the set: \(intersection.descriptionJoined)")
+//                dlog?.notice("WeakSet add(values:filteredBy) contains items already in the set: \(intersection.descriptionJoined)")
 //                vals.remove(objects: intersection)
 //            }
         }

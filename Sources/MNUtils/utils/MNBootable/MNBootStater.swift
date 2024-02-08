@@ -2,13 +2,12 @@
 //  MNBootStater.swift
 //  
 //
-//  Created by Ido on 10/06/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNBootStater")?.setting(verbose: true)
+fileprivate let dlog : Logger? = Logger(label: "MNBootStater") // ?.setting(verbose: true)
 
 public protocol MNBootStaterProtocol<ObjectType> {
     associatedtype ObjectType
@@ -67,11 +66,11 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
                 _isNeedsSaving = newValue
                 
                 guard let object = originObject else {
-                    dlog?.note("set isNeedsSaving: originObject not defined for MNBootStater")
+                    dlog?.notice("set isNeedsSaving: originObject not defined for MNBootStater")
                     return
                 }
                 guard let app = self.app else {
-                    dlog?.note("set isNeedsSaving: app not defined for MNBootStater")
+                    dlog?.notice("set isNeedsSaving: app not defined for MNBootStater")
                     return
                 }
                 if newValue {
@@ -120,15 +119,15 @@ public class MNBootStater<TObject:AnyObject> : MNBootStaterProtocol {
     private func performStateChange(old:MNBootState, new:MNBootState) throws {
         let err : Error? = nil
         guard let object = originObject else {
-            dlog?.note("performStateChange: originObject not defined for MNBootStater")
+            dlog?.notice("performStateChange: originObject not defined for MNBootStater")
             return
         }
         guard let app = self.app else {
-            dlog?.note("performStateChange: app not defined for MNBootStater")
+            dlog?.notice("performStateChange: app not defined for MNBootStater")
             return
         }
         
-        dlog?.info("\(self.logLabel())   notifying \(observers.count) observers:")
+        dlog?.info("\(self.logLabel())   notifying \(self.observers.count) observers:")
         
         observers.invalidate()
         observers.enumerateOnCurrentThread { observer in

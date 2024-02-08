@@ -1,14 +1,14 @@
 //
 //  Cache.swift
 //
-//  Created by Ido on 04/02/2021.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 . All rights reserved.
 //
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : DSLogger? = DLog.forClass("Cache")
+fileprivate let dlog : Logger? = Logger(label: "Cache")
 
 // typealias CodableHashable = Codable & Hashable
 // typealias AnyCodable = Any & Codable
@@ -211,7 +211,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
             let wasNil = oldValue == nil
             if !isNil && !wasNil {
                 if self.isLoaded {
-                    dlog?.note(".determinePolicyAfterLoad was set to a block, but the cache [\(self.name)] has already finished loading.")
+                    dlog?.notice(".determinePolicyAfterLoad was set to a block, but the cache [\(self.name)] has already finished loading.")
                 }
             }
         }
@@ -403,7 +403,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
     func log(_ args:CVarArg...) {
         if isLog && MNUtils.debug.IS_DEBUG {
             if args.count == 1 {
-                dlog?.info("\(self.logPrefix)\(args.first!)")
+                dlog?.info("\(self.logPrefix)\( "\(args.first!)" )")
             } else {
                 dlog?.info("\(self.logPrefix)\(args)")
             }
@@ -411,10 +411,10 @@ public class MNCache<Key : Hashable, Value : Hashable> {
     }
     
     func logWarning(_ args:CVarArg...) {
-        let alog = dlog ?? DLog.misc[self.logPrefix]
+        let alog = dlog // ?? DLog.misc[self.logPrefix]
                 
         if args.count == 1 {
-            alog?.warning("\(self.logPrefix)\(args.first!)")
+            alog?.warning("\(self.logPrefix)\( "\(args.first!)" )")
         } else {
             alog?.warning("\(self.logPrefix)\(args)")
         }
@@ -422,9 +422,9 @@ public class MNCache<Key : Hashable, Value : Hashable> {
     
     func logNote(_ args:CVarArg...) {
         if args.count == 1 {
-            dlog?.note("\(self.logPrefix)\(args.first!)")
+            dlog?.notice("\(self.logPrefix)\( "\(args.first!)" )")
         } else {
-            dlog?.note("\(self.logPrefix)\(args)")
+            dlog?.notice("\(self.logPrefix)\(args)")
         }
     }
     
@@ -706,14 +706,14 @@ public class MNCache<Key : Hashable, Value : Hashable> {
     @discardableResult
     public func replaceKey(from fromKey:Key, to toKey:Key) -> Bool {
         guard fromKey != toKey else {
-            dlog?.verbose(log:.note, "replaceKey from:\(fromKey) to:\(toKey) got the same value!")
+            dlog?.verbose(symbol: .warning, "replaceKey from:\(fromKey) to:\(toKey) got the same value!")
             return false
         }
         var result = false
         self._lock.lock {
             if _items.hasKey(fromKey) {
                 if _items.hasKey(toKey) {
-                    dlog?.warning("[\(self.name)] replaceKey from:\(fromKey) to:\(toKey) already has the target (to) key!")
+                    dlog?.warning("[\(self.name)] replaceKey from:\( "\(fromKey)" ) to:\( "\(toKey)" ) already has the target (to) key!")
                 } else {
                     _items.replaceKey(fromKey: fromKey, toKey: toKey)
                     // mutating - remove all prev references to key (lifo)
@@ -725,7 +725,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
                     result = true
                 }
             } else {
-                dlog?.verbose(log:.note, "replaceKey from:\(fromKey) to:\(toKey) did not find a value for this key!")
+                dlog?.verbose(symbol: .warning, "replaceKey from:\(fromKey) to:\(toKey) did not find a value for this key!")
             }
         }
         return result
@@ -812,7 +812,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
             if let lastIOStart = _lastIOStartTime {
                 let delta = abs(lastIOStart.timeIntervalSinceNow)
                 if delta < 0.05 {
-                    dlog?.warning("\(Self.self)[\(name)] last IO time too soon: \(delta.rounded(decimal: 2)) seconds ago.")
+                    dlog?.warning("\(Self.self)[\(self.name)] last IO time too soon: \(delta.rounded(decimal: 2)) seconds ago.")
                     result = false
                 }
             }
@@ -937,7 +937,9 @@ public extension MNCache where Key : CodableHashable /* saving of keys only*/ {
             } catch {
                 // Might re-throw
                 result = false
-                dlog?.raisePreconditionFailure("\(self.logPrefix) saveKeys Cache [\(self.name)] failed with error:\(error.localizedDescription)")
+                let msg =  "\(self.logPrefix) saveKeys Cache [\(self.name)] failed with error:\(error.localizedDescription)"
+                dlog?.critical("\( msg )")
+                preconditionFailure("msg")
             }
             self.ioEnded()
         }
@@ -1091,7 +1093,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
         }
         
         guard isIOAllowed() else {
-            dlog?.warning("\(Self.self)[\(name)] failed save for IO reasons!")
+            dlog?.warning("\(Self.self)[\(self.name)] failed save for IO reasons!")
             return false
         }
         
@@ -1125,7 +1127,9 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                     saveError = MNCacheError(code: .misc_failed_saving, reason: "Underlying cache save error.", cacheName: self.name, underlyingError: error)
                 }
                 
-                dlog?.raisePreconditionFailure("Cache[\(self.name)].save() failed with error:\(error.localizedDescription)")
+                let msg = "Cache[\(self.name)].save() failed with error:\(error.localizedDescription)"
+                dlog?.critical("\( msg )")
+                preconditionFailure(msg)
             }
         }
         self.ioEnded()
@@ -1225,7 +1229,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                         if let instance = ResultType.createInstance(stringAnyDict: valueDic) as? Value {
                             
                             if Key.self != String.self {
-                                DLog.warning("[TODO] : loadWithSubTypes(data:Data) needs a keyForValue function external? lambda? block?")
+                                dlog?.warning("[TODO] : loadWithSubTypes(data:Data) needs a keyForValue function external? lambda? block?")
                             }
                             
                             if let resultkey = key as? Key {
@@ -1282,7 +1286,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
         }
         
         guard isIOAllowed() else {
-            dlog?.warning("\(Self.self)[\(name)] failed load for IO reasons!")
+            dlog?.warning("\(Self.self)[\(self.name)] failed load for IO reasons!")
             return false
         }
         

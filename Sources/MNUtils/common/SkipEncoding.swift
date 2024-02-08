@@ -1,8 +1,7 @@
 //
 //  SkipEncoding.swift
 //
-//  Created by Ido on 07/11/2021.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import AppKit
 

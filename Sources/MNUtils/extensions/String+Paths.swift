@@ -2,16 +2,18 @@
 //  String+Paths.swift
 //  
 //
-//  Created by Ido on 12/11/2022.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 
 
 import Foundation
-import DSLogger
+import Logging
 
+#if canImport(RoutingKit)
+    import RoutingKit
+#endif
 
-fileprivate let dlog : DSLogger? = DLog.forClass("String+Paths")
+fileprivate let dlog : Logger? = Logger(label: "String+Paths")
 
 fileprivate let ALL_SUSPECTED_PERCENT_ESCAPED_KEYS = MNUtils.constants.PERCENT_ESCAPED_HINTS.keysArray.union(with: MNUtils.constants.PERCENT_DOUBLY_ESCAPED_HINTS.keysArray)
 
@@ -50,7 +52,7 @@ public extension String /* helper functions relevant to vapor URL requests, para
                 dlog?.info("      removingPercentEncoding input was all base 64")
                 return self
             } else {
-                dlog?.note("      removingPercentEncoding mixed base 64 + reg url query params?? [\(clip(self))] \n\nremaining:[\(clip(replaced))]")
+                dlog?.notice("      removingPercentEncoding mixed base 64 + reg url query params?? [\(clip(self))] \n\nremaining:[\(clip(replaced))]")
             }
         }
         
@@ -77,7 +79,7 @@ public extension String /* helper functions relevant to vapor URL requests, para
         // Try fallback approach: result is nil or still has %
         if result?.contains("%") ?? true {
             if isLogIssues {
-                dlog?.note("removingPercentEncodingEx removingPercentEncoding x \(loopCounter) times FAILED from [\(clip(self))] to: [\(clip(result.descOrNil))]")
+                dlog?.notice("removingPercentEncodingEx removingPercentEncoding x \(loopCounter) times FAILED from [\(clip(self))] to: [\(clip(result.descOrNil))]")
             }
             
             // Fallback "manual" parsing:
@@ -149,7 +151,7 @@ public extension String /* helper functions relevant to vapor URL requests, para
                 result[key.removingPercentEncodingEx ?? key] = (val.removingPercentEncodingEx ?? val)
             }
             if MNUtils.debug.IS_DEBUG && result.count > 0 {
-                dlog?.note("explodeBase64IfPossible exploded a string that was already reverted from base64! input should be in base64.")
+                dlog?.notice("explodeBase64IfPossible exploded a string that was already reverted from base64! input should be in base64.")
             }
         }
 
@@ -160,8 +162,10 @@ public extension String /* helper functions relevant to vapor URL requests, para
     }
     
     func explodeProtobufIfPossible()->[String:String]? {
-        let result : [String:String] = [:]
-        dlog?.raisePreconditionFailure("TODO: Implement protobuf decoding!")
+        // let result : [String:String] = [:]
+        let msg = "TODO: Implement protobuf decoding! / import JWT or check #if canImport(JWT) etc..."
+        dlog?.critical("\( msg )")
+        preconditionFailure(msg)
         /*
         let convStr = self
         
@@ -179,7 +183,7 @@ public extension String /* helper functions relevant to vapor URL requests, para
         guard result.count > 0 else {
             return nil
         }*/
-        return result
+        // return result
     }
     
     private func internal_asQueryParamsDictionary(pairsDelimiter pairDelim:String = "&",
@@ -215,7 +219,7 @@ public extension String /* helper functions relevant to vapor URL requests, para
                     dlog?.success("_asQueryParamsDictionary succeeded exploding base64")
                     continue // skip to next part
                 } else if part.count > 0 {
-                    // dlog?.note("_asQueryParamsDictionary failed after attempting explodeBase64IfPossible. depth [\(depth)]: the url part has \(comps.count) != 2 parts:")
+                    // dlog?.notice("_asQueryParamsDictionary failed after attempting explodeBase64IfPossible. depth [\(depth)]: the url part has \(comps.count) != 2 parts:")
                     return nil
                 }
             }
@@ -272,22 +276,22 @@ public extension String /* helper functions relevant to vapor URL requests, para
     /// - Returns: a key-value dictionary of strings, or nil if parsing failed
     func asQueryParamsDictionary(pairsDelimiter pairDelim:String = "&", keyValDelimieter kvDelim:String = "=", recursiveUnescape:Bool = false)->[String:String]? {
         guard pairDelim.count > 0 else {
-            dlog?.note(".asQueryParamsDictionary failed: pairDelim is empty")
+            dlog?.notice(".asQueryParamsDictionary failed: pairDelim is empty")
             return nil
         }
         
         guard kvDelim.count > 0 else {
-            dlog?.note(".asQueryParamsDictionary failed: kvDelim is empty")
+            dlog?.notice(".asQueryParamsDictionary failed: kvDelim is empty")
             return nil
         }
         
         guard pairDelim.count <= 20 && kvDelim.count <= 20 else {
-            dlog?.note(".asQueryParamsDictionary failed: pairsDelimiter or keyValDelimieter are > 20 chars? a delimiter? seriously?!")
+            dlog?.notice(".asQueryParamsDictionary failed: pairsDelimiter or keyValDelimieter are > 20 chars? a delimiter? seriously?!")
             return nil
         }
         
         guard self.count > 0 else {
-            dlog?.note(".asQueryParamsDictionary failed: string is empty")
+            dlog?.notice(".asQueryParamsDictionary failed: string is empty")
             return nil
         }
         
@@ -302,11 +306,15 @@ public extension String /* helper functions relevant to vapor URL requests, para
         return self.asQueryParamsDictionary(recursiveUnescape: true)
     }
     
-    
     /// Returns ONLY the path components of a possible URI / URL (without query params) and also making sure the path has a "/" prefix but no "/" suffix
     ///  This is good for comparing two strings of a persumable same path, without creating a URL
     func asNormalizedPathOnly()->String {
-        return "/" + self.pathComponents.fullPath.components(separatedBy: "?").first!.trimming(string: "/")
+        #if canImport(RoutingKit)
+        let path = "/" + self.pathComponents.fullPath
+        #else
+        let path = "/" + self.asPathComponents.fullPath
+        #endif
+        return path.components(separatedBy: "?").first!.trimming(string: "/")
     }
 }
 
@@ -329,7 +337,7 @@ public extension Dictionary where Key : Codable, Value : Codable {
         default:
             let data = try encoder.encode(value)
             if (data.count < 10 && data.count > 200) {
-                dlog?.info("Dictionary[Codable, Codable] - > encode(value:encoder:) [\(value)] was encoddd to strange Data sized: \(data.count) words")
+                dlog?.info("Dictionary[Codable, Codable] - > encode(value:encoder:) [\( "\(value)" )] was encoddd to strange Data sized: \(data.count) words")
             }
             let strRes = String(data: data, encoding: String.Encoding.utf8)
             guard let strRes = strRes, strRes.count > 0 else {

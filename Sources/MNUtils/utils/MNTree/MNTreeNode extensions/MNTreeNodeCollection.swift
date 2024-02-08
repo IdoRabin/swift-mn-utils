@@ -2,11 +2,10 @@
 //  MNTreeNodeCollection.swift
 //  
 //
-//  Created by Ido on 15/09/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
 #if TESTING
 fileprivate let IS_TESTING = true
@@ -14,7 +13,7 @@ fileprivate let IS_TESTING = true
 fileprivate let IS_TESTING = false || MNUtils.debug.IS_TESTING
 #endif
 
-fileprivate let dlog : DSLogger? = DLog.forClass("MNTreeNodeCollection")?.setting(verbose: false, testing: IS_TESTING)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeCollection") // ?.setting(verbose: false, testing: IS_TESTING)
 
 public class MNTreeNodeCollection : Codable, Hashable, Equatable {
     
@@ -131,7 +130,7 @@ public class MNTreeNodeCollection : Codable, Hashable, Equatable {
             }
         }
         
-        dlog?.info("---- TreeNodeCollection with (\(uniqued.nodes.count)) items will encode. isAllFlat: \(isEncodeAllTreesFlat.descOrNil) ----")
+        dlog?.info("---- TreeNodeCollection with (\(uniqued.nodes.count)) items will encode. isAllFlat: \(self.isEncodeAllTreesFlat.descOrNil) ----")
         
         // 1. Encode collection items / nodes and collect some info:
         // All collection "nodes" that are not cyclic or problematic:
@@ -140,7 +139,7 @@ public class MNTreeNodeCollection : Codable, Hashable, Equatable {
                 dlog?.verbose("TreeNodeCollection will encode: \(node.id)")
                 try itemsContainer.encode(cnode)
             } else {
-                dlog?.note("TreeNodeCollection failed encoding \(node) : is NOT codable!")
+                dlog?.notice("TreeNodeCollection failed encoding \( "\(node)" ) : is NOT codable!")
             }
         }
         
@@ -217,7 +216,8 @@ public class MNTreeNodeCollection : Codable, Hashable, Equatable {
         self.nodes = newNodes
         if let dlog = dlog {
             for node in newNodes {
-                dlog.info("collection node: [\n" + node.treeDescription().joined(separator: "\n") + "\n]")
+                let str = "collection node: [\n" + node.treeDescription().joined(separator: "\n") + "\n]"
+                dlog.info("\( str )")
             }
         }
         

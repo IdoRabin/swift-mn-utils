@@ -1,5 +1,5 @@
 import AppKit
-import DSLogger
+import Logging
 
 open class MNUtils {
     
@@ -35,7 +35,7 @@ public class MNDebug {
 }
 
 public class MNConstants {
-    let dlog : MNLogger? = MNLog.forClass("MNUtils")
+    let dlog : Logger? = Logger(label: "MNUtils")
     
     public let BASE_64_PARAM_KEY = "e64"
     public let PROTOBUF_PARAM_KEY = "ptb"

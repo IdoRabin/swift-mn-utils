@@ -2,8 +2,8 @@
 //  BaseUIClassesEx.swift
 //  Bricks
 //
-//  Created by Ido Rabin on 17/01/2023.
-//  Copyright © 2018 Bricks. All rights reserved.
+// Created by Ido Rabin for Bricks on 17/1/2024.
+// Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Cocoa

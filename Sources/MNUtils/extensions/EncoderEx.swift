@@ -2,13 +2,12 @@
 //  EncoderEx.swift
 //  
 //
-//  Created by Ido on 06/12/2022.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : MNLogger? = MNLog.forClass("EncoderEx")
+fileprivate let dlog : Logger? = Logger(label: "EncoderEx") // ?.setting(verbose: true)
 fileprivate let APP_STRING_PREFERENCE_KEY = "IS_STRING_PREFERENCE"
 
 public extension Decoder {

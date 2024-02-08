@@ -18,17 +18,23 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
+        
+        // 3rd party:
+        .package(url: "https://github.com/apple/swift-log", from: "1.5.3"),
+        
         // In-House pakcages
-        //        .package(url: "https://gitlab.com/ido_r_demos/DSLogger.git", from:"0.0.1"),
-        .package(path: "../../../xcode/DSLogger/"),
+
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         .target(
             name: "MNUtils",
             dependencies: [
+                // 3rd party:
+                .product(name: "Logging", package: "swift-log"),
+                
                 // In-House pakcages
-                .product(name: "DSLogger", package: "DSLogger"),
+                
             ],
             swiftSettings: [
                 // Enables better optimizations when building in Release

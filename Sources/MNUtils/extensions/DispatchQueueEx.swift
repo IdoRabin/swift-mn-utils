@@ -2,15 +2,15 @@
 //  DispatchQueueEx.swift
 //
 //
-//  Created by Ido Rabin on 17/05/2023.
+// Created by Ido Rabin for Bricks on 17/1/2024.
 //  Copyright © 2022 . All rights reserved.
 //
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : MNLogger? = MNLog.forClass("DispatchQueueEx")
-fileprivate let waitForLog : MNLogger? = MNLog.forClass("waitFor")
+fileprivate let dlog : Logger? = Logger(label: "DispatchQueueEx")
+fileprivate let waitForLog : Logger? = Logger(label: "waitFor")
 
 /// Wait until the test block returns anything but nil, and then call the completion block
 /// NOTE: Will take place on main thread only
@@ -203,7 +203,7 @@ extension DispatchQueue {
         if MNUtils.debug.IS_DEBUG {
             DispatchQueue._onceTrackerLock.lock {
                 if DispatchQueue._onceTracker.count > 200 {
-                    MNLog.misc["DispatchQueue"]?.warning("onceTracker tokens count > 200! Should not be used with a often created instances / classes!")
+                    dlog?.warning("onceTracker tokens count > 200! Should not be used with a often created instances / classes!")
                 }
             }
         }
@@ -287,7 +287,7 @@ extension DispatchQueue {
                 dlog?.success("performOncePerInstall performed: \(token)")
                 return self.performOnce(uniqueToken: xtoken, block: block)
             } else {
-                dlog?.note("PerformOncePerInstall already performed for token: \(token)")
+                dlog?.notice("PerformOncePerInstall already performed for token: \(token)")
             }
         } else {
             dlog?.warning("Stack is of depth 1! cannot performOncePerInstall!")
@@ -300,7 +300,7 @@ extension DispatchQueue {
         if DispatchQueue.currentLabel == self.label {
             block()
         } else if Thread.current.isMainThread {
-            // dlog?.note("safeSync tried to sync the mainThread to another thread! will call it async!")
+            // dlog?.notice("safeSync tried to sync the mainThread to another thread! will call it async!")
             block()
             //callers depend on this being Synced.  so we cannot call self.async(execute: block)
         } else {

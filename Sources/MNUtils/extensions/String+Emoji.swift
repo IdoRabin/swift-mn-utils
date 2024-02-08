@@ -2,8 +2,7 @@
 //  String+Emoji.swift
 //  
 //
-//  Created by Ido on 14/07/2022.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 

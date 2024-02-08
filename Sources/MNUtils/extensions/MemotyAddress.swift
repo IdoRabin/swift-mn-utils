@@ -2,8 +2,7 @@
 //  MemotyAddress.swift
 //  
 //
-//  Created by Ido on 25/09/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 

@@ -2,8 +2,7 @@
 //  MNResult3.swift
 //  
 //
-//  Created by Ido on 19/03/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
 

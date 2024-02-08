@@ -1,8 +1,7 @@
 //
 //  NSColorEx.swift
 //
-//  Created by Ido on 28/01/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import AppKit
 

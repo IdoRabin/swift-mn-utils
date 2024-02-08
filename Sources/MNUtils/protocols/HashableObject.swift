@@ -2,8 +2,7 @@
 //  HashableObject.swift
 //  Bricks
 //
-//  Created by Ido Rabin for Bricks on 30/10/2017.
-//  Copyright © 2017 Bricks. All rights reserved.
+//  Created by Ido Rabin for Bricks on 17/1/2024.Copyright © 2024 Bricks. All rights reserved.
 //
 
 import Foundation

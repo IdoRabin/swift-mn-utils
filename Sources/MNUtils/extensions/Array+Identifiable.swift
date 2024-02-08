@@ -2,13 +2,12 @@
 //  Array+Identifiable.swift
 //  XPlan
 //
-//  Created by Ido on 06/11/2023.
-//
+// Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-import DSLogger
+import Logging
 
-fileprivate let dlog : MNLogger? = MNLog.forClass("Array+id")
+fileprivate let dlog : Logger? = Logger(label: "Array+id")
 
 public extension Array {
 
@@ -18,7 +17,7 @@ public extension Array {
         }
         
         if MNUtils.debug.IS_DEBUG && (count > 200 || indexPaths.count > 200) {
-            dlog?.note("Array where Element : Identifiable called elementsAt(indexPaths:) - this search may be CPU intensive (not efficient) use with small arrays only")
+            dlog?.notice("Array where Element : Identifiable called elementsAt(indexPaths:) - this search may be CPU intensive (not efficient) use with small arrays only")
         }
         
         var result : [IndexPath:Element] = [:]
@@ -57,7 +56,7 @@ public extension Sequence where Element : Identifiable {
             return [:]
         }
         if MNUtils.debug.IS_DEBUG && (ids.count > 200 || idsToSearch.count > 200) {
-            dlog?.note("Array where Element : Identifiable called indexPathsFor(ids:) - this search may be CPU intensive (not efficient) use with small arrays only")
+            dlog?.notice("Array where Element : Identifiable called indexPathsFor(ids:) - this search may be CPU intensive (not efficient) use with small arrays only")
         }
         
         var result : [IndexPath:Element] = [:]
