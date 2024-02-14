@@ -12,12 +12,22 @@ fileprivate let dlog : Logger? = Logger(label:"MNError")
 public struct MNErrorStruct : Codable, Hashable {
     public let error_code : Int?
     public let error_domain : String?
-    public let error_reason: String
+    private (set) public var error_reason: String
     
     private (set) public var underlying_errors : [MNErrorStruct]?
     private (set) public var error_originating_path : String? = nil
     private (set) public var error_req_id : String? = nil
     private (set) public var error_text: String? = nil
+    
+    // Readonly
+    public var error_http_status : HTTPResponseStatus? {
+        get {
+            if let code = self.error_code {
+                return HTTPResponseStatus(statusCode: code) // reason ph
+            }
+            return nil
+        }
+    }
     
     public init() {
         // Empty init
@@ -80,6 +90,13 @@ public struct MNErrorStruct : Codable, Hashable {
     public mutating func update(underlyingErrors errors:[Error]) {
         let mnErrors = errors.map { MNError(error: $0) }
         self.update(underlyingMNErrors: mnErrors)
+    }
+    
+    public func mnErrorCode()->MNErrorCode? {
+        guard let code = error_code else {
+            return nil
+        }
+        return MNErrorCode(rawValue: error_code)
     }
     
     // MARK: HasHable
@@ -218,6 +235,27 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
         }
     }
     
+    
+    /// recursively search for any newsted underlying error with this code
+    /// - Parameter code: error code to search
+    public func hasUnderlyingError(code:MNErrorCode)->Bool {
+        return self.hasUnderlyingError(code:code.code)
+    }
+    public func hasUnderlyingError(code:MNErrorInt)->Bool {
+        var result = false
+        var err = self.underlyingError
+        while err != nil {
+            if let err = err {
+                if err.code == code {
+                    result = true
+                    break
+                }
+            }
+            err = err?.underlyingError
+        }
+        
+        return result
+    }
     
     @discardableResult
     /// Will add the error as most nested underlying error in the nested .underlyingError list

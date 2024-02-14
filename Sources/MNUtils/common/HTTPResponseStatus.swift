@@ -237,6 +237,23 @@ public enum HTTPResponseStatus {
 }
 
 public extension HTTPResponseStatus {
+    public var isRedirect : Bool {
+        get {
+            return (300...399).contains(self.code)
+        }
+    }
+    
+    public var isCustom : Bool {
+        get {
+            switch self {
+            case .custom(_, _):
+                return true
+            default:
+                return false
+            }
+        }
+    }
+    
     /// The numerical status code for a given HTTP response status.
     var code: UInt {
         get {
