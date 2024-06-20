@@ -9,14 +9,13 @@ import Logging
 
 fileprivate let dlog : Logger? = Logger(label:"MNError")
 
-public struct MNErrorStruct : Codable, Hashable {
+public struct MNErrorStruct : JSONSerializable, Hashable, Equatable {
     public let error_code : Int?
     public let error_domain : String?
     private (set) public var error_reason: String
-    
     private (set) public var underlying_errors : [MNErrorStruct]?
     private (set) public var error_originating_path : String? = nil
-    private (set) public var error_req_id : String? = nil
+    private (set) public var error_request_id : String? = nil
     private (set) public var error_text: String? = nil
     
     // Readonly
@@ -27,6 +26,10 @@ public struct MNErrorStruct : Codable, Hashable {
             }
             return nil
         }
+    }
+    
+    public var hasUnderlyingError : Bool {
+        return self.underlying_errors?.count ?? 0 > 0
     }
     
     public init() {
@@ -48,16 +51,63 @@ public struct MNErrorStruct : Codable, Hashable {
         underlying_errors = underlying
     }
     
+    mutating private func appendAsUnderlyingError(mnErrors:[MNError]?, recurseUnderlyingErrors:Bool = true) {
+        guard let mnErrors = mnErrors, mnErrors.count > 0 else {
+            return
+        }
+        var structs : [MNErrorStruct] = []
+        for mnError in mnErrors {
+            structs.append(MNErrorStruct(mnError: mnError, recurseUnderlyingErrors: false))
+            
+            // Add underlying errors recurively (as a flattened array):
+            if recurseUnderlyingErrors {
+                if let uerrors = mnError.underlyingErrorsCollated(), uerrors.count > 0 {
+                    structs.append(contentsOf:
+                        uerrors.map({ mnErr in
+                        MNErrorStruct(mnError: mnError, recurseUnderlyingErrors: false)
+                    }))
+                }
+            }
+        }
+        
+        self.appendAsUnderlyingError(structs: structs)
+    }
+    
+    mutating private func appendAsUnderlyingError(structs:[MNErrorStruct]?) {
+        guard let structs = structs, structs.count > 0 else {
+            return
+        }
+        
+        var array =  (self.underlying_errors ?? [])
+        underlying_errors = array.appending(contentsOf: structs).compactMap({ underlyingError in
+            if underlyingError.error_code != self.error_code || underlyingError.error_domain != self.error_domain {
+                return underlyingError
+            } else if underlyingError.self.error_reason != self.error_reason {
+                if self.error_reason == self.mnErrorCode()?.httpStatus?.reasonPhrase &&
+                    underlyingError.error_reason != underlyingError.mnErrorCode()?.httpStatus?.reasonPhrase {
+                    // Change self resons to the non-default reason
+                    self.error_reason = underlyingError.error_reason
+                } else {
+                    return underlyingError
+                }
+            }
+            return nil
+        }).uniqueElements()
+        
+        if underlying_errors?.count == 0 {
+            underlying_errors = nil
+        }
+    }
+    
     public init(mnError:MNError, recurseUnderlyingErrors:Bool = true) {
         error_code = mnError.code
         error_domain = mnError.domain
         error_reason = mnError.reason
-        if recurseUnderlyingErrors, let mnErros = mnError.underlyingErrorsCollated() {
-            underlying_errors = mnErros.map({ underlyingError in
-                MNErrorStruct(mnError: underlyingError)
-            })
-        } else {
-            underlying_errors = nil
+        self.underlying_errors = nil
+        
+        // After init:
+        if recurseUnderlyingErrors {
+            self.appendAsUnderlyingError(mnErrors: mnError.underlyingErrorsCollated(), recurseUnderlyingErrors: false)
         }
     }
     
@@ -69,34 +119,29 @@ public struct MNErrorStruct : Codable, Hashable {
         error_originating_path = originatingPath
     }
     public mutating func update(reqId:String) {
-        error_req_id = reqId
+        error_request_id = reqId
     }
     public mutating func update(errorText:String) {
         error_text = errorText
     }
     public mutating func update(underlyingErrorStructs:[MNErrorStruct]) {
-        underlying_errors = (underlying_errors ?? []).appending(contentsOf: underlyingErrorStructs).uniqueElements()
+        self.appendAsUnderlyingError(structs: underlyingErrorStructs)
     }
     
     public mutating func update(underlyingMNErrors mnErrors:[MNError]) {
-        let newErrorStructs = mnErrors.map({ err in
-            MNErrorStruct(mnError: err, recurseUnderlyingErrors: false)
-        })
-        if newErrorStructs.count > 0 {
-            self.update(underlyingErrorStructs: newErrorStructs)
-        }
+        self.appendAsUnderlyingError(mnErrors: mnErrors, recurseUnderlyingErrors: false)
     }
     
     public mutating func update(underlyingErrors errors:[Error]) {
         let mnErrors = errors.map { MNError(error: $0) }
-        self.update(underlyingMNErrors: mnErrors)
+        self.appendAsUnderlyingError(mnErrors: mnErrors, recurseUnderlyingErrors: false)
     }
     
     public func mnErrorCode()->MNErrorCode? {
         guard let code = error_code else {
             return nil
         }
-        return MNErrorCode(rawValue: error_code)
+        return MNErrorCode(rawValue: code)
     }
     
     // MARK: HasHable
@@ -106,7 +151,7 @@ public struct MNErrorStruct : Codable, Hashable {
         hasher.combine(error_reason)
         hasher.combine(underlying_errors)
         hasher.combine(error_originating_path)
-        hasher.combine(error_req_id)
+        hasher.combine(error_request_id)
     }
 }
 

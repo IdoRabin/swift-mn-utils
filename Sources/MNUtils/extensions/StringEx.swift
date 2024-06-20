@@ -34,6 +34,12 @@ public extension Sequence where Iterator.Element == String {
 
 public extension String {
 
+    
+    /// Returns nil for empty strings (0 length) and the string itself for all other options
+    @inlinable
+    var asOptional : String? {
+        return self.isEmpty ? nil : self
+    }
     /// Return a substring from index (as int)
     /// - Parameters:
     ///   - from: index int location of first charahter to return a substring from
@@ -338,7 +344,6 @@ public extension String {
     /// - Parameters:
     ///   - toLength: the length up to which the string is to be padded from the left
     ///   - character: the pad element to repeat as the filler padding in the left side of the string.
-    ///   - padIndex: the char index from the left to start padding at
     /// - Returns: a string padded from its left side with the given pad element
     func paddingLeft(toLength: Int, withPad character: Character) -> String {
         if toLength <= 0 {return self}
@@ -374,6 +379,38 @@ public extension String {
         if padCount <= 0 {return self}
         
         return self + String(repeatElement(character, count: padCount))
+    }
+    
+    /// Pad the string from its RIGHT side only with a charahter to fill up to a given total length of the string. If the string is already that length or bigger, no change will take place
+    ///
+    /// - Parameters:
+    ///   - toLength: the length up to which the string is to be padded from the right
+    ///   - character: the pad element to repeat as the filler padding in the left side of the string.
+    /// - Returns: a string padded from its left side with the given pad element
+    func paddingRight(toLength: Int, withPad character: Character) -> String {
+        if toLength <= 0 {return self}
+        
+        let stringLength = self.count
+        if stringLength < toLength {
+            return self + String(repeatElement(character, count: toLength - stringLength))
+        } else {
+            return String(self.suffix(toLength))
+        }
+    }
+    
+    func paddingCentered(toLength: Int, withPad character: Character) -> String {
+        if toLength <= 0 {return self}
+        
+        let stringLength = self.count
+        if stringLength < toLength {
+            let padCnt = toLength - stringLength
+            let prfx = max(Int(ceil(Double(padCnt) * 0.5)), 1)
+            let suffx = max(padCnt - prfx, prfx)
+            let char = String(character)
+            return char.repeated(times: prfx) + self + char.repeated(times: suffx)
+        } else {
+            return String(self.prefix(toLength))
+        }
     }
     
     /// Will create a string trimming only from its left side any charahter from the given set. When encountering the first charahter that is not part of the set, the trimming will stop.

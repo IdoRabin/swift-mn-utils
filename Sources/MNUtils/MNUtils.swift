@@ -83,11 +83,12 @@ public class MNConstants {
 }
 
 public extension String {
-    static let NBSP = "\u{00A0}"
+    static let NBSP = "\u{00A0}" // &nbsp;
     static let FIGURE_SPACE = "\u{2007}" // “Tabular width”, the width of digits
     static let IDEOGRAPHIC_SPACE = "\u{3000}" // The width of ideographic (CJK) characters.
     static let NBHypen = "\u{2011}"
     static let ZWSP = "\u{200B}" // Use with great care! ZERO WIDTH SPACE (HTML &#8203)
+    static let THIN_SP = "\u{2009}" // Thin space // &thinsp;
     
     static let SECTION_SIGN = "\u{00A7}" // § Section Sign: &#167; &#xA7; &sect; 0x00A7
     
