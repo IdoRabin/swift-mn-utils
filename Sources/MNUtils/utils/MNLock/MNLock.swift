@@ -33,7 +33,7 @@ public final class MNLock : CustomDebugStringConvertible {
     // MARK: Static
     // MARK: Properties / members
     public let mLock: LockProtocol
-    private (set) public var name : String
+    private(set) public var name : String
     
     // MARK: Private
     

@@ -136,7 +136,9 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     // MAXRANGE: 8999
 
     // Misc
-    case misc_unknown = 9000
+    
+    case misc_unknown = 9000 /// Unknown error
+    
     case misc_failed_loading = 9001
     case misc_failed_saving = 9002
     case misc_operation_canceled = 9003
@@ -153,7 +155,7 @@ public enum MNErrorCode: MNErrorInt, MNErrorCodable, CaseIterable {
     case misc_failed_encoding = 9031
     case misc_failed_decoding = 9032
     case misc_failed_validation = 9033
-    case misc_already_exists = 9034
+    case misc_already_exists = 9040
     case misc_security = 9050
     case misc_concurrency = 9060
     case misc_bad_input = 9070

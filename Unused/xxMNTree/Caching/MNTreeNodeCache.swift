@@ -8,6 +8,7 @@ import Foundation
 import Logging
 
 fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeCache") // ?.setting(verbose: false, testing:MNUtils.debug.IS_TESTING)
+fileprivate let dlogQM : Logger? = (false ? dlog : nil)
 
 class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, CustomStringConvertible where NodeType : AnyObject {
     
@@ -22,12 +23,12 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
     // MARK: Const
     // MARK: Static
     // MARK: Properties / members
-    private (set) public var _treeCache = MNCache<NodeType.IDType, NodeType>(name: "MNTreeNode.cache", maxSize: 8196)
-    private (set) public var _treeReconstructionWaitingList : [ReconstructionItem] = []
-    private (set) public var _treeReconstructionIds = Set<IDType>()
-    // private (set) public var _treeRoots = WeakSet<NodeType, WeakHashable<NodeType>>()
-    private (set) public var _treeRoots = WeakWithMemAddrSet<NodeType, WeakWithMemAddr<NodeType>>()
-    private (set) public var _expectedTotal : Int = 0
+    private(set) public var _treeCache = MNCache<NodeType.IDType, NodeType>(name: "MNTreeNode.cache", maxSize: 8196)
+    private(set) public var _treeReconstructionWaitingList : [ReconstructionItem] = []
+    private(set) public var _treeReconstructionIds = Set<IDType>()
+    // privte (set) public var _treeRoots = WeakSet<NodeType, WeakHashable<NodeType>>()
+    private(set) public var _treeRoots = WeakWithMemAddrSet<NodeType, WeakWithMemAddr<NodeType>>()
+    private(set) public var _expectedTotal : Int = 0
     
     // MARK: Private
     // MARK: Lifecycle
@@ -64,11 +65,22 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
     private func updateRootStatuses(nodes:[NodeType]) {
         guard guardResume(ctx:"updateRootStatus") else { return }
         
-        self._treeRoots.add(values: nodes) { node in
-            node.isRoot
+        self.invalidateRemovingNonRoots()
+        
+        guard nodes.count > 0 else {
+            return
         }
-        self._treeRoots.remove { value in
-            !value.isRoot
+        
+        var remaining = nodes
+        let toRemove = nodes.intersection(with: self._treeRoots.values)
+        if (toRemove.count > 0) {
+            remaining.remove(objects: toRemove)
+        }
+        guard remaining.count > 0 else {
+            return
+        }
+        self._treeRoots.add(values: remaining) { node in
+            node.isRoot
         }
     }
     
@@ -84,22 +96,25 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
                 self.attemptReconstruction(context: "register(node id:\( "\(node.id)" ))", andRebuildQuickMap: MNNodeType.IS_CACHED)
             }
         } else {
-            dlog?.notice("\(self.TREE_NODE_TYPE_KEY) register | \( "\(node.id)" ) - was already registered.")
+            // dlog?.notice("\(self.TREE_NODE_TYPE_KEY) register | \( "\(node.id)" ) - was already registered.")
         }
         
         
     }
     
-    func unregister(byId id: IDType, node:NodeType?) {
-        guard guardResume(ctx:"unregister") else { return }
+    func unregister(byId id: IDType, node:NodeType?, ctx:String) {
+        guard guardResume(ctx:"\(ctx)>unregister") else { return }
+        let isLog = dlog != nil && !ctx.hasPrefix("detachAll>")
         
         if self._treeCache.hasValue(forKey: id) {
-            let indent = "   ".repeated(times: (node as! MNNodeType).depth)
-            dlog?.info("\(indent) \(self.TREE_NODE_TYPE_KEY) unregister | \( "\(id)" )")
+            if isLog {
+                let indent = "   ".repeated(times: (node as! MNNodeType).depth)
+                dlog?.info("\(indent) \(self.TREE_NODE_TYPE_KEY) unregister | \( "\(id)" ) ctx: \(ctx)")
+            }
             self._treeCache[id] = nil
         } else {
             dlog?.verbose(symbol:.warning,"   ".repeated(times: (node as! MNNodeType).depth) +
-                          "\(self.TREE_NODE_TYPE_KEY) unregister | \(id) - was not found!")
+                          "\(self.TREE_NODE_TYPE_KEY) unregister | \(id) - was not found!  ctx: \(ctx)")
         }
         
         if let node = node as? MNNodeType {
@@ -149,9 +164,9 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
         var root : MNNodeType = node as! MNNodeType
         if node.parent != nil {
             root = node.root
-            dlog?.info("rebuildQuickMap for \( "\(node.id)" ) (using root: \( "\(root.id)" ))")
+            dlogQM?.info("rebuildQuickMap for \( "\(node.id)" ) (using root: \( "\(root.id)" ))")
         } else {
-            dlog?.info("rebuildQuickMap for \( "\(node.id)" )")
+            dlogQM?.info("rebuildQuickMap for \( "\(node.id)" )")
         }
         
         var count : Int = 0
@@ -164,12 +179,12 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
             }
             let nodeId = "\(node.id)".paddingLeft(toLength: 3, withPad: " ")
             
-            dlog?.info("   rebuildQuickMap parent:\(parentId) \(parentMemStr) child:\(nodeId) \(MemoryAddress(of: node).description)")
+            dlogQM?.info("   rebuildQuickMap parent:\(parentId) \(parentMemStr) child:\(nodeId) \(MemoryAddress(of: node).description)")
             if let mnNode = node as? NodeType {
                 self._treeCache[node.id] = mnNode
                 self.updateRootStatus(node: mnNode)
             } else {
-                dlog?.notice("rebuildQuickMap()")
+                dlog?.warning("rebuildQuickMap node \(node) typed \(type(of:node)) was not typed: \(NodeType.self) as expected.")
             }
             count += 1
         }, method: .depthFirst, includeSelf:true)
@@ -278,16 +293,40 @@ class MNTreeNodeCache<NodeType:MNTreeNodeProtocol> : MNTreeNodeCacheProtocol, Cu
         // Rebuild quickmap:
         if shouldRebuild {
             self._treeRoots.invalidateNillifiedWeaks()
-            for rootNode in self._treeRoots.values {
+            var wereRebuiltIds : [NodeType.IDType] = []
+            let lastRootList = self._treeRoots.values
+            for rootNode in lastRootList {
                 let validatedRoot = rootNode.root
-                dlog?.verbose("\(self.TREE_NODE_TYPE_KEY).attemptReconstruction will rebuildQuickMap() for root: \(validatedRoot.id)")
-                validatedRoot.rebuildQuickMap()
+                
+                // We should not rebuild nodes that were already built.
+                // Considering the case where validatedRoot = rootNode.root returns a root that was already rebuilt! (especially if rootNode.root returns a node that is not itself (i.e a different root "took" it into its reconstruction, but it was still kept in lastRootList.
+                if !wereRebuiltIds.contains(validatedRoot.root.id) {
+                    dlog?.verbose("\(self.TREE_NODE_TYPE_KEY).attemptReconstruction will rebuildQuickMap() for root: \(validatedRoot.id)")
+                    validatedRoot.rebuildQuickMap()
+                    wereRebuiltIds.appendIfNotAlready(validatedRoot.root.id)
+                }
             }
         }
     }
     
-    public func invalidate() {
-        self._treeRoots.invalidateNillifiedWeaks()
+    @discardableResult
+    private func invalidateRemovingNonRoots()->Int {
+        return self._treeRoots.remove { value in
+            !value.isRoot
+        }
+    }
+    
+    public func invalidate(_ ctx : String) { //  = "Unknown"
+        dlog?.info("will invalidate MNTreeNodeCache ctx:\(ctx)")
+        
+        // Will invalidate the nonRoots from the _treeRoots weak set.
+        self.invalidateRemovingNonRoots()
+        
+        // If _treeRoots doesn't automatically compact (find nillified after any remove / CRUD operation)
+        // We do it ourselves
+        if self._treeRoots.isShouldCompactAfterCRUD == false {
+            self._treeRoots.invalidateNillifiedWeaks()
+        }
     }
     
 }

@@ -90,7 +90,7 @@ public class MNExec {
     /// - Returns: a cancel key to allow canceling the whole operation
     @discardableResult
     public static func debounceExecutingLastBlockOnly(withKey key:String, afterDelay delay:TimeInterval, block:@escaping ()->Void)->CancelKey? {
-        guard delay > 0 else {
+        guard delay >= 0 else {
             dlog?.info(">>> debounceExecLastBlockOnly delay should be a positive value. (not \(delay))")
             return nil
         }

@@ -7,6 +7,7 @@
 import Foundation
 import CommonCrypto
 import Logging
+import MNMacros
 
 public typealias UUIDv5 = UUID
 public let UID_EMPTY_STRING : String = "00000000-0000-0000-0000-000000000000";
@@ -36,6 +37,7 @@ public extension UUID {
         case v5 = 5
     }
 
+    @SimplifiedEnum
     enum UUIDv5Namespace {
         case dns
         case url
@@ -61,27 +63,7 @@ public extension UUID {
             return result;
         }
         
-        public enum Simplified : Equatable, CaseIterable {
-            case dns
-            case url
-            case oid
-            case x500
-            case uuidV4
-            case custom
-        }
-        
-        var simplified : Simplified {
-            switch self {
-            case .dns:   return .dns;
-            case .url:   return .url;
-            case .oid:   return .oid;
-            case .x500:  return .x500;
-            case .uuidV4:  return .uuidV4;
-            case .custom: return .custom;
-            }
-        }
-        
-        static var allSimplified : [Simplified] = [.dns, .url, .oid, .x500, .uuidV4, .custom]
+        static var allSimplified : [Simplified] = Simplified.allCases
         static var allCases : [UUIDv5Namespace] = [.dns, .url, .oid, .x500, .uuidV4, .custom("?")]
     }
 

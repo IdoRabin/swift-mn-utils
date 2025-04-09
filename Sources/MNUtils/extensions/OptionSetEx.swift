@@ -35,7 +35,7 @@ public extension OptionSet where RawValue: FixedWidthInteger {
         return result
     }
     
-    public var elementsCount : Int {
+    var elementsCount : Int {
         guard isPowerOfTwo(self.rawValue) else {
             return 1 // one element when we are an exact power of 2
         }
@@ -44,7 +44,7 @@ public extension OptionSet where RawValue: FixedWidthInteger {
     }
     
     /// Returns all the elements in the current set as a Sequence
-    public var elements : AnySequence<Self> {
+    var elements : AnySequence<Self> {
         
         // TODO: Check how to implement this optimization returning a sequence
         // guard isPowerOfTwo(self.rawValue) else {
@@ -71,7 +71,7 @@ public extension OptionSet where RawValue: FixedWidthInteger {
     /// Checks for intersection between the current set and another set, syntactic sugar
     /// - Parameter members: sequence of member elements
     /// - Returns: true if at least one element in common between self and anyOf other members
-    public func contains(anyOf members: [Element]) -> Bool {
+    func contains(anyOf members: [Element]) -> Bool {
         return !self.intersection(Self(members)).isEmpty
     }
     
@@ -80,7 +80,7 @@ public extension OptionSet where RawValue: FixedWidthInteger {
     /// Checks for intersection between the current set and another set, syntactic sugar
     /// - Parameter other: another optionSet of the same type
     /// - Returns: true if at least one element in common between self and anyOf the other set.
-    public func contains(anyOf other: Self) -> Bool {
+    func contains(anyOf other: Self) -> Bool {
         return !self.intersection(other).isEmpty
     }
 }

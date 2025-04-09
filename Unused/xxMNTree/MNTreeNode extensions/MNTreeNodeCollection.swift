@@ -163,6 +163,21 @@ public class MNTreeNodeCollection : Codable, Hashable, Equatable {
         }
     }
     
+    public func logCollectionTree(ctx:String) {
+        guard let dlog = dlog else {
+            return
+        }
+        
+        let totalCount = self.nodes.count
+        var lines = ["collection #hash: \(self.hashValue) (\(totalCount) items)", "["]
+        self.nodes.forEachIndex { index, node in
+            lines.append("  [\(index + 1)/\(totalCount)] nodes tree:")
+            lines.append(contentsOf: node.treeDescription())
+        }
+        lines.append("]")
+        dlog.info("\(lines.joined(separator: "\n"))")
+    }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
@@ -214,12 +229,7 @@ public class MNTreeNodeCollection : Codable, Hashable, Equatable {
         }
         
         self.nodes = newNodes
-        if let dlog = dlog {
-            for node in newNodes {
-                let str = "collection node: [\n" + node.treeDescription().joined(separator: "\n") + "\n]"
-                dlog.info("\( str )")
-            }
-        }
+        self.logCollectionTree(ctx:"Decoded")
         
         if let decodedInfo = decodedInfo {
             // validate loaded structures?
@@ -228,7 +238,7 @@ public class MNTreeNodeCollection : Codable, Hashable, Equatable {
                 dlog?.success("|dec| MNTreeNodeCollectionInfo validation matches the resulting collection info!\n      decoded: \(decodedInfo) \n         self: \(selfInfo)")
             } else {
                 // Decoding went wrong:
-                dlog?.warning("|dec| MNTreeNodeCollectionInfo does not match the resulting collection info!\n      decoded: \(decodedInfo) \n         self: \(selfInfo)")
+                dlog?.warning("|dec| MNTreeNodeCollectionInfo does ❌ NOT match the resulting collection info!\n      decoded: \(decodedInfo) \n         self: \(selfInfo)")
             }
         }
         

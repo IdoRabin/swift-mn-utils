@@ -237,13 +237,13 @@ public enum HTTPResponseStatus {
 }
 
 public extension HTTPResponseStatus {
-    public var isRedirect : Bool {
+    var isRedirect : Bool {
         get {
             return (300...399).contains(self.code)
         }
     }
     
-    public var isCustom : Bool {
+    var isCustom : Bool {
         get {
             switch self {
             case .custom(_, _):

@@ -146,7 +146,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
     private var _isSavesDates : Bool = false
     private var _isSavesTypes : Bool = false
     private var _loadError : MNCacheError? = nil
-    private (set) var isLoaded : Bool = false {
+    private(set) var isLoaded : Bool = false {
         didSet {
             if isLoaded == true, oldValue != isLoaded {
                 notifyWasLoaded(error: self._loadError)
@@ -167,7 +167,7 @@ public class MNCache<Key : Hashable, Value : Hashable> {
     public var decodeElementFromJSONFragment : CacheDecodeJSONFragmentBlock? = nil
     
     // When loading objects by their type when using the loadWithSubTypes function, will fail or throw errors during load
-    public var isDecodingSubTypeItemFailsOnNilReasult : Bool = true
+    public var isDecodingSubTypeItemFailsOnNilResult : Bool = true
     
     // MARK: Computed or misc Properties
     
@@ -1239,7 +1239,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                             } else {
                                 logNote(".loadWithSubTypes Failed finding key or value for StringAnyDictionary as sub-value")
                             }
-                        } else if self.isDecodingSubTypeItemFailsOnNilReasult {
+                        } else if self.isDecodingSubTypeItemFailsOnNilResult {
                             logNote(".loadWithSubTypes Failed init for \(types.valueType).init(stringAnyDict:) for content: \(val["value"].descOrNil) returned nil")
                         }
                     }
@@ -1260,7 +1260,7 @@ public extension MNCache where Key : CodableHashable, Value : Codable {
                     decodePair(key:key, val:itemToParse)
                 }
                 // log("✓ loadWithSubTypes \(items.sortedKeys.descriptionsJoined)") // checkmark ✓
-                if self.isDecodingSubTypeItemFailsOnNilReasult && pairsExpected > 0 && pairsExpected > pairsParsed {
+                if self.isDecodingSubTypeItemFailsOnNilResult && pairsExpected > 0 && pairsExpected > pairsParsed {
                     throw MNCacheError(code:.misc_failed_decoding,
                                        reason: "Cache<\(self.name)> failed decoding all \(pairsExpected) expected items",
                                        cacheName: self.name)

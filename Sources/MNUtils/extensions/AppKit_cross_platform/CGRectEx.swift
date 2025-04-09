@@ -435,7 +435,7 @@ extension CGRect { /* Aspect sizes */
     
 }
 
-extension CGSize : Hashable {
+extension CGSize : @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.width)
         hasher.combine(self.height)
@@ -446,14 +446,14 @@ extension CGSize : Hashable {
     }
 }
 
-extension CGPoint : Hashable {
+extension CGPoint : @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.x)
         hasher.combine(self.y)
     }
 }
 
-extension CGRect : Hashable {
+extension CGRect : @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.origin)
         hasher.combine(self.size)

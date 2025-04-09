@@ -100,6 +100,19 @@ public extension Dictionary {
     var keysArray : [Key] {
         return Array(self.keys)
     }
+    
+    
+    func updating(value:Value, forKey key:Key)->Self {
+        return self.updating(keyValues: [key : value])
+    }
+    
+    func updating(keyValues:[Key:Value])->Self {
+        var result = self
+        for (key, value) in keyValues {
+            result[key] = value
+        }
+        return result
+    }
 }
 
 public extension Dictionary where Value : Equatable {

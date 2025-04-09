@@ -420,6 +420,10 @@ public extension Array where Element: Equatable {
     /// - Parameter objects: objects to remove
     /// - Returns: count of removed items
     @discardableResult mutating func remove(objects: [Element])->Int {
+        guard objects.count > 0 else {
+            return 0
+        }
+        
         var removedCount = 0
         for object in objects {
             while let index = firstIndex(of: object) {
@@ -453,6 +457,9 @@ public extension Array where Element: Equatable {
     }
     
     func removing(objects: [Element])->[Element] {
+        guard objects.count > 0 else {
+            return []
+        }
         var result : [Element] = Array(self)
         result.remove(objects: objects)
         return result
@@ -705,6 +712,9 @@ public extension Sequence {
 }
 
 public extension Sequence where Element : Sequence {
+    
+    
+    /// Returns a flat array from all internal arays concatuated.
     var flattened : [Element.Element] {
         return self.flatMap { $0 }
     }

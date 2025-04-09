@@ -9,6 +9,7 @@ import Logging
 
 fileprivate let dlog : Logger? = Logger(label: "MNTreeNode") // ?.setting(verbose: false)
 fileprivate let dlogDecode : Logger? = Logger(label: "MNTreeNode |dec|") // ?.setting(verbose: true)
+fileprivate let dlogDeinit : Logger? = Logger(label: "MNTreeNode |deinit|") // ?.setting(verbose: true)
 
 public enum MNTreeNodeType : String, Codable, CaseIterable {
     case leaf
@@ -27,18 +28,17 @@ public enum MNTreeNodeType : String, Codable, CaseIterable {
 
 // Coding Keys for encoder.userInfo
 fileprivate let _MNTN_depthCodingUIKey = CodingUserInfoKey(rawValue: "MNTreeNode.depth")!
-fileprivate let _MNTN_is_flat_CodingUIKey = CodingUserInfoKey(rawValue: "MNTreeNode.is_flat")!
+fileprivate let _MNTN_is_flat_CodingUIKey = CodingUse rInfoKey(rawValue: "MNTreeNode.is_flat")!
 
 // NOTE:
 // ValueType : Hashable // Needed for some caching operations
 // IDType : Hashable // Needed for some caching operations
 /// A tree node, wrapping a generic value, able to manage many versatile actions and has multiple extension for encodinhg, identifiable and more.
-public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringConvertible, Hashable, MNTreeNodeProtocol {
+public class MNTreeNode<IDType: Hashable, ValueType: Hashable> :  CustomStringConvertible, Hashable, MNTreeNodeProtocol {
     
     // MARK: Types
     typealias ReconstructionItem = MNTNReconstructionItem<ValueType, IDType>
     typealias DepthToReconstrut = MNTNReconstructionItem<ValueType, IDType>.DepthToReconstrut
-    public typealias SelfType = MNTreeNode<ValueType, IDType>
     public typealias IDType = IDType
     public typealias ValueType = ValueType
     
@@ -93,16 +93,16 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
     public static var MNTN_is_flat_CodingUIKey : CodingUserInfoKey { _MNTN_depthCodingUIKey }
     
     // MARK: Const
-    public static var MAX_TREE_DEPTH : Int { return 32 }
-    public static var IS_SHOULD_AUTO_RECONSTRUCT : Bool { return false }
-    public var IS_SHOULD_AUTO_RECONSTRUCT : Bool { return Self.IS_SHOULD_AUTO_RECONSTRUCT }
-    public static var IS_CACHED : Bool { return true }
+    public static var MAX_TREE_DEPTH: Int { return 32 }
+    public static var IS_SHOULD_AUTO_RECONSTRUCT: Bool { return false }
+    public var IS_SHOULD_AUTO_RECONSTRUCT: Bool { return Self.IS_SHOULD_AUTO_RECONSTRUCT }
+    public static var IS_CACHED: Bool { return true }
     
     // MARK: Properties / members
-    public var value : ValueType? = nil
-    private (set) public var id : IDType
-    private (set) public var children : [SelfType] = []
-    private (set) public var parent : SelfType? = nil
+    public var value: ValueType? = nil
+    public private(set) var id: IDType
+    public private(set) var children: [SelfType] = []
+    public private(set) var parent: SelfType? = nil
     
     // MARK: Public computed vars
     // Default implementations (overrides not needed)
@@ -150,7 +150,8 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
 //        } else {
 //            return "<\(Self.self) id: \"\(id)\" |\(typ)| value: \"\(value.descOrNil.substring(to: 32, suffixIfClipped: "..."))\"\(childs) >"
 //        }
-        return "<\(Self.self) id: \"\(id)\" |\(typ)| \(MemoryAddress(of: self).description) >"
+        //  #\(self.hashValue)
+        return "<\(Self.self) id: \"\(id)\" |\(typ)| \(MemoryAddress(of: self).description)>"
     }
     
     public func treeDescription() -> [String] {
@@ -182,11 +183,11 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
     // MARK: HasHable
     public func hash(into hasher: inout Hasher) {
         // NOTE: Non-persistant across sessions or instances!
-        hasher.combine(MemoryAddress(of: self).rawValue)
-        hasher.combine(id)
-        hasher.combine(value)
-        hasher.combine(parent?.id)
-        hasher.combine(children.ids)
+        // DO NOT: hasher.combine(MemoryAddress(of: self).rawValue)
+        hasher.combine(id.hashValue)
+        hasher.combine(value?.hashValue)
+        hasher.combine(parent?.id.hashValue)
+        hasher.combine(children.nodesHashValue())
     }
     
     // MARK: Mutate id before init for various protocol conformances
@@ -428,7 +429,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
     }
     
     deinit {
-        dlog?.info("\(self).deinit")
+        dlogDeinit?.info("\(self).deinit")
     }
     
     // MARK: private
@@ -530,6 +531,10 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
     
     func removeChildren(_ nodes: [SelfType]) {
         
+        guard self.children.count > 0 else {
+            return
+        }
+        
         var rootNode : SelfType? = nil
         if config.isValidatesPossibleRecursiveIssues {
             rootNode = self.root
@@ -539,8 +544,8 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         if nodesToRemove.count < nodes.count {
             dlog?.notice("removeChildren recieved some nodes to remove (\(nodes.removing(objects: nodesToRemove).ids.descriptionJoined)) that are NOT children of self: \"\( "\(self.id)" )\"")
         }
+        
         guard nodesToRemove.count > 0 else {
-            dlog?.notice("removeChildren has 0 nodes to remove!")
             return
         }
         
@@ -550,7 +555,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
         
         if config.isValidatesPossibleRecursiveIssues {
             if removedCount < nodes.count {
-                
+                // TODO: what is this?
             }
             if rootNode != self.root {
                 dlog?.warning("Removed a node that was also a parent, this means the tree structure was broken in an unintended place.")
@@ -585,7 +590,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
             return
         }
         
-        dlog?.info("\("   ".repeated(times: 2)) \(self).detachAll(recursivelyDowntree:\(recursivelyDowntree))")
+        dlogDeinit?.info("\("   ".repeated(times: 2)) \(self).detachAll(recursivelyDowntree:\(recursivelyDowntree))")
         
         if recursivelyDowntree {
             let children = self.allChildrenByDepth // recoursive call, does not include self.
@@ -597,16 +602,20 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
                     child._detachAll(recursivelyDowntree: false, recursionDepth:recursionDepth + 1)
                 }
             }
-            dlog?.info("detachAll(recursivelyDowntree) resulted in root: \((Self.rootNodes?.ids ?? []).descriptions().descriptionsJoined)")
         }
         
         // Handle self
         let prevParent = self.parent
         self.setParent(nil)
         self.removeChildren(self.children)
-        self.unregisterFromQuickMap()
+        self.unregisterFromQuickMap(ctx: "detachAll")
         if depth == 0 {
+            // Rebuild map if parent is the root.
             prevParent?.rebuildQuickMap()
+        }
+        
+        if recursivelyDowntree && dlog != nil {
+            dlogDeinit?.info("detachAll(recursivelyDowntree) resulted in root: \((Self.rootNodes?.ids ?? []).descriptions().descriptionsJoined)")
         }
     }
     
@@ -623,7 +632,7 @@ public class MNTreeNode<ValueType: Hashable, IDType: Hashable> :  CustomStringCo
                 dlog?.warning("debugValidateChild \( "\(child.id)" ) parent is not \( "\(parent.id)" )!")
             }
             if !parent.children.contains(elementEqualTo: child) {
-                dlog?.warning("debugValidateChild \( "\(child.id)" ) parent is not \( "\(self.id)" )!")
+                dlog?.warning("debugValidateChild \( "\(child.id)" ) parent is not \( "\(self.id)" ) in children!")
             }
         }
     }
@@ -1055,84 +1064,6 @@ extension MNTreeNode where IDType : Hashable {
     
     var allParentsById : [IDType:SelfType] {
         return self.allParents.toDictionary { $0.id as IDType }
-    }
-    
-}
-
-// ======================== Sequence extension =============================
-
-// MARK: Sequence extension
-extension Sequence where Element : MNTreeNodeProtocol { // , Element.IDType : Equatable
-    
-    var ids : [Element.IDType] {
-        return self.map { node in
-            node.id
-        }
-    }
-    
-    var values : [Element.ValueType] {
-        return self.compactMap { node in
-            node.value
-        }
-    }
-}
-
-extension Sequence where Element : MNTreeNodeProtocol, Element.IDType : Any {
-    var idDescriptions : [String] {
-        return self.map { elem in
-            return "\(elem.id)"
-        }
-    }
-}
-
-
-extension Sequence where Element == MNTreeNode<AnyHashable, AnyHashable> {
-    
-    var nodesById : [Element.IDType:Element] {
-        return self.toDictionary { element in
-            element.id
-        }
-    }
-    
-}
-
-// Type 'any MNTreeNodeProtocol' cannot conform to 'Hashable'
-
-extension Sequence where Element : MNTreeNodeProtocol {
-    
-    /// Returns the same array, but sorted so that elements with less children are first, or later
-    /// - Parameter byChildrenAscending: will sort from nodes with lowest number or children to height, when false, will return the reverse.
-    /// - Returns: array of MNTreeNodes sorted by amount of children for each node in the array.
-    @inlinable public func sorted(byChildrenCountAscending isAscending:Bool) -> [Element] {
-        return self.sorted { chld1, chld2 in
-            return isAscending ?
-                (chld1.children.count < chld2.children.count) :
-                (chld1.children.count > chld2.children.count)
-        }
-    }
-    
-    @inlinable public func sorted(byIDsAscending isAscending:Bool) -> [Element] where Element.IDType : Comparable {
-        return self.sorted { chld1, chld2 in
-            return isAscending ?
-                (chld1.id < chld2.id) :
-                (chld1.id > chld2.id)
-        }
-    }
-    
-    @inlinable public func sorted(byValuessAscending isAscending:Bool) -> [Element] where Element.ValueType : Comparable {
-        return self.sorted { chld1, chld2 in
-            if let val1 = chld1.value {
-                if let val2 = chld2.value {
-                    return isAscending ?
-                        (val1 < val2) :
-                        (val1 > val2)
-                } else {
-                    return false
-                }
-            } else {
-                return true
-            }
-        }
     }
     
 }

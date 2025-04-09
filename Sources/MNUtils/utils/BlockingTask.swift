@@ -12,7 +12,7 @@ fileprivate let dlog : Logger? = Logger(label: "BlockingTask") // ?.setting(verb
 //@frozen
 public final class BlockingTask<Success, Failure> where Success : Sendable, Failure : Error {
 
-    private (set) public var result : MNResult<Success> = .failure(code: .misc_unknown, reason: "<?>")
+    private(set) public var result : MNResult<Success> = .failure(code: .misc_unknown, reason: "<?>")
     
     @discardableResult
     public init(priority: TaskPriority? = nil, operation: @escaping @Sendable () async throws -> Success) {

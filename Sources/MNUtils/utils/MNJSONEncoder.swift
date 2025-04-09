@@ -6,7 +6,7 @@
 
 import Foundation
 
-public class MNJSONEncoder : JSONEncoder {
+public class MNJSONEncoder :  JSONEncoder {
     public override init() {
         super.init()
         self.isStringPreference = MNUtils.debug.IS_DEBUG
@@ -16,4 +16,7 @@ public class MNJSONEncoder : JSONEncoder {
         // self .decimalEncodingStrategy = .precise //outputs as number: 46.984765
         // self .decimalEncodingStrategy = .lossy //current output like: 46.984765
     }
+}
+
+extension MNJSONEncoder : @unchecked Sendable {
 }

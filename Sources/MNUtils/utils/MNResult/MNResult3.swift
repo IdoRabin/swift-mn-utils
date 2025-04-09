@@ -5,17 +5,13 @@
 // Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
-
+import MNMacros
 
 /// A value that represents the result of a transformation on some value - either the value hadn't changed, changed or the transformation failed. including an
 /// associated value in each succes case. And an associated Failure value. to access the successValue disregaring the type of success, use .successValue
-@frozen public enum MNResult3<Success, Failure> {
 
-    enum Simplified : String, Equatable, Hashable {
-        case successChanged
-        case successNoChange
-        case failure
-    }
+@SimplifiedEnum
+@frozen public enum MNResult3<Success, Failure> {
     
     /// A success, storing a `Success` value.
     case successChanged(Success)
@@ -102,14 +98,6 @@ import Foundation
         case .successChanged: return nil
         case .successNoChange: return nil
         case .failure(let failure): return failure
-        }
-    }
-    
-    var simplified : Simplified {
-        switch self {
-        case .successChanged:   return .successChanged
-        case .successNoChange:  return .successNoChange
-        case .failure:          return .failure
         }
     }
     

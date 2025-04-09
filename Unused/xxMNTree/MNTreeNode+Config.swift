@@ -37,9 +37,9 @@ public class MNTreeConfig : CustomStringConvertible {
     // MARK: Static
     // MARK: Properties / members
     private var enumerationCounter : Int = 0
-    private (set) var uuid : UUID
-    private (set) var treeName : String?
-    private (set) var treeKey : String
+    private(set) var uuid : UUID
+    private(set) var treeName : String?
+    private(set) var treeKey : String
     
     
     /// Determines is a tree of nodes is saved "flat" in the encoded version and reconstructed using the parentId for each node, or saved as a tree structure, which inherantly contains the parent relations.
@@ -60,13 +60,17 @@ public class MNTreeConfig : CustomStringConvertible {
     /// NOTE: This may prove to be CPU intensive, since on every addition and removal to the tree, some checks will use recursive methods.
     var isValidatesPossibleRecursiveIssues : Bool = MNUtils.debug.IS_DEBUG
     
-    private (set) weak var rootNode : (any MNTreeNodeProtocol)? {
+    /// When a node is added to the tree, or tree structure changes, children array for each node is sorted according to this method
+    var sortMethod : MNTreeNodeSorting = (.byChildrenCount, true)
+
+    private(set) weak var rootNode : (any MNTreeNodeProtocol)? {
         didSet {
             if self.rootNode == nil {
                 dlog?.todo("\(self) rootNode was killed - handle this!")
             }
             if self.rootNode?.isRoot == false {
                 dlog?.todo("\(self) rootNode id: \(self.rootNode!.id) is not a root - handle this!")
+                //TODO: should we do: self.rootNode = self.rootNode.root ?
             }
         }
     }

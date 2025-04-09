@@ -22,12 +22,14 @@ public extension MNUIDProtocol /* Default implementations */ {
     }
     
     // MARK: Equatable
-    static func ==(lhs:any MNUIDProtocol, rhs:any MNUIDProtocol)->Bool {
+    // TODO: Check how to implement with "any MNUIDProtocol"
+    static func ==(lhs:Self, rhs:Self)->Bool {
         return lhs.type == rhs.type && lhs.uid == rhs.uid
     }
     
     // MARK: Sorted
-    static func <(lhs:any MNUIDProtocol, rhs:any MNUIDProtocol)->Bool {
+    // TODO: Check how to implement with "any MNUIDProtocol"
+    static func <(lhs:Self, rhs:Self)->Bool {
         guard lhs.type == rhs.type else {
             return lhs.type < rhs.type
         }

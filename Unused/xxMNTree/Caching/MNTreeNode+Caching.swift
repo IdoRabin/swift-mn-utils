@@ -23,57 +23,6 @@ protocol MNTreeNodeCacheProtocol<NodeType> where NodeType : MNTreeNode<ValueType
     var isEmpty : Bool { get }
 }
 
-public class MNTreeNodeMgr {
-    // MARK: Types
-    // MARK: Const
-    // MARK: Static
-    
-    // MARK: Properties / members
-    private var caches : [String:any MNTreeNodeCacheProtocol] = [:]
-    
-    // MARK: Private
-    // MARK: Lifecycle
-    // MARK: Singleton
-    public static let shared = MNTreeNodeMgr()
-    private init(){
-        
-    }
-    
-    // MARK: Public
-    func cacheFor<ValueType: Hashable, IDType: Hashable>(node:MNTreeNode<ValueType, IDType>) -> MNTreeNodeCache<MNTreeNode<ValueType, IDType>> {
-        typealias CacheType = MNTreeNodeCache<MNTreeNode<ValueType, IDType>>
-        let key = CacheType.NodeType.TREE_NODE_TYPE_KEY
-        var result : CacheType? = caches[key] as? CacheType
-        if result == nil {
-            result = CacheType()
-            caches[key] = result
-        }
-        
-        return result!
-    }
-    
-    func cacheFor<NodeType: MNTreeNodeProtocol>(nodeType:NodeType.Type) -> MNTreeNodeCache<MNTreeNode< NodeType.ValueType, NodeType.IDType>> {
-        typealias CacheType = MNTreeNodeCache<MNTreeNode<NodeType.ValueType, NodeType.IDType>>
-        let key = CacheType.NodeType.TREE_NODE_TYPE_KEY
-        var result : CacheType? = caches[key] as? CacheType
-        if result == nil {
-            result = CacheType()
-            caches[key] = result
-        }
-        
-        return result!
-    }
-    
-    func cacheFor(nodeTypeString key:String) -> Any? {
-        return caches[key]
-    }
-    
-    func clear() {
-        dlog?.notice("MNTreeNodeMgr.shared.clear() (will clear \(self.caches.count) existing caches)")
-        caches = [:]
-    }
-}
-
 extension MNTreeNode /* CACHING */ {
     
     // MARK: Static public
@@ -96,21 +45,21 @@ extension MNTreeNode /* CACHING */ {
         cache.register(node: node)
     }
     
-    static func unregisterFromQuickMap(byId id: IDType, node:SelfType? = nil) {
+    static func unregisterFromQuickMap(byId id: IDType, node:SelfType? = nil, ctx:String) {
         guard Self.IS_CACHED else {
             return
         }
         
         // Trampoline
-        guard DispatchQueue.isMainQueue else {
+        guard DispatchQueue.isMainQueue && !ctx.hasSuffix("delayedExec") else {
             MNExec.exec(afterDelay: 0) {
-                [self, node] in self.unregisterFromQuickMap(byId:id, node:node)
+                [self, node] in self.unregisterFromQuickMap(byId:id, node:node, ctx: ctx + ">delayedExec")
             }
             return
         }
         
         let cache = MNTreeNodeMgr.shared.cacheFor(nodeType: SelfType.self)
-        cache.unregister(byId: id, node: node)
+        cache.unregister(byId: id, node: node, ctx: ctx + ".cache")
     }
     
     static func removeFromReconstruction(byId id:IDType) {
@@ -212,14 +161,13 @@ extension MNTreeNode /* CACHING */ {
         let cache : CacheType = MNTreeNodeMgr.shared.cacheFor(nodeType: Self.self)
         
         // Find all root nodes:
-        var result = cache._treeRoots.values
-        result.remove { node in
-            // Validate they are, indeed root nodes:
-            return node.isRoot == false
+        let result = cache._treeRoots.values.uniqueElements().filter { node in
+            node.isRoot
         }
         
-        MNExec.exec(afterDelay: 0) {[weak cache] in
-            cache?.invalidate()
+        let cacheKey = cache.TREE_NODE_TYPE_KEY
+        MNExec.debounceExecutingLastBlockOnly(withKey: cacheKey, afterDelay: 0.02) { [weak cache] in
+            cache?.invalidate("MNTreeNode.rootNodes.debounce [\(cacheKey.trimmingCharacters(in: .whitespacesAndNewlines))]")
         }
         
         if MNUtils.debug.IS_DEBUG, let dlog = dlog {
@@ -260,8 +208,8 @@ extension MNTreeNode /* CACHING */ {
         Self.registerToQuickMap(node: self)
     }
     
-    func unregisterFromQuickMap() {
-        Self.unregisterFromQuickMap(byId: self.id, node: self)
+    func unregisterFromQuickMap(ctx:String) {
+        Self.unregisterFromQuickMap(byId: self.id, node: self, ctx: ctx + ">MNTreeNode.unregisterFromQuickMap.id[\(self.id)]")
     }
     
     @discardableResult

@@ -8,7 +8,10 @@
 import XCTest
 import Logging
 
-fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeTest") // ?.setting(verbose: false, testing: true)
+/*
+// fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeTest") // ?.setting(verbose: false, testing: true)
+fileprivate let dlog : Logger? = Logger(label: "MNTreeNodeTest")
+
 
 class TestNode : MNTreeNode<String, String> {
     //
@@ -17,67 +20,86 @@ class TestNode : MNTreeNode<String, String> {
 final class MNTreeNodeTest: XCTestCase {
 
     let root : TestNode? = TestNode(id: "1", value: "root")
-    var child2a : TestNode? = TestNode(id: "2a", value: "child2a")
+    var child4 : TestNode? = TestNode(id: "2d", value: "child4")
 
     override func setUpWithError() throws {
         dlog?.info("setUpWithError START")
-        let child3b : TestNode? = TestNode(id: "3b", value: "child3b", parentIDString: "2b")
-        let child2b : TestNode? = TestNode(id: "2b", value: "child2b", parent: root)
-        let child3a : TestNode? = TestNode(id: "3a", value: "child3a", parentID: "2b")
-        let child3x : TestNode? = TestNode(id: "3x", value: "child3x", parent: root)
+        
+        // Children
+        let child2a : TestNode? = TestNode(id: "2a", value: "childA", parentIDString: "root")
+        let child2b : TestNode? = TestNode(id: "2b", value: "childB", parentIDString: "root")
+        let child2c : TestNode? = TestNode(id: "2c", value: "childC", parentIDString: "root")
+        
+        // Grandchildren
+        
+        let gchild2a1 : TestNode? = TestNode(id: "2a1", value: "gchild2a1", parentIDString: "2a")
+        let gchild2a2 : TestNode? = TestNode(id: "2a2", value: "gchild2a2", parent: child2a)
+        let child2a3 : TestNode? = TestNode(id: "2a3", value: "gchild2a3", parentID: "2a3")
+        
+        let child2c1 : TestNode? = TestNode(id: "2c1", value: "gchild2c1", parent: child2c)
+        
+        let ggchild2a2a : TestNode? = TestNode(id: "2a2a", value: "ggchild2a2a", parentID: "2a3")
+        let ggchild2a2aX : TestNode? = TestNode(id: "2a2aX", value: "ggchild2a2aX", parentID: "2a2a")
+        let ggchild2a2aY : TestNode? = TestNode(id: "2a2aY", value: "ggchild2a2aY", parentID: "2a2a")
+        
+        /*
         dlog?.info("""
-        3b \( "\(child3b.descOrNil)" )
+        \n        3b \( "\(child3b.descOrNil)" )
         2b \( "\(child2b.descOrNil)" )
         3a \( "\(child3a.descOrNil)" )
         3x \( "\(child3x.descOrNil)" )
 """)
         
         //dlog?.info("== Setting parent for child2a: \((child2a?.id).descOrNil) parent: \((root?.id).descOrNil)")
-        child2a?.setParent(root)
         dlog?.info("setUpWithError END: \(self.root!.treeDescription().descriptionLines)")
-        //dlog?.info("setUpWithError END: \([child3b?.id, child2b?.id, child3a?.id, child3x?.id])")
+         */
+        child4?.setParent(root)
+        dlog?.info("setUpWithError END")
     }
 
     override func tearDownWithError() throws {
-        /*
-        dlog?.info("tearDownWithError START")
         
+        dlog?.info("tearDownWithError START")
+
+        
+        // Finally?
+        // dlog?.info("tearDownWithError - will detach all")
+        for aroot in root?.allRootNodesForSelfOfHomogenousType ?? [] {
+            aroot.detachAll(recursivelyDowntree: true) // remove all childrens and parent
+        }
+        
+        MNTreeNodeMgr.shared.clear()
+        dlog?.info("tearDownWithError END")
+    }
+
+    func testCreateFromJSON () throws {
+        
+    }
+    
+    func testMNTreeNodeEncoding () throws {
         // let rootNodes = root?.allRootNodesForSelfOfHomogenousType ?? []
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
         encoder.outputFormatting = .prettyPrinted
-//        for isFlat in [false, true] {
-//            print("encoding JSON:")
-//            root!.config.isEncodeFlat = isFlat
-//            // encoder.userInfo[root!.MNTN_is_flat_CodingUIKey] = isFlat
-//            let coded = try encoder.encode(root)
-//            let str = String(data: coded, encoding: .utf8) ?? "<encoding failed!>"
-//            print("ONE JSON: \n" + str)
-//        }
-        
-        // dlog?.info("tearDownWithError - will detach all")
-        // child2a?.detachAll()
         
         for isFlat in [false] { // [false, true]
-            let nodesCollection : MNTreeNodeCollection = [root!, child2a!].asMNTreeNodeCollection
+            dlog?.info("= testMNTreeNodeEncoding with \(isFlat ? "flat" : "non-flat") tree = ")
+            let nodesCollection : MNTreeNodeCollection = [root!, child4!].asMNTreeNodeCollection
             nodesCollection.isEncodeAllTreesFlat = isFlat
             nodesCollection.isEncodeCollectionInfo = true
-            let coded = try encoder.encode(nodesCollection)
-            for node in nodesCollection.nodes {
-                dlog?.info("collection node: \(node.treeDescription().descriptionLines)")
-            }
+            let encoded = try encoder.encode(nodesCollection)
             
-             let decoded = try decoder.decode(MNTreeNodeCollection.self, from: coded)
-            print(" >> decoded trees \(isFlat ? "flat" : "tree" ) are equal? \(decoded == nodesCollection) <<")
+            nodesCollection.logCollectionTree(ctx: "Encoded")
+            
+            /*
+            let str = String(data: encoded, encoding: .utf8) ?? "<encoding failed!>"
+            print(">> ONE JSON: \n" + str)
+            */
+            
+            let decoded = try decoder.decode(MNTreeNodeCollection.self, from: encoded)
+            print(" >> decoded trees [\(isFlat ? "flat" : "tree" )] are equal? \(decoded == nodesCollection ? "✅ true" : "❌ false") <<")
                 
         }
-
-        dlog?.info("tearDownWithError END")
-        // Finally?
-//        for aroot in rootNodes {
-//            aroot.detachAll(recursivelyDowntree: true) // remove all childrend and parent
-//        }
-         */
     }
 
     func testMNTreeNode() throws {
@@ -106,6 +128,115 @@ final class MNTreeNodeTest: XCTestCase {
         }
     }
 
+    func testrecourseChildren() throws {
+        for includeSelf in [false, true] {
+            for method in MNTreeNodeRecursionType.allCases {
+                
+                // Test recourseChildren using the different methods, isIncludeSelf and checking is the stop condition block works
+                var allChildrenCollected : [TestNode] = []
+                let result = root?.recourseChildren({ node, depth in
+                    allChildrenCollected.append(node as! TestNode)
+                    return node
+                }, method: method, stopTest: { node, depth, result in
+                    return false
+                }, includeSelf: includeSelf)
+                
+                dlog?.info("recourseChildren: \(method) includeSelf: \(includeSelf) count: \(result?.ids.description ?? "[]") allChildrenCollected: \(allChildrenCollected.ids.description)")
+                XCTAssert(result?.count == (includeSelf ? 5 : 4), "recourseChildren failed")
+                
+//                + <TestNode id: "1" |root| 0x0000600000a4a080>
+//                   ^ <MNTreeNode<String, String> id: "2a" |leaf| 0x0000600000a4a180>
+//                   - <MNTreeNode<String, String> id: "2b" |node| 0x0000600000a4a200>
+//                      ^ <MNTreeNode<String, String> id: "3a" |leaf| 0x0000600000a4a140>
+//                   ^ <MNTreeNode<String, String> id: "3x" |leaf| 0x0000600000a40140>
+                let incStr = (includeSelf ? "1," : "")
+                switch method {
+                case .breadthFirst:
+                    XCTAssert(result?.ids.description ?? "[]" == "[\(incStr)2a,3x,2b,3a]", "recourseChildren failed")
+                case .depthFirst:
+                    XCTAssert(result?.ids.description ?? "[]" == "[\(incStr)2a,3x,2b,3a]", "recourseChildren failed")
+                }
+            }
+        }
+    }
+        
+    func testrecourseParents() throws {
+//        for includeSelf in [false, true] {
+//            for method in MNTreeNodeRecursionType.allCases {
+////                var allParentsIterated : [TestNode] = []
+////                
+////                // Test recourseParents using the different methods, isIncludeSelf and checking is the stop condition block works
+////                let parents = child2a?.recourseParents(recursionType: method, isIncludeSelf: includeSelf, stopCondition: { node in
+////                    allParentsIterated.append(node)
+////                    return node.value !== "root"
+////                })
+////                
+////                dlog.info("recourseParents: \(method) includeSelf: \(includeSelf) count: \(parents?.count ?? 0) allParentsCollected: \(allParentsCollected.ids)")
+////                XCTAssert(parents?.count == 2, "recourseParents failed")
+//            }
+//        }
+    }
+    func tesfilterChildrenDowntree() throws {
+        // func filterChildrenDowntree(where block:(_ node:SelfType, _ depth:Int)->Bool, includeSelf:Bool, method:MNTreeNodeRecursionType)->[SelfType]
+        for includeSelf in [false, true] {
+            for method in MNTreeNodeRecursionType.allCases {
+//                let filtered = root.filterChildrenDowntree(where:{
+//            `     node, depth in
+//                    return node.value != "child3a"
+//                }, includeSelf: includeSelf, method: method)
+//                // expect 4 children
+//                dlog.info("filterChildrenDowntree: \(method) includeSelf: \(includeSelf) count: \(filtered.count) filtered: \(filtered.ids)")
+//                XCTAssert(filtered.count == 4, "filterChildrenDowntree failed")
+            }
+        }
+    }
+    func testiterateChildrenDowntree() throws {
+    }
+    func testfirstChildDowntree() throws {
+    }
+    func testfilterParents() throws {
+    }
+    func testfirstParent() throws {
+    }
+    func testiterateParentNodes() throws {
+    }
+    func testallChildren() throws {
+    }
+    func testallChildrenCount() throws {
+    }
+
+    func testallParents() throws {
+    }
+
+    func testallChildrenByDepth() throws {
+    }
+
+    func testallParentsByDepth() throws {
+    }
+
+    func testRemoveChild() throws {
+        XCTAssertTrue(root?.children.contains(child4!) ?? false, "child4 was not setUp in root parent correctly (check setUp) / root is nil")
+        root?.removeChild(child4!)
+        XCTAssertFalse(root?.children.contains(child4!) ?? true, "Child was not removed correctly / root is nil")
+    }
+
+    func testMoveToNewParent() throws {
+        let newParent = TestNode(id: "5", value: "newParent")
+        child4?.moveToNewParent(newParent)
+        XCTAssertTrue(newParent.children.contains(child4!), "Child was not moved to new parent correctly")
+        XCTAssertFalse(root?.children.contains(child4!) ?? false, "Child was not removed from old parent correctly")
+    }
+
+    func testIsChildOf() throws {
+        XCTAssertTrue(child4?.isChildOf(node: root!) ?? false, "isChildOf failed")
+        XCTAssertFalse(root?.isChildOf(node: child4!) ?? false, "isChildOf failed")
+    }
+
+    func testIsParentOf() throws {
+        XCTAssertTrue(root?.isParentOf(node: child4!) ?? false, "isParentOf failed")
+        XCTAssertFalse(child4?.isParentOf(node: root!) ?? false, "isParentOf failed")
+    }
+
     deinit {
         dlog?.info("\(self).deinit()")
     }
@@ -117,3 +248,4 @@ final class MNTreeNodeTest: XCTestCase {
 //    }
 
 }
+*/

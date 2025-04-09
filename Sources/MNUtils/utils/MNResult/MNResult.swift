@@ -9,7 +9,7 @@ import Foundation
 public typealias MNResult<Success:Any> = Result<Success, MNError>
 public typealias MNResultBlock<Success:Any> = (MNResult<Success>)->Void
 
-func MNResultOrErr<Success:Any>(_ result:Success?, error:MNError)->MNResult<Success> {
+public func MNResultOrErr<Success:Any>(_ result:Success?, error:MNError)->MNResult<Success> {
     if let result = result {
         return MNResult.success(result)
     } else {
@@ -60,6 +60,24 @@ public extension Result {
         return self.failure(code: mnErrorCode, reasons: reasons, underlyingError: nil)
     }
     
+    static func successOrFail<ShadowSuccess>(usingOther other:Self, convert:(_ success:Success)->ShadowSuccess)->MNResult<ShadowSuccess> {
+        switch other {
+        case .success(let succ):
+            return MNResult<ShadowSuccess>.success(convert(succ))
+            
+        case .failure(let fail):
+            return Self.failure(fromError: fail)
+            
+        }
+//        if let mnError = error as? MNError {
+//            return Self.fromMNError(mnError, orSuccess: orSuccess)
+//        } else if let err = error {
+//            return Self.fromMNError(MNError(error: err), orSuccess: orSuccess)
+//        } else {
+//            return .success(orSuccess)
+//        }
+    }
+    
     static func fromError<ShadowSuccess>(_ error:(any Error)?, orSuccess:ShadowSuccess)->MNResult<ShadowSuccess> {
         if let mnError = error as? MNError {
             return Self.fromMNError(mnError, orSuccess: orSuccess)
@@ -80,13 +98,31 @@ public extension Result {
 }
 
 // Description for CustomStringConvertibles
-extension Result where Success : CustomStringConvertible, Failure : CustomStringConvertible {
+public extension Result where Success : CustomStringConvertible, Failure : CustomStringConvertible {
     var description : String {
         switch self {
         case .success(let success):
             return ".success(\(success.description.safePrefix(maxSize: 180, suffixIfClipped: "...")))"
         case .failure(let err):
             return ".failure(\(err.description.safePrefix(maxSize: 180, suffixIfClipped: "...")))"
+        }
+    }
+}
+
+public extension Result where Success : Sequence {
+    
+    /// Returns a result with a success value of the first item from the sequence, or a failure.
+    /// - Returns: Result with either one element from the sequence.
+    func asSingluarItemResult(expecting:Int = 1)->Result<Success.Element?, Failure> {
+        switch self {
+        case .success(let seq):
+            let arr = Array(seq)
+            if MNUtils.debug.IS_DEBUG && (arr.count != expecting) {
+                print("⚠️️ Result.asSingluarItemResult() called on a sequence with \(arr.count) items. expected \(expecting) item!")
+            }
+            return .success(arr.first)
+        case .failure(let err):
+            return .failure(err)
         }
     }
 }

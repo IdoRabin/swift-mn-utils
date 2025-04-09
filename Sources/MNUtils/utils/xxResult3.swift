@@ -5,16 +5,17 @@
 // Created by Ido Rabin for Bricks on 17/1/2024.
 
 import Foundation
+import MNMacros
 
 /// A value that represents the result of a transformation on some value - either the value hadn't changed, changed or the transformation failed. including an
 /// associated value in each succes case. And an associated Failure value. to access the successValue disregaring the type of success, use .successValue
-@frozen public enum Result3<Success, Failure> {
+///
+///
 
-    public enum Simplified : String, Equatable, Hashable {
-        case successChanged
-        case successNoChange
-        case failure
-    }
+//@SimplifiedEnum
+// Was renamed MNResult3
+/*
+@frozen public enum Result3<Success, Failure> {
     
     /// A success, storing a `Success` value.
     case successChanged(Success)
@@ -101,14 +102,6 @@ import Foundation
         case .successChanged: return nil
         case .successNoChange: return nil
         case .failure(let failure): return failure
-        }
-    }
-    
-    public var simplified : Simplified {
-        switch self {
-        case .successChanged:   return .successChanged
-        case .successNoChange:  return .successNoChange
-        case .failure:          return .failure
         }
     }
     
@@ -406,9 +399,10 @@ extension Result3 where Success : Equatable, Failure : Equatable {
     public static func != (lhs: Result3<Success, Failure>, rhs: Result3<Success, Failure>) -> Bool {
         // Check if not equal by enum case or wrapped value:
         
-        guard lhs.simplified == rhs.simplified else {
-            return true // no, they are not equal
-        }
+        // TODO: Reimplement
+//        guard lhs.simplified == rhs.simplified else {
+//            return true // no, they are not equal
+//        }
         
         if lhs.isSucess && lhs.successValue != rhs.successValue {
             return true // yes, they are not equal
@@ -472,3 +466,4 @@ extension Result3 : Hashable where Success : Hashable, Failure : Hashable {
 extension Result3: Sendable where Success: Sendable, Failure : Sendable {
     
 }
+*/

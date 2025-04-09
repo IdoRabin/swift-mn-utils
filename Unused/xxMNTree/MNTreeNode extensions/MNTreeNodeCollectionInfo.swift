@@ -86,8 +86,8 @@ struct MNTreeNodeCollectionInfo : Codable, Equatable, CustomStringConvertible, H
     var description : String {
         var dup = ""
         if duplicateNodesCount > 0 {
-            dup = " duplicates: \(duplicateNodesCount) "
+            dup = " duplicates:\(duplicateNodesCount) "
         }
-        return "<\(Self.self) treesCount:\(treesCount) totalNodesCount:\(self.totalNodesCount) maxDepth:\(self.maxDepth) hash:\(self.hashSum)\(dup)>"
+        return "<\(Self.self) treesCount:\(treesCount) totalNodesCount:\(self.totalNodesCount) maxDepth:\(self.maxDepth) hashSum:\(self.hashSum)\(dup)>"
     }
 }

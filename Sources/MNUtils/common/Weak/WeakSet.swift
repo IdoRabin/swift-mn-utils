@@ -54,17 +54,17 @@ class WeakSet<T: AnyObject, WeakType: Weakable> where T : Equatable & Hashable {
             })
         }
         
-        // Validate dupliactes
-        if MNUtils.debug.IS_DEBUG {
-//            let intersection = self.values.intersection(with: vals)
-//            if intersection.count > 0 {
-//                dlog?.notice("WeakSet add(values:filteredBy) contains items already in the set: \(intersection.descriptionJoined)")
-//                vals.remove(objects: intersection)
-//            }
-        }
-        
         guard vals.count > 0 else {
             return
+        }
+        
+        // Validate dupliactes
+        if MNUtils.debug.IS_DEBUG {
+            let intersection = self.values.intersection(with: vals)
+            if intersection.count > 0 {
+                dlog?.notice("WeakSet add(values:filteredBy) contains items already in the set: \(intersection.descriptionJoined)")
+                // vals.remove(objects: intersection)
+            }
         }
         
         // dlog?.info("adding: \(vals.descriptionJoined) into Weak >> \(objects.values.descriptionJoined)")

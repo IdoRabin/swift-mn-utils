@@ -19,6 +19,8 @@ fileprivate let IS_DEBUG = false
 // Using UUID v5 we can also embed the checksum of the type and namespace if we are the ones creating the UUID.
 // Using UUID v5 we can also validate the checksum of the type and namespace if we recieved the UUID as a string from remote sources.
 // reference:  https://www.rfc-editor.org/rfc/rfc4122
+
+// TODO: Determine why this needs to be a class and not a struct!
 open class MNUID : MNUIDProtocol, LosslessStringConvertible, Comparable, Codable {
     
     // Seperator

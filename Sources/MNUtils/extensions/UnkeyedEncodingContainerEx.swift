@@ -25,12 +25,12 @@ public struct TypeDescriptor {
     let name : String
     let type : Any.Type
     
-    init(name:String, type:Any.Type) {
+    public init(name:String, type:Any.Type) {
         self.name = name
         self.type = type
     }
     
-    init(type:Any.Type) {
+    public init(type:Any.Type) {
         self.init(name: "\(type)", type: type)
     }
 }
@@ -318,7 +318,7 @@ public extension UnkeyedDecodingContainer {
     }
 }
 
-extension Dictionary : LosslessStringConvertible where Key == String, Value == String {
+extension Dictionary : @retroactive LosslessStringConvertible where Key == String, Value == String {
      
     public init?(_ description: String) {
         self.init()

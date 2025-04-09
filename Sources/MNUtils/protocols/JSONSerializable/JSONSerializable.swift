@@ -162,13 +162,13 @@ public protocol JSONSerializable : Codable {
     static func deserializeFromJsonData<AType:Decodable>(data:Data?)->AType?
     static func deserializeFromJsonString<AType:Decodable>(string:String?)->AType?
     
-    func didDeserializefromJson()
+    func didDeserializeFromJson()
     func didSerializeToJson()
 }
 
 public extension JSONSerializable {
     
-    func didDeserializefromJson() {
+    func didDeserializeFromJson() {
         // Re-implement in implementor to get the event
     }
     
@@ -235,7 +235,7 @@ public extension JSONSerializable {
         let decoder = JSONDecoder()
         do {
             let result = try decoder.decode(AType.self, from: data)
-            (result as? JSONSerializable)?.didDeserializefromJson()
+            (result as? JSONSerializable)?.didDeserializeFromJson()
             return result
         } catch let error as NSError {
             let appErr = MNError(error: error)
@@ -249,7 +249,7 @@ public extension JSONSerializable {
             let decoder = JSONDecoder()
             do {
                 let result = try decoder.decode(AType.self, from: data)
-                (result as? JSONSerializable)?.didDeserializefromJson()
+                (result as? JSONSerializable)?.didDeserializeFromJson()
                 return result
             } catch let error as NSError {
                 dlog?.notice("Failed deserializing from JSON: error: \(error.code) > \(error.localizedDescription) > \(String(describing: error))")

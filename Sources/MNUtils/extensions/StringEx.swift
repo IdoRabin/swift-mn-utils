@@ -197,6 +197,27 @@ public extension String {
         return str
     }
     
+    
+    /// Will return a new string by replacing all items between prefix and suffix strings or regex fragments.
+    /// - Parameters:
+    ///   - prefix: prefix string or regex
+    ///   - suffix: suffix string or regex
+    ///   - to: function for each match
+    func replacingSubstrings(betweenPrefix prefix:String, suffix:String, to:(_ matchIndex:Int,_ match:String)->String) {
+        var prefix = prefix.trimmingPrefix("^").trimmingSuffix("$")
+        var suffix = suffix.trimmingPrefix("^").trimmingSuffix("$")
+        
+        var newString = ""
+        var index = 0
+        
+    }
+    
+    func replacingSubstrings(betweenPrefix prefix:String, suffix:String, to:String) {
+        return self.replacingSubstrings(betweenPrefix: prefix, suffix: suffix) { matchIndex, match in
+            return to
+        }
+    }
+    
     /// Validate if the string is a valid email address (uses a simple regex)
     ///
     /// - Returns: true when email is valid
@@ -824,7 +845,6 @@ public extension String {
         }
         return true
     }
-    
     
     func matchRanges(for regex: String, options: NSRegularExpression.Options = []) -> [NSRange] {
         do {

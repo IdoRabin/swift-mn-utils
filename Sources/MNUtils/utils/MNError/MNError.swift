@@ -12,11 +12,11 @@ fileprivate let dlog : Logger? = Logger(label:"MNError")
 public struct MNErrorStruct : JSONSerializable, Hashable, Equatable {
     public let error_code : Int?
     public let error_domain : String?
-    private (set) public var error_reason: String
-    private (set) public var underlying_errors : [MNErrorStruct]?
-    private (set) public var error_originating_path : String? = nil
-    private (set) public var error_request_id : String? = nil
-    private (set) public var error_text: String? = nil
+    private(set) public var error_reason: String
+    private(set) public var underlying_errors : [MNErrorStruct]?
+    private(set) public var error_originating_path : String? = nil
+    private(set) public var error_request_id : String? = nil
+    private(set) public var error_text: String? = nil
     
     // Readonly
     public var error_http_status : HTTPResponseStatus? {
@@ -78,7 +78,7 @@ public struct MNErrorStruct : JSONSerializable, Hashable, Equatable {
             return
         }
         
-        var array =  (self.underlying_errors ?? [])
+        let array =  (self.underlying_errors ?? [])
         underlying_errors = array.appending(contentsOf: structs).compactMap({ underlyingError in
             if underlyingError.error_code != self.error_code || underlyingError.error_domain != self.error_domain {
                 return underlyingError
@@ -172,8 +172,8 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
     public let domain : String
     public let code:MNErrorInt
     public let desc : String
-    private (set) public var underlyingError:MNError?
-    private (set) public var reasons:[String]?
+    private(set) public var underlyingError:MNError?
+    private(set) public var reasons:[String]?
         
     public func mnErrorCode() -> MNErrorCode? {
         guard let result = MNErrorCode(rawValue:code) else {
@@ -302,7 +302,7 @@ open class MNError : Error, MNErrorable, JSONSerializable, CustomDebugStringConv
         return result
     }
     
-    @discardableResult
+    // @discardableResult
     /// Will add the error as most nested underlying error in the nested .underlyingError list
     ///  NOTE: We ignore / do not set an error equal to any one of its parents.
     /// - Parameter error: error to set as the most-nested error
@@ -584,7 +584,7 @@ extension MNError : Hashable {
     }
 }
 
-extension Result3 where Failure : MNError {
+extension MNResult3 where Failure : MNError {
     
     var mnError : MNError? {
         switch self {

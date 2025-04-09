@@ -8,6 +8,13 @@ import Foundation
 import CommonCrypto
 
 extension String /* MD5 */ {
+    
+    /// Returns a MD5 of a given string to a given length. Not cryptographically secure.
+    /// NOTE: Not for use in security or cryptographically importans impliementations.
+    /// - Parameters:
+    ///   - string: string to get the MD5 for
+    ///   - length: the required resulting length of the MD5 checksum
+    /// - Returns: the MD5 for the original string
     static func MD5NotSecure(string: String, length:Int = 0) -> Data {
         let length = (abs(length) > 8) ? abs(length) : Int(CC_MD5_DIGEST_LENGTH)
         let messageData = string.data(using:.utf8)!
@@ -25,6 +32,7 @@ extension String /* MD5 */ {
         }
         return digestData
     }
+    
     static func MD5NotSecureString(string: String, length:Int = 0) -> String {
         return MD5NotSecure(string: string, length:length).base64EncodedString()
     }
