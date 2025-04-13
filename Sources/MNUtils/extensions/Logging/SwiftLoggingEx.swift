@@ -6,7 +6,7 @@
 
 import Foundation
 // Extensing swift-log package from SPM
-// see .package(url: "https://github.com/apple/swift-log.git", from: "1.5.3"),
+// see .package(url: "https://github.com/apple/swift-log.git", from: "1.6.3"),
 
 import Logging
 

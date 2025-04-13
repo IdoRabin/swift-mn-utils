@@ -3,8 +3,6 @@
 //  
 //
 // Created by Ido Rabin for Bricks on 17/1/2024.
-
-import MNUtils
 import MNMacros
 
 public typealias MNFlowResult<Value> = FlowResult<Value, MNError>
@@ -41,13 +39,15 @@ public enum FlowResult<Value, Err> : CustomStringConvertible where Err : Error {
             
         case .stop(let value, let err):
             switch (value, err) {
-            case (let value, let err):
+            case (let value, let err) where value != nil && err != nil:
                 return .stopWithValueAndError
-            case (let value, nil):
-                return .stopWithValue
-            case (nil, let err):
-                return .stopWithError
             case (nil, nil):
+                return .stopEmpty
+            case (_, nil):
+                return .stopWithValue
+            case (nil, _):
+                return .stopWithError
+            default:
                 return .stopEmpty
             }
         }
@@ -80,13 +80,15 @@ public enum FlowResult<Value, Err> : CustomStringConvertible where Err : Error {
             }
         case .stop(let value, let err):
             switch (value, err) {
-            case (let value, let err):
-                return "stop(value: \(String(describing:value)), error: \(err?.description))"
-            case (let value, nil):
-                return "stop(value: \(String(describing:value)))"
-            case (nil, let err):
-                return "stop(error: \(err?.description))"
+            case (let value, let err) where value != nil && err != nil:
+                return "stop(value: \(value.descOrNil), error: \(err.descOrNil))"
             case (nil, nil):
+                return "stop(=empty=)"
+            case (let value, nil):
+                return "stop(value: \(value.descOrNil))"
+            case (nil, let err):
+                return "stop(error: \(err.descOrNil))"
+            default:
                 return "stop(=empty=)"
             }
         }
@@ -132,7 +134,7 @@ public enum FlowResult<Value, Err> : CustomStringConvertible where Err : Error {
         switch self {
         case .resume(let value):
             return value
-        case .stop(let value, let err):
+        case .stop(let value, _ /* let err */):
             return value
         }
     }
@@ -163,9 +165,9 @@ public enum FlowResult<Value, Err> : CustomStringConvertible where Err : Error {
     
     public func asEmptyResult() -> MNEmptyFlowResult {
         switch self {
-        case .resume(let value):
+        case .resume: //( let value):
             return .resumeEmpty
-        case .stop(let value, let err):
+        case .stop(_, let err): // let value
             return .stop(nil, err as? MNError)
 
         }

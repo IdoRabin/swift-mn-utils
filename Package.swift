@@ -20,7 +20,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         
         // 3rd party:
-        .package(url: "https://github.com/apple/swift-log", from: "1.5.3"),
+        // DO NOT USE: .package(url: "https://github.com/apple/swift-log", from: "1.6.3"),
         
         // In-House pakcages
         //.package(url: "https://github.com/IdoRabin/swift-MNMacros", .upToNextMajor(from: "0.0.1-pre")),
@@ -32,7 +32,7 @@ let package = Package(
             name: "MNUtils",
             dependencies: [
                 // 3rd party:
-                .product(name: "Logging", package: "swift-log"),
+                // DO NOT USE: .product(name: "Logging", package: "swift-log"),
                 
                 // In-House pakcages
                 .product(name: "MNMacros", package: "MNMacros"),

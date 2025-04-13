@@ -11,7 +11,7 @@ import Foundation
 fileprivate let dlog : Logger? = Logger(label: "ObserversArray")
 import Logging
 
-public class ObserversArrayLock : NSRecursiveLock {
+public class ObserversArrayLock : NSRecursiveLock, @unchecked Sendable {
     fileprivate static let DEBUG_LONG_LOCKS = false
     fileprivate static var locksDebugged : [Int] = []
     
